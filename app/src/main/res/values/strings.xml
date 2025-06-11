@@ -121,12 +121,12 @@
     <!--about fragment-->
     <string name="version">"version"</string>
     <string name="github_title">Github源码地址</string>
-    <string name="github_url">https://github.com/fabricezhang/lcg/</string>
+    <string name="github_url">https://github.com/sjshb57/NewLcgR/</string>
     <string name="author_title">问题反馈邮箱</string>
-    <string name="author_email">fabrice@163.com</string>
+    <string name="author_email"> </string>
 
     <!--favorite fragment-->
-    <string name="empty_favorite">收藏夹目前是空的。</string>
+    <string name="empty_favorite">收藏夹目前是空的</string>
     <string name="add_to_favorite_successfully">收藏本地成功</string>
     <string name="add_to_favorite_failed">收藏本地失败</string>
     <string name="sync_favorite_successfully">同步网络收藏成功</string>

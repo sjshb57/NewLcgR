@@ -5,11 +5,9 @@ plugins {
     alias(libs.plugins.parcelize)
 }
 
-// App Version is composed by Major * 10000 + Minor * 100 + Patch
-// each version starts from 0
 val versionMajor = 1
 val versionMinor = 9
-val versionPatch = 7
+val versionPatch = 8
 
 android {
     namespace = "top.easelink.lcg"
@@ -43,7 +41,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isShrinkResources = false
+        //    isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
@@ -85,8 +83,9 @@ android {
 }
 
 dependencies {
-    // database
     kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.base)
     implementation(project(":framework"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
@@ -94,4 +93,7 @@ dependencies {
     implementation(libs.shiply.upgrade)
     implementation(libs.shiply.upgrade.ui)
     implementation(libs.androidx.annotation)
+
+    implementation(libs.google.material)
+    implementation(libs.androidx.appcompat)
 }

@@ -1,7 +1,6 @@
 plugins {
     id("com.android.library")
-//    alias(libs.plugins.parcelize)
-//    alias(libs.plugins.kace)
+    alias(libs.plugins.parcelize)
 //    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlin.android)
 }
@@ -54,6 +53,7 @@ dependencies {
     api(libs.androidx.swiperefreshlayout)
     api(libs.androidx.work.runtime)
     api(libs.easypermissions)
+    api(libs.androidx.core.ktx)
 
     // image
     api(libs.photoview)

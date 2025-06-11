@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Your Project Name"
+rootProject.name = "NewLcgR"
 include(":app")
 include(":framework")

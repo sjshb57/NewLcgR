@@ -9,12 +9,11 @@
 
     <ImageView
         android:id="@+id/iv_profile_pic"
-        android:layout_width="@dimen/dp_200"
-        android:layout_height="@dimen/dp_100"
-        android:layout_marginTop="@dimen/dp_80"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:contentDescription="@null"
         android:scaleType="fitCenter"
-        android:src="@mipmap/logo"
-        android:contentDescription="@null"/>
+        android:src="@mipmap/logo" />
 
     <!--    <TextView-->
     <!--        android:id="@+id/tv_name"-->
@@ -31,4 +30,5 @@
     <!--        android:layout_height="wrap_content"-->
     <!--        android:text="@{viewModel.userEmail}" />-->
 
+    <!--        android:layout_marginTop="@dimen/dp_80"-->
 </LinearLayout>

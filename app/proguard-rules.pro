@@ -121,6 +121,8 @@
 -keep public class com.tencent.bugly.**{*;}
 -keep class android.support.**{*;}
 
+-dontwarn com.tencent.beacon.event.UserAction
+
 -keep public class top.easelink.lcg.R$*{
     public static final int *;
 }
