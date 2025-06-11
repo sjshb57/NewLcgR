@@ -1,0 +1,104 @@
+[versions]
+# Build tools
+gradle = "8.11.1"
+androidGradlePlugin = "8.10.1"
+kotlin = "2.1.21"
+# AndroidX
+compileSdk = "36"
+minSdk = "21"
+targetSdk = "34"
+androidxAppCompat = "1.7.1"
+androidx-annotation = "1.9.1"
+androidxCardView = "1.0.0"
+androidxConstraintLayout = "2.2.1"
+androidxLifecycle = "2.9.1"
+androidxRecyclerView = "1.4.0"
+androidxRoom = "2.7.1"
+androidxVectorDrawable = "1.2.0"
+androidxWork = "2.10.1"
+androidxSwipeRefreshLayout = "1.1.0"
+
+# Google
+material = "1.12.0"
+# Coroutines
+coroutines = "1.10.2"
+# Other
+coil = "2.7.0"
+easypermissions = "3.0.0"
+eventbus = "3.3.1"
+gson = "2.13.1"
+guava = "33.4.8-android"
+jsoup = "1.17.2"
+lottie = "6.6.6"
+multiType = "4.3.0"
+okhttp = "4.12.0"
+persistentCookieJar = "v1.0.1"
+photoView = "2.3.0"
+richtext = "3.0.8"
+shimmerlayout = "2.1.0"
+timber = "5.0.1"
+# Debug
+debugDB = "1.0.6"
+# Shiply
+shiply = "2.2.0"
+
+# kace = "2.1.0-1.2.0"
+# parcelize = "2.1.21"
+
+[libraries]
+# AndroidX
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "androidxCardView" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidxConstraintLayout" }
+androidx-lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycle" }
+androidx-lifecycle-extensions = { group = "androidx.lifecycle", name = "lifecycle-extensions", version.ref = "androidxLifecycle" }
+androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidxLifecycle" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidxRecyclerView" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidxRoom" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidxRoom" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidxRoom" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "androidxSwipeRefreshLayout" }
+androidx-vectordrawable = { group = "androidx.vectordrawable", name = "vectordrawable", version.ref = "androidxVectorDrawable" }
+androidx-vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version.ref = "androidxVectorDrawable" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "androidxWork" }
+
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
+
+# Google
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+# Coroutines
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+
+# Other
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+easypermissions = { group = "pub.devrel", name = "easypermissions", version.ref = "easypermissions" }
+eventbus = { group = "org.greenrobot", name = "eventbus", version.ref = "eventbus" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
+multitype = { group = "com.drakeet.multitype", name = "multitype", version.ref = "multiType" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+persistentcookiejar = { group = "com.github.franmontiel", name = "PersistentCookieJar", version.ref = "persistentCookieJar" }
+photoview = { group = "com.github.chrisbanes", name = "PhotoView", version.ref = "photoView" }
+richtext = { group = "com.zzhoujay.richtext", name = "richtext", version.ref = "richtext" }
+shimmerlayout = { group = "io.supercharge", name = "shimmerlayout", version.ref = "shimmerlayout" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+# Debug
+debug-db = { group = "com.amitshekhar.android", name = "debug-db", version.ref = "debugDB" }
+# Shiply
+shiply-upgrade = { group = "com.tencent.shiply", name = "upgrade", version.ref = "shiply" }
+shiply-upgrade-ui = { group = "com.tencent.shiply", name = "upgrade-ui", version.ref = "shiply" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+
+# kace = { id = "com.kanyun.kace", version.ref = "kace" }
+# parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "parcelize" }
+parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }

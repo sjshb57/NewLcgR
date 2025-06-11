@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="viewModel"
+            type="top.easelink.lcg.ui.main.articles.viewmodel.ArticlesViewModel"/>
+
+    </data>
+
+    <top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
+        android:id="@+id/refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        app:refreshing="@{viewModel.isLoading}"
+        android:focusable="true"
+        android:clickable="true">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:background="@color/slight_light_light_gray"
+                tools:visibility="visible" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:elevation="@dimen/dp_4"
+                android:layout_gravity="bottom|end"
+                android:id="@+id/back_to_top"
+                android:layout_width="@dimen/dp_32"
+                android:layout_height="@dimen/dp_32"
+                android:scaleType="fitCenter"
+                android:layout_marginEnd="@dimen/dp_20"
+                android:layout_marginBottom="@dimen/dp_54"
+                android:focusable="true"
+                android:clickable="true"
+                android:visibility="gone"
+                android:background="@drawable/bg_oval"
+                tools:visibility="visible"
+                app:lottie_rawRes="@raw/swipe_up"
+                app:lottie_loop="true"
+                app:lottie_autoPlay="false"/>
+        </FrameLayout>
+
+    </top.easelink.framework.customview.ScrollChildSwipeRefreshLayout>
+
+</layout>

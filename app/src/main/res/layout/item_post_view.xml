@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/post_card"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rectangle_bg_white_4dp"
+    android:paddingBottom="@dimen/dp_5">
+
+    <ImageView
+        android:id="@+id/post_avatar"
+        style="@style/TextStyle.Heading"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"
+        android:layout_marginStart="@dimen/dp_8"
+        android:layout_marginTop="@dimen/dp_10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@null"
+        tools:src="@drawable/ic_noavatar_middle"/>
+
+    <TextView
+        android:id="@+id/author_text_view"
+        style="@style/TextStyle.Title.Sub"
+        android:layout_marginTop="@dimen/dp_5"
+        android:layout_marginStart="@dimen/dp_5"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/post_avatar"
+        app:layout_constraintTop_toTopOf="@id/post_avatar"
+        tools:text="Author"/>
+
+    <TextView
+        android:id="@+id/date_text_view"
+        style="@style/TextStyle.Title.Sub"
+        android:layout_marginTop="@dimen/dp_5"
+        android:layout_marginStart="@dimen/dp_5"
+        android:layout_width="@dimen/dp_0"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/author_text_view"
+        app:layout_constraintStart_toEndOf="@id/post_avatar"
+        tools:text="2019-07-04"/>
+
+    <top.easelink.framework.customview.htmltextview.HtmlTextView
+        android:id="@+id/content_text_view"
+        style="@style/TextStyle.Title"
+        android:paddingBottom="@dimen/dp_2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:textIsSelectable="true"
+        android:focusableInTouchMode="true"
+        android:textColorHighlight="@color/translucent_white"
+        android:focusable="true"
+        android:textSize="@dimen/sp_14"
+        android:lineSpacingExtra="@dimen/dp_4"
+        android:layout_marginEnd="@dimen/dp_8"
+        app:layout_constraintTop_toBottomOf="@id/post_avatar"
+        app:layout_constraintStart_toStartOf="@id/post_avatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textStyle="normal"
+        tools:text="This repository contains a detailed sample app that implements MVVM architecture using Dagger2, Android Room, RxJava2 ,etc" />
+
+    <View
+        android:id="@+id/guide_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_0_1"
+        android:layout_marginTop="@dimen/dp_6"
+        android:layout_marginStart="@dimen/dp_20"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:background="@drawable/rectangle_bg"
+        android:backgroundTint="@color/slight_light_gray"
+        app:layout_constraintTop_toBottomOf="@id/content_text_view"
+        />
+
+    <LinearLayout
+        android:id="@+id/post_btn_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@id/guide_line"
+        android:layout_marginTop="@dimen/dp_3"
+        android:layout_marginBottom="@dimen/dp_1"
+        android:layout_marginEnd="@dimen/dp_8" >
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/post_btn_capture"
+            android:padding="@dimen/dp_4"
+            android:layout_width="@dimen/dp_25"
+            android:layout_height="@dimen/dp_25"
+            android:src="@drawable/btn_selector_capture"
+            android:tint="@color/btn_color"
+            android:layout_marginEnd="@dimen/dp_25"
+            android:contentDescription="@null" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/post_btn_thumb_up"
+            android:padding="@dimen/dp_4"
+            android:layout_width="@dimen/dp_25"
+            android:layout_height="@dimen/dp_25"
+            android:src="@drawable/btn_selector_thubm_up"
+            android:tint="@color/btn_color"
+            android:layout_marginEnd="@dimen/dp_25"
+            android:contentDescription="@null" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/post_btn_reply"
+            android:padding="@dimen/dp_4"
+            android:layout_width="@dimen/dp_25"
+            android:layout_height="@dimen/dp_25"
+            android:src="@drawable/btn_selector_reply"
+            android:tint="@color/btn_color"
+            android:layout_marginEnd="@dimen/dp_25"
+            android:contentDescription="@null" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/post_btn_copy"
+            android:padding="@dimen/dp_4"
+            android:layout_width="@dimen/dp_25"
+            android:layout_height="@dimen/dp_25"
+            android:src="@drawable/btn_selector_copy"
+            android:tint="@color/btn_color"
+            android:contentDescription="@null" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/reply_header"
+        layout="@layout/item_reply_header"
+        android:layout_marginTop="@dimen/dp_20"
+        app:layout_constraintTop_toBottomOf="@id/post_btn_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

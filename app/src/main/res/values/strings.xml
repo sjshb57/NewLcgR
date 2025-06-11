@@ -1,0 +1,240 @@
+<resources>
+    <string name="app_name">吾爱破解</string>
+    <string name="todo_tips">未完成的功能</string>
+    <string name="login_required_error">请求页面失败，请确认是否登陆</string>
+    <string name="error">请求页面失败，请稍后再试</string>
+    <string name="network_error">当前网络质量差，请稍后再试</string>
+    <string name="anti_scraping_error">请重新清除账户信息，重新登录</string>
+    <string name="request_too_often_warning">访问接口过于频繁，请稍后重试</string>
+    <string name="qq_not_support">暂不支持QQ登陆</string>
+    <string name="baidu_net_disk_not_support">暂不支持百度网盘唤起</string>
+    <string name="login_or_register">登录或注册</string>
+    <string name="login_hint_message">登陆开启更多功能</string>
+    <string name="history_articles_empty_tips">看过的文章才有记录哦</string>
+
+    <!--  History  -->
+    <string name="btn_clear_histories">全部删除</string>
+
+    <!--  Error messages  -->
+    <string name="io_error_mark_invalid">页面解析失败，请使用网页打开</string>
+    <!--Toolbar menus-->
+    <string name="clear">Clear</string>
+    <string name="share">Share</string>
+    <string name="search">搜索</string>
+    <string name="search_result_title">搜索结果：</string>
+    <string name="open_in_webview">网页打开</string>
+    <string name="extract_urls">提取下载链接</string>
+    <string name="add_to_my_favorite">添加到收藏</string>
+    <string name="clear_all_from_my_favorite">清空本地收藏</string>
+    <string name="manage_my_favorites">管理在线收藏</string>
+    <string name="sync_my_favorite">同步在线收藏</string>
+    <string name="start_sync">开始同步</string>
+
+    <string name="order_by_datetime">按发帖时间排序</string>
+    <string name="order_by_lastpost">按回帖时间排序</string>
+
+    <!--Toolbar menus-->
+    <string name="about_me">我的</string>
+    <string name="message">消息</string>
+    <string name="discover_tab">发现</string>
+    <string name="forum_page">专区</string>
+    <string name="home_page">首页</string>
+
+    <!--Drawer-->
+    <string name="open_drawer">Drawer Open</string>
+    <string name="close_drawer">Drawer Close</string>
+
+    <!--Drawer Menus-->
+    <string name="setting">『应用设置』</string>
+    <string name="about">『关于应用』</string>
+    <string name="thread_about_app">『App发布页』</string>
+    <string name="open_portal_page">『吾爱网页版』</string>
+    <string name="open_jrs_page">『JRS看球』</string>
+
+    <!--home fragment-->
+    <string name="tab_title_hot">人气热门</string>
+    <string name="tab_title_tech">技术分享</string>
+    <string name="tab_title_new_thread">新鲜出炉</string>
+    <string name="tab_title_digest">精华采撷</string>
+    <string name="tab_title_help">求助新帖</string>
+    <string name="help_request_solved">解</string>
+    <string name="my_post">我</string>
+    <string name="app_exit_tip">再按一次退出应用</string>
+
+    <!--Setting Activity-->
+    <string name="account_setting">账号</string>
+    <string name="start_auto_sign_in">开启自动签到</string>
+    <string name="search_setting">搜索</string>
+    <string name="search_engine_setting">默认搜索引擎</string>
+    <string name="open_search_result_in_webview">网页形式打开搜索结果</string>
+    <string name="article_setting">文章</string>
+    <string name="open_article_in_webview">网页形式打开文章</string>
+    <string name="show_recommend_flag_on_article">标题显示推荐标签</string>
+    <string name="article_handle_pre_tag">单独页面展示代码</string>
+    <string name="favorite_setting">收藏</string>
+    <string name="sync_favorites">同步收藏文章到网站</string>
+    <string name="sync_favorites_instruction">（默认仅收藏到本地）</string>
+    <string name="app_setting">应用</string>
+    <string name="check_app_update">检查最新版本</string>
+    <string name="app_is_latest">已经是最新版本了</string>
+    <string name="check_app_update_error">检查版本失败</string>
+
+    <!--Me Fragment-->
+    <string name="me_tab_title">个人页</string>
+    <string name="me_tab_level_placeholder">个人信息</string>
+    <string name="me_tab_username_placeholder">路人甲</string>
+    <string name="me_tab_group_placeholder">游客</string>
+    <string name="me_tab_placeholder">-</string>
+    <string name="me_notification_title">我的信息</string>
+
+    <string name="ic_history">阅读记录</string>
+    <string name="ic_notifications">消息提醒</string>
+    <string name="ic_feedback">问题反馈</string>
+    <string name="ic_follow">我的收听</string>
+    <string name="ic_favorite">我的收藏</string>
+    <string name="ic_my_articles">我的帖子</string>
+
+    <!--Login Dialog-->
+    <string name="login_username">用户名</string>
+    <string name="login_password">密码</string>
+    <string name="login_verify_code">验证码</string>
+    <string name="login_btn">登陆</string>
+    <string name="login_hint_btn">账号登陆</string>
+    <string name="login_qq">QQ</string>
+    <string name="cancel_btn">取消</string>
+    <string name="login_successfully">登陆成功，处理数据中请稍等…</string>
+
+    <!--Logout Dialog-->
+    <string name="logout_confirm_message">退出账号@%s？</string>
+    <string name="logout_confirm_btn">是的</string>
+    <string name="clear_cookie">本地信息已清除</string>
+
+    <!-- Profile Dialog   -->
+    <string name="subscribe_btn">收听TA</string>
+    <string name="open_profile_btn">查看TA</string>
+    <string name="subscribe_failed">收听失败，请尝试从网站操作</string>
+
+    <!--Notification-->
+    <string name="notification_arrival">有新的消息</string>
+    <string name="notification_read">知道了</string>
+    <string name="notification_title">全部通知</string>
+    <!--about fragment-->
+    <string name="version">"version"</string>
+    <string name="github_title">Github源码地址</string>
+    <string name="github_url">https://github.com/fabricezhang/lcg/</string>
+    <string name="author_title">问题反馈邮箱</string>
+    <string name="author_email">fabrice@163.com</string>
+
+    <!--favorite fragment-->
+    <string name="empty_favorite">收藏夹目前是空的。</string>
+    <string name="add_to_favorite_successfully">收藏本地成功</string>
+    <string name="add_to_favorite_failed">收藏本地失败</string>
+    <string name="sync_favorite_successfully">同步网络收藏成功</string>
+    <string name="sync_favorite_failed">同步网络收藏失败</string>
+    <string name="sync_favorite_failed_empty_favorites">同步网络收藏失败:网络收藏为空</string>
+    <string name="remove_all_favorites_successfully">清空收藏成功</string>
+    <string name="remove_all_favorites_failed">清空收藏失败</string>
+
+    <!--feed-->
+    <string name="load_more">加载更多</string>
+    <string name="no_more_content">没有更多了</string>
+    <string name="tap_for_code">『点击显示代码』</string>
+    <string name="tap_for_large_image_failed">查看失败</string>
+
+    <!--message fragment-->
+    <string name="tab_title_private_message">私信</string>
+    <string name="tab_title_notification">通知</string>
+
+    <!--follow fragment-->
+    <string name="tab_title_following_feed">广播动态</string>
+    <string name="tab_title_following">我的收听</string>
+    <string name="tab_title_subscriber">我的听众</string>
+    <string name="follower_num_template">听众 %d 人</string>
+    <string name="following_num_template">收听 %d 人</string>
+    <string name="following_feed_open_original_content">查看原文</string>
+
+    <!--download link dialog-->
+    <string name="download_title">下载链接</string>
+    <string name="download_link_not_found">未找到下载链接</string>
+    <string name="copy_succeed">已复制到剪贴板</string>
+    <string name="copy_failed">复制失败</string>
+
+    <!--reply post dialog  -->
+    <string name="reply_post_dialog_title">回复：%s</string>
+    <string name="reply_post_btn_cancel">取消</string>
+    <string name="reply_post_btn_confirm">确认</string>
+    <string name="reply_post_btn_sending">发送中</string>
+    <string name="reply_post_btn_sent">完成</string>
+    <string name="reply_post_input_hint">请输入回复内容…</string>
+    <string name="reply_post_failed">回复失败</string>
+    <string name="reply_post_succeed">回复成功</string>
+    <string name="reply_btn_debounced_notice">发送中，请稍等</string>
+
+    <!--comment article dialog  -->
+    <string name="comment_article_dialog_title">跟帖评论：</string>
+    <string name="comment_article_input_hint">请输入评论内容…</string>
+    <string name="reply_title">全部回复</string>
+
+    <!--empty state-->
+    <string name="empty_screen">目前没有内容可供展示</string>
+    <string name="please_retry">请重试</string>
+    <string name="retry">重试</string>
+
+    <!--share template-->
+    <string name="share_template">分享文章 %s %s</string>
+    <string name="share_title">快来看这篇</string>
+
+    <!--rank list-->
+    <string name="rank_list_today_heat_title">今日热榜</string>
+    <string name="type_view_template">查看：%d</string>
+    <string name="type_heat_template">热度：%d</string>
+    <string name="type_share_template">分享：%d</string>
+    <string name="type_favorite_template">收藏：%d</string>
+    <string name="type_reply_template">回复：%d</string>
+
+    <!--forum grid-->
+    <string name="more_forums">更多板块</string>
+    <string name="forum_most_frequent_title">常用板块导航</string>
+    <string name="forum_title_tips">右滑查看更多</string>
+    
+    <string name="forum_title">论坛板块导航</string>
+    <string name="forum_doctors">向逆行的白衣天使们致敬！</string>
+    <string name="forum_secondary_footer">没有更多了</string>
+    <string name="forum_mobile_security">移动安全</string>
+    <string name="forum_software">精品软件</string>
+    <string name="forum_original_release">原创发布</string>
+    <string name="forum_program_language">编程语言</string>
+    <string name="forum_animation_release">动画发布</string>
+    <string name="forum_reverse_resource">逆向资源</string>
+    <string name="forum_qa">悬赏问答</string>
+    <string name="forum_virus_analysis">病毒分析</string>
+    <string name="forum_virus_sample">病毒样本</string>
+    <string name="forum_virus_rescue">病毒救援</string>
+    <string name="free_chat_title">水漫金山</string>
+    <string name="welfare_title">福利经验</string>
+
+    <!-- setting -->
+    <string name="setting_title">设置</string>
+
+    <!--block-->
+    <string name="not_found_info">抱歉，文章可能已经被删除了</string>
+    <string name="block_info">抱歉，本帖要求阅读权限高于 10 才能浏览</string>
+    <string name="preview_loading">加载中，请稍候</string>
+    <string name="preview_fail_info">预览失败，请检查阅读权限</string>
+    <string name="preview_fail_info_post_deleted">帖子违规，已被管理员删除</string>
+
+    <string name="general_error">未知错误，欢迎反馈问题</string>
+    <!--permissions-->
+    <string name="permission_request">请授予读写磁盘权限</string>
+    <string name="permission_grant">已授权</string>
+    <string name="permission_denied">未授权，部分功能可能无法使用</string>
+
+    <!--extras-->
+    <string name="jrs_sport">看球直播』</string>
+
+    <!--newFile-->
+    <string name="input_key_word">输入关键字</string>
+    <string name="html_general_error">内容解析失败，欢迎将文章反馈给作者以便及时修复</string>
+    <string name="linkage_rv_the_end">这里是底线</string>
+    <string name="install_wechat_tips">您没有安装微信，请先安装</string>
+</resources>

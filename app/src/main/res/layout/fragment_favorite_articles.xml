@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="viewModel"
+            type="top.easelink.lcg.ui.main.articles.viewmodel.FavoriteArticlesViewModel"/>
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clRootView"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:backgroundTint="@color/slight_light_gray"
+        android:focusable="true"
+        android:clickable="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/article_toolbar"
+            style="@style/Toolbar"
+            app:title="@string/ic_favorite"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:subtitleTextColor="@color/white"
+            app:titleTextAppearance="@style/Toolbar.TitleText"
+            app:titleTextColor="@color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_margin="@dimen/dp_5"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            android:padding="@dimen/dp_5"
+            app:layout_constraintTop_toBottomOf="@id/article_toolbar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
+
+        <FrameLayout
+            android:visibility="@{viewModel.isLoading? View.VISIBLE:View.GONE, default = gone}"
+            android:background="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/recycler_view"
+            app:layout_constraintBottom_toBottomOf="@id/recycler_view">
+            <com.airbnb.lottie.LottieAnimationView
+                android:layout_gravity="center"
+                android:id="@+id/loading"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"
+                android:scaleType="fitCenter"
+                android:visibility="visible"
+                app:lottie_rawRes="@raw/sync_icon"
+                app:lottie_loop="true"
+                app:lottie_autoPlay="true"/>
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
