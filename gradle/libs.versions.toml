@@ -5,11 +5,12 @@ androidGradlePlugin = "8.10.1"
 kotlin = "2.1.21"
 # AndroidX
 compileSdk = "36"
-minSdk = "21"
+minSdk = "23"
 targetSdk = "36"
 androidxAppCompat = "1.7.1"
 androidx-annotation = "1.9.1"
 androidxCardView = "1.0.0"
+androidxCore = "1.16.0"
 androidxConstraintLayout = "2.2.1"
 androidxLifecycle = "2.9.1"
 androidxRecyclerView = "1.4.0"
@@ -28,7 +29,7 @@ easypermissions = "3.0.0"
 eventbus = "3.3.1"
 gson = "2.13.1"
 guava = "33.4.8-android"
-jsoup = "1.17.2"
+jsoup = "1.20.1"
 lottie = "6.6.6"
 multiType = "4.3.0"
 okhttp = "4.12.0"
@@ -42,16 +43,14 @@ debugDB = "1.0.6"
 # Shiply
 shiply = "2.2.0"
 
-# kace = "2.1.0-1.2.0"
-# parcelize = "2.1.21"
-
 [libraries]
 # AndroidX
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
 androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "androidxCardView" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidxConstraintLayout" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
+androidx-core-base = { group = "androidx.core", name = "core", version.ref = "androidxCore" }
 androidx-lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycle" }
-androidx-lifecycle-extensions = { group = "androidx.lifecycle", name = "lifecycle-extensions", version.ref = "androidxLifecycle" }
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "androidxLifecycle" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidxLifecycle" }
@@ -99,6 +98,4 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 
-# kace = { id = "com.kanyun.kace", version.ref = "kace" }
-# parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "parcelize" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
