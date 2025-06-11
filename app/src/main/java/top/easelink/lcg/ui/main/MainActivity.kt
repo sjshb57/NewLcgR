@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
@@ -14,7 +15,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.badge.BadgeDrawable // 导入 BadgeDrawable
+import com.google.android.material.badge.BadgeDrawable
 import com.tencent.upgrade.core.DefaultUpgradeStrategyRequestCallback
 import com.tencent.upgrade.core.UpgradeManager
 import kotlinx.coroutines.GlobalScope
@@ -59,26 +60,28 @@ class MainActivity : TopActivity(), BottomNavigationView.OnNavigationItemSelecte
 
     private lateinit var binding: ActivityMainBinding
 
-    override fun onBackPressed() {
-        if (mFragmentTags.isNotEmpty() && mFragmentTags.size > 1) {
-            while (onFragmentDetached(mFragmentTags.pop())) {
-                syncBottomViewNavItemState()
-                return
-            }
-        }
-        if (System.currentTimeMillis() - lastBackPressed > 2000) {
-            Toast.makeText(this, R.string.app_exit_tip, Toast.LENGTH_SHORT).show()
-            lastBackPressed = System.currentTimeMillis()
-        } else {
-            finish()
-            exitProcess(0)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (mFragmentTags.isNotEmpty() && mFragmentTags.size > 1) {
+                    while (onFragmentDetached(mFragmentTags.pop())) {
+                        syncBottomViewNavItemState()
+                        return
+                    }
+                }
+                if (System.currentTimeMillis() - lastBackPressed > 2000) {
+                    Toast.makeText(this@MainActivity, R.string.app_exit_tip, Toast.LENGTH_SHORT).show()
+                    lastBackPressed = System.currentTimeMillis()
+                } else {
+                    finish()
+                    exitProcess(0)
+                }
+            }
+        })
 
         EventBus.getDefault().register(this)
         setupDrawer(binding.toolbar)
@@ -236,7 +239,6 @@ class MainActivity : TopActivity(), BottomNavigationView.OnNavigationItemSelecte
         }
     }
 
-
     private fun showFragmentWithTag(tag: String): Boolean {
         supportFragmentManager.findFragmentByTag(tag)?.let {
             if (popBackFragmentUntil(supportFragmentManager, tag)) {
@@ -274,18 +276,31 @@ class MainActivity : TopActivity(), BottomNavigationView.OnNavigationItemSelecte
             false
         } else {
             when (item.itemId) {
-                R.id.action_message -> {
-                    removeBubbleView(PRIVATE_MESSAGE_POS)
-                    MessageFragment::class.java
+                R.id.action_message,
+                R.id.action_forum_navigation,
+                R.id.action_about_me -> {
+                    // 隐藏 Toolbar
+                    binding.toolbar.visibility = View.GONE
+                    when (item.itemId) {
+                        R.id.action_message -> {
+                            removeBubbleView(PRIVATE_MESSAGE_POS)
+                            MessageFragment::class.java
+                        }
+                        R.id.action_forum_navigation -> DiscoverFragment::class.java
+                        R.id.action_about_me -> MeFragment::class.java
+                        else -> { null }
+                    }?.let {
+                        showFragment(it)
+                        true
+                    }?: false
                 }
-                R.id.action_forum_navigation -> DiscoverFragment::class.java
-                R.id.action_about_me -> MeFragment::class.java
-                R.id.action_home -> RecommendFragment::class.java
-                else -> { null }
-            }?.let {
-                showFragment(it)
-                true
-            }?: false
+                R.id.action_home -> {
+                    binding.toolbar.visibility = View.VISIBLE
+                    showFragment(RecommendFragment::class.java)
+                    true
+                }
+                else -> false
+            }
         }
     }
 

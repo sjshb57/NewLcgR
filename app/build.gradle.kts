@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.parcelize)
-//    alias(libs.plugins.kace)
 }
 
 // App Version is composed by Major * 10000 + Minor * 100 + Patch
@@ -23,9 +22,7 @@ android {
         versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
 
-        // apply build configs
         buildConfigField("String", "DB_NAME", "\"articles.db\"")
-        // 请在 local.properties 文件中定义 SHIPLY_APP_ID 和 SHIPLY_APP_KEY
         buildConfigField("String", "SHIPLY_APP_ID",  "\"" + System.getenv("SHIPLY_APP_ID") + "\"")
         buildConfigField("String", "SHIPLY_APP_KEY", "\"" + System.getenv("SHIPLY_APP_KEY") + "\"")
 
@@ -36,7 +33,6 @@ android {
 
     signingConfigs {
         create("release") {
-            // 请在 local.properties 文件中定义签名信息
             keyAlias = System.getenv("RELEASE_KEY_ALIAS")
             keyPassword = System.getenv("RELEASE_KEY_PWD")
             storeFile = file("../keystore.jks")
