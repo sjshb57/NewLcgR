@@ -10,7 +10,7 @@ plugins {
 // each version starts from 0
 val versionMajor = 1
 val versionMinor = 9
-val versionPatch = 6
+val versionPatch = 7
 
 android {
     namespace = "top.easelink.lcg"

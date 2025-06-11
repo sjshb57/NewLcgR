@@ -9,8 +9,6 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <dist:module dist:instant="true"/>
 
@@ -28,6 +26,7 @@
         android:requestLegacyExternalStorage="true"
         tools:ignore="LockedOrientationActivity,UnusedAttribute" >
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
+
         <activity
             android:name=".ui.splash.view.SplashActivity"
             android:exported="true"
@@ -39,12 +38,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <activity
-            android:launchMode="singleTask"
             android:name=".ui.main.MainActivity"
-            android:screenOrientation="portrait">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:exported="false">
         </activity>
-        <activity android:name=".ui.webview.view.WebViewActivity"
+
+        <activity
+            android:name=".ui.webview.view.WebViewActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:configChanges="orientation|keyboardHidden|navigation|screenSize"
@@ -66,30 +69,42 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.main.message.view.ConversationDetailActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait">
-        </activity>
-        <activity android:name=".ui.search.view.BaiduSearchActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait">
-        </activity>
-        <activity android:name=".ui.search.view.LCGSearchActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait">
-        </activity>
-        <activity android:name=".ui.search.view.SettingActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait">
-        </activity>
-        <activity android:name=".ui.profile.view.ProfileActivity"
-            android:launchMode="standard"
-            android:screenOrientation="portrait">
-        </activity>
+
         <activity
-            android:name="com.tencent.bugly.beta.ui.BetaActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|locale"
-            android:theme="@android:style/Theme.Translucent" />
+            android:name=".ui.setting.view.SettingActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:exported="false"
+            android:theme="@style/AppTheme">
+        </activity>
+
+        <activity
+            android:name=".ui.main.message.view.ConversationDetailActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".ui.search.view.BaiduSearchActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".ui.search.view.LCGSearchActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".ui.profile.view.ProfileActivity"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+            android:exported="false">
+        </activity>
     </application>
 
 </manifest>
