@@ -60,9 +60,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 设置沉浸式状态栏
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
 
         super.onCreate(savedInstanceState)
@@ -70,6 +68,8 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         setContentView(binding.root)
 
         binding.statusBarBackground.layoutParams.height = getStatusBarHeight()
+        binding.statusBarBackground.setBackgroundColor(resources.getColor(R.color.white, theme))
+
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -95,7 +95,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         setupDrawer(binding.toolbar)
         setupBottomNavMenu()
         showFragment(RecommendFragment::class.java)
-        setStatusBarColorForFragment(RecommendFragment::class.java.simpleName)
+        setStatusBarIconColorForFragment(RecommendFragment::class.java.simpleName)
 
         GlobalScope.launch(BackGroundPool) {
             UpgradeManager.getInstance().checkUpgrade(false, null, DefaultUpgradeStrategyRequestCallback())
@@ -197,21 +197,19 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         }
     }
 
-    private fun setStatusBarColorForFragment(fragmentSimpleName: String) {
-        val (color, isLightStatusBar) = when (fragmentSimpleName) {
-            RecommendFragment::class.java.simpleName ->
-                Pair(resources.getColor(R.color.statusBarColorRecommend, theme), false)
-            MessageFragment::class.java.simpleName ->
-                Pair(resources.getColor(R.color.statusBarColorMessageTab, theme), true)
-            DiscoverFragment::class.java.simpleName, MeFragment::class.java.simpleName ->
-                Pair(resources.getColor(R.color.statusBarColorWhite, theme), true)
+    private fun setStatusBarIconColorForFragment(fragmentSimpleName: String) {
+        val isLightStatusBar = when (fragmentSimpleName) {
+            RecommendFragment::class.java.simpleName,
+            MessageFragment::class.java.simpleName,
+            DiscoverFragment::class.java.simpleName,
+            MeFragment::class.java.simpleName,
             ArticleFragment::class.java.simpleName ->
-                Pair(resources.getColor(R.color.statusBarColorRecommend, theme), false)
+                true
             else ->
-                Pair(resources.getColor(R.color.statusBarColorDefault, theme), false)
+                true
         }
 
-        binding.statusBarBackground.setBackgroundColor(color)
+        binding.statusBarBackground.setBackgroundColor(resources.getColor(R.color.white, theme))
 
         WindowCompat.getInsetsController(window, window.decorView)?.apply {
             isAppearanceLightStatusBars = isLightStatusBar
@@ -290,7 +288,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                     mFragmentTags.pop()
                     d--
                 }
-                setStatusBarColorForFragment(tag)
+                setStatusBarIconColorForFragment(tag)
                 return true
             }
         }
@@ -305,7 +303,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 fragment,
                 R.id.fragment_container
             )
-            setStatusBarColorForFragment(clazz.simpleName)
+            setStatusBarIconColorForFragment(clazz.simpleName)
         }
     }
 
@@ -315,7 +313,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             fragment,
             R.id.fragment_container
         )
-        setStatusBarColorForFragment(fragment.javaClass.simpleName)
+        setStatusBarIconColorForFragment(fragment.javaClass.simpleName)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

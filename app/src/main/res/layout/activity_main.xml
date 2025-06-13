@@ -38,10 +38,10 @@
                     android:layout_height="?attr/actionBarSize"
                     android:elevation="@dimen/dp_4"
                     app:layout_scrollFlags="scroll|enterAlways"
-                    app:subtitleTextColor="@color/white"
+                    app:subtitleTextColor="@color/black"
                     app:title="@string/app_name"
                     app:titleTextAppearance="@style/Toolbar.TitleText"
-                    app:titleTextColor="@color/white"/>
+                    app:titleTextColor="@color/black"/>
             </com.google.android.material.appbar.AppBarLayout>
 
             <FrameLayout

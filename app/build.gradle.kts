@@ -5,9 +5,9 @@ plugins {
     alias(libs.plugins.parcelize)
 }
 
-val versionMajor = 1
-val versionMinor = 9
-val versionPatch = 9
+val versionMajor = 2
+val versionMinor = 0
+val versionPatch = 0
 
 android {
     namespace = "top.easelink.lcg"

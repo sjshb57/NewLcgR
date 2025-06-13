@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -72,17 +71,12 @@ class ArticleFragment : TopFragment(), ControllableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity?.window?.let { window ->
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-        }
-
         ViewCompat.setOnApplyWindowInsetsListener(binding.clRootView) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             binding.postRecyclerView.setPadding(
                 binding.postRecyclerView.paddingLeft,
-                0,
+                binding.postRecyclerView.paddingTop,
                 binding.postRecyclerView.paddingRight,
                 systemBars.bottom
             )

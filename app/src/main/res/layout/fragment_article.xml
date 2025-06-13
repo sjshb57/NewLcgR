@@ -13,21 +13,24 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/light_grey_background"
-        android:fitsSystemWindows="false"
-        app:elevation="0dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/article_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/transparent"
-            android:minHeight="?attr/actionBarSize"
-            app:titleTextColor="@color/black"
-            tools:title="Article title"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:titleTextAppearance="@style/Toolbar.TitleText" />
-    </com.google.android.material.appbar.AppBarLayout>
+        android:background="@color/white"
+        android:elevation="0dp"
+        app:elevation="0dp"
+        android:outlineProvider="none"
+        app:liftOnScroll="false">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/article_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:elevation="0dp"
+        app:elevation="0dp"
+        android:outlineProvider="none"
+        app:titleTextColor="@color/black"
+        tools:title="Article title"
+        app:layout_scrollFlags="scroll|enterAlways|snap"
+        app:titleTextAppearance="@style/Toolbar.TitleText" />
+</com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/post_recycler_view"
