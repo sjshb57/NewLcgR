@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,8 +19,8 @@ import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.FragmentArticleBinding
-import top.easelink.lcg.ui.main.article.view.DownloadLinkDialog.Companion.newInstance
-import top.easelink.lcg.ui.main.article.view.ReplyPostDialog.Companion.newInstance
+import top.easelink.lcg.ui.main.article.view.DownloadLinkDialog.Companion.newInstance as newDownloadLinkDialog
+import top.easelink.lcg.ui.main.article.view.ReplyPostDialog.Companion.newInstance as newReplyPostDialog
 import top.easelink.lcg.ui.main.article.view.ScreenCaptureDialog.Companion.TAG
 import top.easelink.lcg.ui.main.article.viewmodel.ArticleAdapterListener.Companion.FETCH_POST_INIT
 import top.easelink.lcg.ui.main.article.viewmodel.ArticleViewModel
@@ -28,16 +31,15 @@ import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant
 import top.easelink.lcg.utils.showMessage
 
-class ArticleFragment: TopFragment(), ControllableFragment {
+class ArticleFragment : TopFragment(), ControllableFragment {
 
     companion object {
         fun newInstance(url: String): ArticleFragment {
-            val args = Bundle().apply {
-                putString(ARTICLE_URL, url)
+            return ArticleFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARTICLE_URL, url)
+                }
             }
-            val fragment = ArticleFragment()
-            fragment.arguments = args
-            return fragment
         }
 
         private const val ARTICLE_URL = "article_url"
@@ -49,13 +51,9 @@ class ArticleFragment: TopFragment(), ControllableFragment {
     private var _binding: FragmentArticleBinding? = null
     private val binding get() = _binding!!
 
-    override fun isControllable(): Boolean {
-        return true
-    }
+    override fun isControllable(): Boolean = true
 
-    override fun getBackStackTag(): String {
-        return articleUrl
-    }
+    override fun getBackStackTag(): String = articleUrl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +72,24 @@ class ArticleFragment: TopFragment(), ControllableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        activity?.window?.let { window ->
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.clRootView) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            binding.postRecyclerView.setPadding(
+                binding.postRecyclerView.paddingLeft,
+                0,
+                binding.postRecyclerView.paddingRight,
+                systemBars.bottom
+            )
+
+            insets
+        }
+
         viewModel = ViewModelProvider(this)[ArticleViewModel::class.java]
         initObserver()
         setUp()
@@ -113,96 +129,111 @@ class ArticleFragment: TopFragment(), ControllableFragment {
 
     private fun setUp() {
         binding.postRecyclerView.apply {
-            val mLayoutManager = LinearLayoutManager(context).also {
-                it.orientation = RecyclerView.VERTICAL
+            layoutManager = LinearLayoutManager(context).apply {
+                orientation = RecyclerView.VERTICAL
             }
-            layoutManager = mLayoutManager
             itemAnimator = DefaultItemAnimator()
-            adapter = ArticleAdapter(
-                viewModel, this@ArticleFragment
-            )
+            adapter = ArticleAdapter(viewModel, this@ArticleFragment)
 
-            viewModel.posts.observe(viewLifecycleOwner) {
-                val url = it[0].replyUrl
-                if (it.size > 0 && url != null) {
-                    binding.comment.apply {
-                        visibility = View.VISIBLE
-                    }.setOnClickListener {
-                        val dialog = CommentArticleDialog.newInstance(url)
-                        dialog.setTargetFragment(this@ArticleFragment, REPLY_POST_RESULT)
-                        dialog.show(if (isAdded) parentFragmentManager else childFragmentManager)
+            viewModel.posts.observe(viewLifecycleOwner) { posts ->
+                if (posts.isNotEmpty() && posts[0].replyUrl != null) {
+                    binding.comment.visibility = View.VISIBLE
+                    binding.comment.setOnClickListener {
+                        showCommentDialog(posts[0].replyUrl!!)
                     }
                 } else {
                     binding.comment.visibility = View.GONE
                 }
-                (adapter as? ArticleAdapter)?.run {
+                (adapter as? ArticleAdapter)?.apply {
                     clearItems()
-                    addItems(it)
+                    addItems(posts)
                 }
             }
         }
     }
 
+    private fun showCommentDialog(replyUrl: String) {
+        try {
+            val dialog = CommentArticleDialog.newInstance(replyUrl)
+            dialog.setTargetFragment(this@ArticleFragment, REPLY_POST_RESULT)
+            dialog.show(if (isAdded) parentFragmentManager else childFragmentManager, "CommentArticleDialog")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun setupToolBar() {
         binding.articleToolbar.apply {
+            setNavigationOnClickListener { activity?.onBackPressed() }
             inflateMenu(R.menu.article)
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.action_open_in_webview -> WebViewActivity.startWebViewWith(
-                        WebsiteConstant.SERVER_BASE_URL + articleUrl,
-                        context
-                    )
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_open_in_webview -> {
+                        WebViewActivity.startWebViewWith(
+                            WebsiteConstant.SERVER_BASE_URL + articleUrl,
+                            requireContext()
+                        )
+                    }
                     R.id.action_extract_urls -> {
-                        viewModel.extractDownloadUrl()
-                            ?.takeIf { list -> list.isNotEmpty() }
-                            ?.run {
-                                newInstance(this).show(if (isAdded) parentFragmentManager else childFragmentManager)
-                            } ?: showMessage(R.string.download_link_not_found)
+                        viewModel.extractDownloadUrl()?.takeIf { it.isNotEmpty() }?.let { urls ->
+                            newDownloadLinkDialog(urls).show(
+                                parentFragmentManager,
+                                "DownloadLinkDialog"
+                            )
+                        } ?: run {
+                            showMessage(R.string.download_link_not_found)
+                        }
                     }
-                    R.id.action_add_to_my_favorite -> viewModel.addToFavorite()
-                    else -> {
+                    R.id.action_add_to_my_favorite -> {
+                        viewModel.addToFavorite()
                     }
+                    else -> { /* Do nothing */ }
                 }
-                return@setOnMenuItemClickListener true
+                true
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REPLY_POST_RESULT -> {
-                if (resultCode == 1) {
-                    data?.getBundleExtra("post")
-                        ?.getParcelable<Post>("post")
-                        ?.let {
-                            viewModel.addPostToTop(it)
-                            binding.postRecyclerView.scrollToPosition(1)
-                        }
-                    showMessage(R.string.reply_post_succeed)
-                } else {
-                    showMessage(R.string.reply_post_failed)
-                }
+            REPLY_POST_RESULT -> handleReplyPostResult(resultCode, data)
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    private fun handleReplyPostResult(resultCode: Int, data: Intent?) {
+        if (resultCode == 1) {
+            data?.getBundleExtra("post")?.getParcelable<Post>("post")?.let { post ->
+                viewModel.addPostToTop(post)
+                binding.postRecyclerView.scrollToPosition(1)
+                showMessage(R.string.reply_post_succeed)
             }
-            else -> {
-                super.onActivityResult(requestCode, resultCode, data)
-            }
+        } else {
+            showMessage(R.string.reply_post_failed)
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: ReplyPostEvent) {
-        newInstance(event.replyUrl, event.author).show(
-            if (isAdded) parentFragmentManager else childFragmentManager
-        )
+        try {
+            newReplyPostDialog(event.replyUrl, event.author).show(
+                parentFragmentManager,
+                "ReplyPostDialog"
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: ScreenCaptureEvent) {
-        ScreenCaptureDialog
-            .newInstance(event.imagePath)
-            .show(
-                fragmentManager = if (isAdded) parentFragmentManager else childFragmentManager,
-                tag = TAG
+        try {
+            ScreenCaptureDialog.newInstance(event.imagePath).show(
+                parentFragmentManager,
+                TAG
             )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

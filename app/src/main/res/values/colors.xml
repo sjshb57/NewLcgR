@@ -39,4 +39,5 @@
     <color name="statusBarColorMessageTab">#FFFFFF</color>
     <color name="statusBarColorWhite">#FFFFFF</color>
     <color name="statusBarColorDefault">@color/colorPrimary</color>
+    <color name="light_grey_background">#ECECEC</color>
 </resources>

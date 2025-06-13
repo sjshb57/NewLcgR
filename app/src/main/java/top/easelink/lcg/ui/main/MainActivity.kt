@@ -205,6 +205,8 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 Pair(resources.getColor(R.color.statusBarColorMessageTab, theme), true)
             DiscoverFragment::class.java.simpleName, MeFragment::class.java.simpleName ->
                 Pair(resources.getColor(R.color.statusBarColorWhite, theme), true)
+            ArticleFragment::class.java.simpleName ->
+                Pair(resources.getColor(R.color.statusBarColorRecommend, theme), false)
             else ->
                 Pair(resources.getColor(R.color.statusBarColorDefault, theme), false)
         }

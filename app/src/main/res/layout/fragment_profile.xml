@@ -69,7 +69,7 @@
             android:layout_width="@dimen/dp_20"
             android:layout_height="@dimen/dp_20"
             android:scaleType="fitCenter"
-            android:tint="@color/semi_gray"
+            app:tint="@color/semi_gray"
             android:layout_marginTop="@dimen/dp_15"
             android:src="@drawable/ic_coin"
             app:layout_constraintTop_toBottomOf="@id/me_user_avatar"

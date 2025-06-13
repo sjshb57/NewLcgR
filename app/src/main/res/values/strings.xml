@@ -123,7 +123,7 @@
     <string name="github_title">Github源码地址</string>
     <string name="github_url">https://github.com/sjshb57/NewLcgR/</string>
     <string name="author_title">问题反馈邮箱</string>
-    <string name="author_email"> </string>
+    <string name="author_email">http://t.me/sjshb_2157</string>
 
     <!--favorite fragment-->
     <string name="empty_favorite">收藏夹目前是空的</string>
