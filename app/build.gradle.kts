@@ -7,7 +7,7 @@ plugins {
 
 val versionMajor = 1
 val versionMinor = 9
-val versionPatch = 8
+val versionPatch = 9
 
 android {
     namespace = "top.easelink.lcg"
@@ -36,6 +36,9 @@ android {
             keyPassword = System.getenv("RELEASE_KEY_PWD")
             storeFile = file("../keystore.jks")
             storePassword = System.getenv("RELEASE_KEY_STORE_PWD")
+            enableV1Signing = false
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
@@ -97,4 +100,5 @@ dependencies {
 
     implementation(libs.google.material)
     implementation(libs.androidx.appcompat)
+    implementation(libs.fragment.ktx)
 }

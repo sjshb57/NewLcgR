@@ -14,9 +14,6 @@ UI参考了知乎、虎扑App及头条系各app的展示, 架构参考了Google�
 - 支持阅读记录，避免错过内容
 - 支持自动签到
 
-APK下载 蓝奏云
- - [V1.8.7](https://fabirce.lanzous.com/i46Z5j7scab)
- 
 ## 相关技术
 - 使用最新流行的[Coil](https://coil-kt.github.io/coil/)替换了Glide
 - 参考并重写了[HtmlTextView](https://github.com/SufficientlySecure/html-textview)
