@@ -1,7 +1,7 @@
 package top.easelink.lcg.ui.profile.view
 
-import android.app.Activity
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -22,7 +22,7 @@ class UserInfoGridViewAdapter internal constructor(
     ): View {
         val v: View
         val vh = if (convertView == null) {
-            (context as Activity).layoutInflater.inflate(mLayoutRes, parent, false).let {
+            LayoutInflater.from(context).inflate(mLayoutRes, parent, false).let {
                 ViewHolder().apply {
                     titleText = it.findViewById(R.id.title_tv)
                     valueText = it.findViewById(R.id.value_tv)
@@ -40,7 +40,6 @@ class UserInfoGridViewAdapter internal constructor(
         }
         return v
     }
-
 
     private class ViewHolder {
         var titleText: TextView? = null
