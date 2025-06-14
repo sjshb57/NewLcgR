@@ -60,7 +60,7 @@
             android:id="@+id/profile_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:text="@string/open_profile_btn"
             android:textSize="@dimen/sp_12"
             android:layout_margin="@dimen/dp_6" />
@@ -69,7 +69,7 @@
             android:id="@+id/subscribe_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:text="@string/subscribe_btn"
             android:textSize="@dimen/sp_12"
             android:layout_margin="@dimen/dp_6" />
