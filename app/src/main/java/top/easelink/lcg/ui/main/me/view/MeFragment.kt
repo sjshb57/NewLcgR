@@ -22,6 +22,7 @@ import top.easelink.framework.utils.dpToPx
 import top.easelink.lcg.R
 import top.easelink.lcg.account.AccountManager
 import top.easelink.lcg.databinding.FragmentMeBinding
+import top.easelink.lcg.ui.main.articles.view.FavoriteArticlesFragment
 import top.easelink.lcg.ui.main.follow.view.FollowFragment
 import top.easelink.lcg.ui.main.history.view.HistoryArticlesFragment
 import top.easelink.lcg.ui.main.me.viewmodel.MeViewModel
@@ -125,6 +126,7 @@ class MeFragment : TopFragment(), ControllableFragment {
     private fun updateIconButtons() {
         binding.cardviewMeNotifications.iconNotifications.apply {
             root.setOnClickListener {
+                showFragment(FavoriteArticlesFragment())
                 badge.visibility = View.GONE
             }
             btnIcon.setImageResource(R.drawable.ic_favorite)
