@@ -9,10 +9,10 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/web_view_toolbar"
         style="@style/Toolbar"
-        app:subtitleTextColor="@color/white"
+        app:subtitleTextColor="@color/black"
         app:title="@string/app_name"
         app:titleTextAppearance="@style/Toolbar.TitleText"
-        app:titleTextColor="@color/white" />
+        app:titleTextColor="@color/black" />
 
     <FrameLayout
         android:id="@+id/container"

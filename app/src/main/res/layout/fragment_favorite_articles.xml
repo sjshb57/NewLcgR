@@ -26,9 +26,9 @@
             app:title="@string/ic_favorite"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:subtitleTextColor="@color/white"
+            app:subtitleTextColor="@color/black"
             app:titleTextAppearance="@style/Toolbar.TitleText"
-            app:titleTextColor="@color/white"
+            app:titleTextColor="@color/black"
             app:layout_constraintTop_toTopOf="parent"
             />
         <androidx.recyclerview.widget.RecyclerView

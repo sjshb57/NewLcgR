@@ -28,9 +28,9 @@
                 style="@style/Toolbar"
                 app:title="@{viewModel.title}"
                 app:layout_scrollFlags="scroll|enterAlways"
-                app:subtitleTextColor="@color/white"
+                app:subtitleTextColor="@color/black"
                 app:titleTextAppearance="@style/Toolbar.TitleText"
-                app:titleTextColor="@color/white" />
+                app:titleTextColor="@color/black" />
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/forum_tab"
