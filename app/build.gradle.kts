@@ -7,7 +7,7 @@ plugins {
 
 val versionMajor = 2
 val versionMinor = 0
-val versionPatch = 1
+val versionPatch = 2
 
 android {
     namespace = "top.easelink.lcg"
@@ -44,8 +44,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+        //    isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
