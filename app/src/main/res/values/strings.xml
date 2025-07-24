@@ -181,7 +181,7 @@
     <string name="retry">重试</string>
 
     <!--share template-->
-    <string name="share_template">分享文章 %s %s</string>
+    <string name="share_template">分享文章 %1$s %2$s</string>
     <string name="share_title">快来看这篇</string>
 
     <!--rank list-->
