@@ -1,12 +1,8 @@
 [versions]
 # Build tools
-gradle = "8.14.3"
-androidGradlePlugin = "8.11.1"
+agp = "8.11.1"
 kotlin = "2.1.21"
 # AndroidX
-compileSdk = "36"
-minSdk = "23"
-targetSdk = "36"
 androidxAppCompat = "1.7.1"
 androidx-annotation = "1.9.1"
 androidxCardView = "1.0.0"
@@ -75,6 +71,7 @@ google-material = { group = "com.google.android.material", name = "material", ve
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlin-stdlib-jdk8 = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 
 # Other
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
@@ -98,7 +95,7 @@ shiply-upgrade = { group = "com.tencent.shiply", name = "upgrade", version.ref =
 shiply-upgrade-ui = { group = "com.tencent.shiply", name = "upgrade-ui", version.ref = "shiply" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }

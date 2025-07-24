@@ -7,11 +7,11 @@ plugins {
 
 android {
     namespace = "top.easelink.framework"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = 23
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -87,7 +87,7 @@ dependencies {
     api(libs.eventbus)
 
     // kotlin
-    api(kotlin("stdlib-jdk7"))
+    api(kotlin("stdlib-jdk8"))
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
 }

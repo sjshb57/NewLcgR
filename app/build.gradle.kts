@@ -11,12 +11,12 @@ val versionPatch = 2
 
 android {
     namespace = "top.easelink.lcg"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "top.easelink.lcg"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = 23
+        targetSdk = 36
         versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
 
@@ -148,4 +148,5 @@ dependencies {
     implementation(libs.richtext)
     implementation(libs.shimmerlayout)
     implementation(libs.timber)
+    implementation(libs.kotlin.stdlib.jdk8)
 }
