@@ -11,17 +11,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.RoundedCornersTransformation
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
 import top.easelink.framework.base.BaseViewHolder
 import top.easelink.framework.customview.htmltextview.DrawPreCodeSpan
 import top.easelink.framework.customview.htmltextview.HtmlCoilImageGetter
-import top.easelink.framework.threadpool.Main
 import top.easelink.framework.utils.*
 import top.easelink.lcg.R
 import top.easelink.lcg.account.UserDataRepo.isLoggedIn
@@ -393,12 +395,32 @@ class ArticleAdapter(
 
     inner class LoadMoreViewHolder internal constructor(private val binding: ItemLoadMoreViewBinding) :
         BaseViewHolder(binding.root) {
+
+        private var fetchJob: Job? = null
+
         override fun onBind(position: Int) {
-            mListener.fetchArticlePost(ArticleAdapterListener.FETCH_POST_MORE) { res ->
-                GlobalScope.launch(Main) {
-                    binding.root.visibility = if (res) View.GONE else View.VISIBLE
+            fetchJob?.cancel()
+            fetchJob = mFragment.lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) {
+                    var fetchResult = false
+                    mListener.fetchArticlePost(ArticleAdapterListener.FETCH_POST_MORE) { res ->
+                        fetchResult = res
+                    }
+                    fetchResult
                 }
+                binding.root.visibility = if (result) View.GONE else View.VISIBLE
             }
+        }
+
+        fun onRecycled() {
+            fetchJob?.cancel()
+        }
+    }
+
+    override fun onViewRecycled(holder: BaseViewHolder) {
+        super.onViewRecycled(holder)
+        if (holder is LoadMoreViewHolder) {
+            holder.onRecycled()
         }
     }
 

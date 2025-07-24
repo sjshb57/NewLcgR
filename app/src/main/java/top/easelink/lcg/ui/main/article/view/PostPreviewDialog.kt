@@ -12,7 +12,6 @@ import timber.log.Timber
 import top.easelink.framework.customview.htmltextview.HtmlCoilImageGetter
 import top.easelink.framework.topbase.TopDialog
 import top.easelink.framework.utils.dpToPx
-import top.easelink.lcg.R
 import top.easelink.lcg.databinding.DialogPostPreviewBinding
 import top.easelink.lcg.ui.main.article.viewmodel.PostPreviewViewModel
 import top.easelink.lcg.utils.getScreenHeightDp
@@ -54,6 +53,14 @@ class PostPreviewDialog : TopDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        dialog?.window?.attributes?.apply {
+            val context = requireContext()
+            width = (getScreenWidthDp(context).dpToPx(context) * 0.95).toInt()
+            height = (getScreenHeightDp(context).dpToPx(context) * 0.75).toInt()
+            gravity = Gravity.CENTER
+        }
+
         binding.exit.setOnClickListener {
             dismissDialog()
         }
@@ -97,16 +104,6 @@ class PostPreviewDialog : TopDialog() {
                 }
         } catch (e: Exception) {
             Timber.e(e)
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        dialog?.window?.attributes?.apply {
-            val context = this@PostPreviewDialog.mContext
-            width = (getScreenWidthDp(context).dpToPx(context) * 0.95).toInt()
-            height = (getScreenHeightDp(context).dpToPx(context) * 0.75).toInt()
-            gravity = Gravity.CENTER
         }
     }
 
