@@ -66,10 +66,7 @@ class HtmlCoilImageGetter(
         ).drawable!!
     }
 
-    private inner class BitmapDrawablePlaceholder : BitmapDrawable(
-        context.resources,
-        Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-    ) {
+    private inner class BitmapDrawablePlaceholder : BitmapDrawable(context.resources, Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565)) {
         private var drawable: Drawable? = null
 
         override fun draw(canvas: Canvas) {
@@ -78,17 +75,20 @@ class HtmlCoilImageGetter(
 
         fun setDrawable(drawable: Drawable) {
             this.drawable = drawable
-            var drawableWidth = drawable.intrinsicWidth
-            var drawableHeight = drawable.intrinsicHeight
 
-            val maxWidth = textView.measuredWidth.takeIf { it > 0 } ?: 300
-            if (drawableWidth > maxWidth) {
-                drawableHeight = (maxWidth * drawableHeight) / drawableWidth
-                drawableWidth = maxWidth
+            val targetWidth = if (textView.measuredWidth > 0) {
+                textView.measuredWidth
+            } else {
+                context.resources.displayMetrics.widthPixels
             }
 
-            drawable.setBounds(0, 0, drawableWidth, drawableHeight)
-            setBounds(0, 0, drawableWidth, drawableHeight)
+            val intrinsicWidth = drawable.intrinsicWidth
+            val intrinsicHeight = drawable.intrinsicHeight
+            val scaledHeight = (targetWidth * intrinsicHeight / intrinsicWidth.toFloat()).toInt()
+
+            drawable.setBounds(0, 0, targetWidth, scaledHeight)
+            setBounds(0, 0, targetWidth, scaledHeight)
+
             textView.text = textView.text
         }
     }
