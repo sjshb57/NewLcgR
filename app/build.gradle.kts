@@ -56,6 +56,11 @@ android {
         }
     }
 
+    packaging {
+        resources.excludes += "**/libc++_shared.so"
+        resources.excludes += "**/libmmkv.so"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -88,7 +93,6 @@ android {
 
 dependencies {
     // Room
-    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
 
@@ -130,11 +134,19 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
+    // Compose
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.ui.graphics)
+
     // WorkManager
     implementation(libs.androidx.work.runtime)
 
     // Third-party
     implementation(libs.coil)
+    implementation(libs.coil.compose)
     implementation(libs.easypermissions)
     implementation(libs.eventbus)
     implementation(libs.gson)
@@ -149,4 +161,5 @@ dependencies {
     implementation(libs.shimmerlayout)
     implementation(libs.timber)
     implementation(libs.kotlin.stdlib.jdk8)
+    testImplementation(libs.junit)
 }
