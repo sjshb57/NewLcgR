@@ -136,11 +136,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     // Compose
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.compose.ui.graphics)
+//    implementation(libs.androidx.compose.ui)
+//    implementation(libs.androidx.compose.ui.tooling)
+//    implementation(libs.androidx.compose.foundation)
+//    implementation(libs.androidx.compose.material)
+//    implementation(libs.androidx.compose.ui.graphics)
 
     // WorkManager
     implementation(libs.androidx.work.runtime)
