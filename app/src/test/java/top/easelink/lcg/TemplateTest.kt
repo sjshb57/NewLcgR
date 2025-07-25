@@ -1,34 +1,25 @@
 package top.easelink.lcg
 
-class Box<out T>(e: T) {
-    private var value = e
-
-    fun get(): T{
-        return value
-    }
+class Box<out T>(private val value: T) {
+    fun get(): T = value
 }
 
 class TemplateTest {
 
-    val box: Box<out Int> = Box<Int>(1)
+    val box: Box<Int> = Box(1)
 
     @org.junit.Test
     fun aTest() {
         val a = mutableListOf<Any>("1", 1, 4.0)
-
         val b = mutableListOf<B>(B(), B())
 
-
-        fill(a,b)
-
+        fill(a, b)
     }
-
 }
 
 open class A
-
-class B: A()
+class B : A()
 
 fun fill(dest: MutableList<in A>, value: MutableList<out A>) {
-
+    dest.addAll(value)
 }
