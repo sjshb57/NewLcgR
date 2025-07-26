@@ -3,7 +3,7 @@ package top.easelink.lcg.ui.main.articles.viewmodel
 import androidx.annotation.MainThread
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import top.easelink.framework.threadpool.IOPool
@@ -68,7 +68,7 @@ class ForumArticlesViewModel : ViewModel(), ArticleFetcher {
 
     override fun fetchArticles(fetchType: ArticleFetcher.FetchType, callback: (Boolean) -> Unit) {
         isLoading.value = true
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(IOPool) {
             try {
                 val query = composeUrlByRequestType(fetchType)
                 val forumPage = getForumArticles(

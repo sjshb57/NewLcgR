@@ -2,11 +2,10 @@ package top.easelink.lcg.ui.main.articles.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import top.easelink.framework.threadpool.CalcPool
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.R
 import top.easelink.lcg.ui.main.articles.source.FavoriteDataSource.getAllRemoteFavorites
 import top.easelink.lcg.ui.main.source.local.ArticlesLocalDataSource
@@ -18,7 +17,6 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
     val isLoading = MutableLiveData<Boolean>()
     private var mCurrentPage = 0
 
-
     override fun fetchArticles(fetchType: ArticleFetcher.FetchType, callback: (Boolean) -> Unit) {
         when (fetchType) {
             ArticleFetcher.FetchType.FETCH_MORE -> {
@@ -28,8 +26,9 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
             }
             ArticleFetcher.FetchType.FETCH_INIT -> rewindPageNum()
         }
+
         isLoading.value = true
-        GlobalScope.launch(CalcPool) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 ArticlesLocalDataSource.getAllFavoriteArticles().let {
                     if (it.isNotEmpty().also(callback)) {
@@ -46,7 +45,7 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
 
     fun removeAllFavorites() {
         isLoading.value = true
-        GlobalScope.launch(CalcPool) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 if (ArticlesLocalDataSource.delAllArticlesFromFavorite()) {
                     articles.postValue(emptyList())
@@ -65,7 +64,7 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
 
     fun syncFavorites() {
         isLoading.value = true
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val articleEntities = getAllRemoteFavorites()
                 if (articleEntities.isEmpty()) {
@@ -88,6 +87,7 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
         mCurrentPage = 0
     }
 
+    @Suppress("unused")
     private fun nextPage() {
         mCurrentPage++
     }

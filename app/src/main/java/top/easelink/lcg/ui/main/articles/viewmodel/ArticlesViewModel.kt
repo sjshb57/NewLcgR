@@ -2,7 +2,7 @@ package top.easelink.lcg.ui.main.articles.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.ui.main.source.model.Article
@@ -25,11 +25,11 @@ class ArticlesViewModel : ViewModel(), ArticleFetcher {
             ArticleFetcher.FetchType.FETCH_INIT -> 1
         }
         isLoading.value = true
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(IOPool) {
             ArticlesRemoteDataSource.getHomePageArticles(mUrl, pageNum).let {
                 if (it.isNotEmpty().also(callback)) {
                     val list = articles.value?.toMutableList()
-                    if (fetchType == ArticleFetcher.FetchType.FETCH_MORE && list != null && list.size != 0) {
+                    if (fetchType == ArticleFetcher.FetchType.FETCH_MORE && list != null && list.isNotEmpty()) {
                         list.addAll(it)
                         articles.postValue(list)
                     } else {

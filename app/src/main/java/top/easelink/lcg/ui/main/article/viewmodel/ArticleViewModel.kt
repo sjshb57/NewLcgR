@@ -3,7 +3,7 @@ package top.easelink.lcg.ui.main.article.viewmodel
 import android.text.TextUtils
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import top.easelink.framework.threadpool.IOPool
@@ -55,7 +55,7 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
             isLoading.value = false
             return
         }
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(IOPool) {
             try {
                 ArticlesRemoteDataSource.getArticleDetail(
                     query, type == FETCH_POST_INIT
@@ -107,7 +107,7 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
             isLoading.value = false
             throw IllegalStateException()
         }
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(IOPool) {
             ArticlesRemoteDataSource.replyAdd(url).also {
                 showMessage(it)
             }
@@ -139,9 +139,9 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
         val posts: MutableList<Post> = posts.value ?: mutableListOf()
         if (posts.isEmpty()) {
             showMessage(R.string.add_to_favorite_failed)
-            return // 添加 return 确保在 posts 为空时不执行后续逻辑
+            return
         }
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(IOPool) {
             try {
                 val title = articleTitle.value ?: articleAbstract?.title
                 val threadId = extractThreadId(mUrl)
@@ -179,7 +179,7 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
                 }
             } catch (e: Exception) {
                 Timber.e(e)
-                showMessage(R.string.add_to_favorite_failed) // 确保外层异常也被捕获并提示用户
+                showMessage(R.string.add_to_favorite_failed)
             }
         }
     }
