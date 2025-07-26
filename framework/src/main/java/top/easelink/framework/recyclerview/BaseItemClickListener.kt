@@ -1,64 +1,47 @@
 package top.easelink.framework.recyclerview
 
-import android.view.GestureDetector.SimpleOnGestureListener
+import android.view.GestureDetector
 import android.view.MotionEvent
-import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.SimpleOnItemTouchListener
 
-@Suppress("unused", "RedundantVisibilityModifier")
-open class BaseItemClickListener(private val mListener: OnItemClickListener) : SimpleOnItemTouchListener() {
+@Suppress("unused")
+open class BaseItemClickListener(
+    private val listener: OnItemClickListener
+) : RecyclerView.SimpleOnItemTouchListener() {
 
-    private var mGestureDetector: GestureDetectorCompat? = null
+    private var gestureDetector: GestureDetector? = null
 
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-        if (mGestureDetector == null) {
-            useDefaultGestureDetector(rv)
+        if (gestureDetector == null) {
+            initGestureDetector(rv)
         }
-        return mGestureDetector!!.onTouchEvent(e)
+        return gestureDetector?.onTouchEvent(e) ?: false
     }
 
-    public fun setGestureDetector(gestureDetectorCompat: GestureDetectorCompat) {
-        mGestureDetector = gestureDetectorCompat
-    }
-
-    private fun useDefaultGestureDetector(recyclerView: RecyclerView) {
-        mGestureDetector = GestureDetectorCompat(recyclerView.context, object : SimpleOnGestureListener() {
-
+    private fun initGestureDetector(recyclerView: RecyclerView) {
+        gestureDetector = GestureDetector(recyclerView.context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapUp(e: MotionEvent): Boolean {
-                recyclerView.findChildViewUnder(e.x, e.y)?.let {
-                    mListener.onItemClick(
-                        it,
-                        recyclerView.getChildLayoutPosition(it)
-                    )
+                recyclerView.findChildViewUnder(e.x, e.y)?.let { child ->
+                    listener.onItemClick(child, recyclerView.getChildAdapterPosition(child))
                     return true
                 }
                 return false
             }
 
             override fun onLongPress(e: MotionEvent) {
-                recyclerView.findChildViewUnder(e.x, e.y)?.let {
-                    mListener.onItemLongClick(
-                        it,
-                        recyclerView.getChildLayoutPosition(it)
-                    )
+                recyclerView.findChildViewUnder(e.x, e.y)?.let { child ->
+                    listener.onItemLongClick(child, recyclerView.getChildAdapterPosition(child))
                 }
             }
 
             override fun onDoubleTapEvent(e: MotionEvent): Boolean {
-                val action = e.action
-                if (action == MotionEvent.ACTION_UP) {
-                    recyclerView.findChildViewUnder(e.x, e.y)?.let {
-                        mListener.onItemDoubleClick(
-                            it,
-                            recyclerView.getChildLayoutPosition(it)
-                        )
-                        return true
+                if (e.action == MotionEvent.ACTION_UP) {
+                    recyclerView.findChildViewUnder(e.x, e.y)?.let { child ->
+                        return listener.onItemDoubleClick(child, recyclerView.getChildAdapterPosition(child))
                     }
                 }
                 return false
             }
         })
     }
-
 }

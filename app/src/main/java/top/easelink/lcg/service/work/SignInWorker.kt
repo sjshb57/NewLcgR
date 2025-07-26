@@ -1,8 +1,9 @@
 package top.easelink.lcg.service.work
 
 import android.content.Context
-import android.os.Build
 import androidx.work.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import top.easelink.lcg.BuildConfig
 import top.easelink.lcg.network.JsoupClient
@@ -10,21 +11,25 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
 class SignInWorker(context: Context, workerParams: WorkerParameters) :
-    Worker(context, workerParams) {
+    CoroutineWorker(context, workerParams) {
 
-    override fun doWork(): Result {
-        try {
+    override suspend fun doWork(): Result {
+        return try {
             Timber.d("Sign In Job Start")
-            sendSignInRequest()
+            withContext(Dispatchers.IO) {
+                sendSignInRequest()
+            }
+            Result.success()
+        } catch (e: SocketTimeoutException) {
+            Timber.e(e, "Sign in timeout, will retry")
+            Result.retry()
         } catch (e: Exception) {
-            Timber.e(e, "Sign In Job Failed")
-            return Result.retry()
+            Timber.e(e, "Sign in failed")
+            Result.failure()
         }
-        return Result.success()
     }
 
     companion object {
-
         private val WORK_INTERVAL: Long = if (BuildConfig.DEBUG) 15L else 8L
         private val DEFAULT_TIME_UNIT = if (BuildConfig.DEBUG) TimeUnit.SECONDS else TimeUnit.HOURS
 
@@ -35,37 +40,36 @@ class SignInWorker(context: Context, workerParams: WorkerParameters) :
 
         @Throws(SocketTimeoutException::class)
         fun sendSignInRequest() {
-            JsoupClient.sendGetRequestWithUrl(APPLY_TASK_URL)
-                .getElementsByClass("alert_info")
-                ?.first()
-                ?.selectFirst("p")
-                ?.text()
-                ?.takeIf {
-                    Timber.d(it)
-                    it.contains(TASK_APPLIED)
-                }?.run {
-                    JsoupClient.sendGetRequestWithUrl(DRAW_TASK_URL)
-                        .getElementsByClass("alert_info")
-                        ?.first()
-                        ?.selectFirst("p")
-                        ?.text()
-                        ?.let {
-                            Timber.d(it)
-                        }
-                }
+            try {
+                val applyResponse = JsoupClient.sendGetRequestWithUrl(APPLY_TASK_URL)
+                applyResponse.getElementsByClass("alert_info")
+                    .first()
+                    ?.selectFirst("p")
+                    ?.text()
+                    ?.takeIf { it.contains(TASK_APPLIED) }
+                    ?.let {
+                        Timber.d("Task applied: $it")
+                        JsoupClient.sendGetRequestWithUrl(DRAW_TASK_URL)
+                            .getElementsByClass("alert_info")
+                            .first()
+                            ?.selectFirst("p")
+                            ?.let { drawText ->
+                                Timber.d("Draw result: $drawText")
+                            }
+                    }
+            } catch (e: Exception) {
+                Timber.e(e, "Sign in request failed")
+                throw e
+            }
         }
 
-        fun startSignInWork(): Operation {
+        fun startSignInWork(context: Context): Operation {
             val constraints = Constraints.Builder()
-                .apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        setRequiresDeviceIdle(false)
-                    }
-                }
                 .setRequiresCharging(false)
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(false)
                 .build()
+
             val request = PeriodicWorkRequest.Builder(
                 SignInWorker::class.java,
                 WORK_INTERVAL,
@@ -75,7 +79,8 @@ class SignInWorker(context: Context, workerParams: WorkerParameters) :
                 .addTag(TAG)
                 .setBackoffCriteria(BackoffPolicy.LINEAR, 15L, TimeUnit.MINUTES)
                 .build()
-            return WorkManager.getInstance().enqueueUniquePeriodicWork(
+
+            return WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 TAG,
                 ExistingPeriodicWorkPolicy.KEEP,
                 request

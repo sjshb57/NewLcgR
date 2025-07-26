@@ -1,17 +1,19 @@
 package top.easelink.lcg.cache
 
 import android.content.Context
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.appinit.LCGApp
 import java.io.File
 
 object PreviewCacheManager: ICacheManager {
+    private val cacheScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val PREVIEW_CACHE_FOLDER = "${LCGApp.context.cacheDir}/preview_articles"
     private const val CONFIG_FILE_NAME = "PreviewCacheConfig"
@@ -20,7 +22,7 @@ object PreviewCacheManager: ICacheManager {
      * 将Url对应的内容存入磁盘缓存
      */
     fun saveToDisk(url: String, content: String) {
-        GlobalScope.launch(IOPool) {
+        cacheScope.launch {
             checkDirs()
             val file = File(PREVIEW_CACHE_FOLDER, getCacheFileName(url))
             try {
@@ -48,9 +50,9 @@ object PreviewCacheManager: ICacheManager {
     }
 
     /**
-     * 清楚磁盘缓存
+     * 清除磁盘缓存
      */
-    override suspend fun clearAllCaches() = withContext(IOPool) {
+    override suspend fun clearAllCaches() = withContext(Dispatchers.IO) {
         if (checkShouldCache()) {
             File(PREVIEW_CACHE_FOLDER).deleteRecursively()
         }
@@ -77,7 +79,9 @@ object PreviewCacheManager: ICacheManager {
         return url.hashCode().toString()
     }
 
-    private suspend fun checkShouldCache(): Boolean {
-        return System.currentTimeMillis() - LCGApp.instance.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getLong("LastCleanTime", System.currentTimeMillis()) > 24 * 60 * 60_000
+    private fun checkShouldCache(): Boolean {
+        return System.currentTimeMillis() - LCGApp.instance
+            .getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE)
+            .getLong("LastCleanTime", System.currentTimeMillis()) > 24 * 60 * 60_000
     }
 }

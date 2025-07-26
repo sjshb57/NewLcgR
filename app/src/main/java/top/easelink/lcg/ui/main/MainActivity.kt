@@ -2,29 +2,25 @@ package top.easelink.lcg.ui.main
 
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.updatePadding
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationBarView
-import com.tencent.upgrade.core.DefaultUpgradeStrategyRequestCallback
-import com.tencent.upgrade.core.UpgradeManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import top.easelink.framework.threadpool.BackGroundPool
 import top.easelink.framework.topbase.TopActivity
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.framework.utils.WRITE_EXTERNAL_CODE
@@ -36,95 +32,83 @@ import top.easelink.lcg.config.AppConfig
 import top.easelink.lcg.databinding.ActivityMainBinding
 import top.easelink.lcg.ui.main.about.view.AboutFragment
 import top.easelink.lcg.ui.main.article.view.ArticleFragment
-import top.easelink.lcg.ui.main.articles.view.ForumArticlesFragment.Companion.newInstance
+import top.easelink.lcg.ui.main.articles.view.ForumArticlesFragment
 import top.easelink.lcg.ui.main.discover.view.DiscoverFragment
 import top.easelink.lcg.ui.main.largeimg.view.LargeImageDialog
 import top.easelink.lcg.ui.main.me.view.MeFragment
 import top.easelink.lcg.ui.main.message.view.MessageFragment
-import top.easelink.lcg.ui.main.model.NewMessageEvent
-import top.easelink.lcg.ui.main.model.OpenArticleEvent
-import top.easelink.lcg.ui.main.model.OpenForumEvent
-import top.easelink.lcg.ui.main.model.OpenHalfWebViewFragmentEvent
-import top.easelink.lcg.ui.main.model.OpenLargeImageViewEvent
 import top.easelink.lcg.ui.main.recommand.view.RecommendFragment
+import top.easelink.lcg.ui.main.model.*
 import top.easelink.lcg.ui.setting.view.SettingActivity
 import top.easelink.lcg.ui.webview.view.HalfScreenWebViewFragment
 import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.showMessage
 import java.util.EmptyStackException
-import kotlin.system.exitProcess
 
 class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
+
     private var lastBackPressed = 0L
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.navigationBarColor = Color.TRANSPARENT
-
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.statusBarBackground.layoutParams.height = getStatusBarHeight()
-        binding.statusBarBackground.setBackgroundColor(resources.getColor(R.color.white, theme))
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            binding.statusBarBackground.layoutParams.height = systemBars.top
-            binding.statusBarBackground.requestLayout()
+            binding.statusBarBackground.apply {
+                layoutParams.height = systemBars.top
+                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.white))
+            }
+
+            binding.toolbar.updatePadding(top = 0)
+
+            binding.fragmentContainer.updatePadding(
+                top = 0,
+                bottom = systemBars.bottom
+            )
 
             (binding.bottomNavigation.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
                 bottomMargin = systemBars.bottom
             }
-            binding.bottomNavigation.requestLayout()
 
             insets
         }
 
+        setupDrawer(binding.toolbar)
+        setupBottomNavMenu()
+
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                handleBackPressed()
+                if (mFragmentTags.size > 1) {
+                    while (onFragmentDetached(mFragmentTags.pop())) {
+                        syncBottomViewNavItemState()
+                        return
+                    }
+                } else {
+                    if (System.currentTimeMillis() - lastBackPressed > 2000) {
+                        showMessage(R.string.app_exit_tip)
+                        lastBackPressed = System.currentTimeMillis()
+                    } else {
+                        finishAffinity()
+                    }
+                }
             }
         })
 
         EventBus.getDefault().register(this)
-        setupDrawer(binding.toolbar)
-        setupBottomNavMenu()
+
         showFragment(RecommendFragment::class.java)
-        setStatusBarIconColorForFragment(RecommendFragment::class.java.simpleName)
-
-        GlobalScope.launch(BackGroundPool) {
-            UpgradeManager.getInstance().checkUpgrade(false, null, DefaultUpgradeStrategyRequestCallback())
-        }
-    }
-
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources.getDimensionPixelSize(resourceId)
-        }
-        return result
-    }
-
-    private fun handleBackPressed() {
-        if (mFragmentTags.isNotEmpty() && mFragmentTags.size > 1) {
-            while (onFragmentDetached(mFragmentTags.pop())) {
-                syncBottomViewNavItemState()
-                return
-            }
-        }
-        if (System.currentTimeMillis() - lastBackPressed > 2000) {
-            Toast.makeText(this, R.string.app_exit_tip, Toast.LENGTH_SHORT).show()
-            lastBackPressed = System.currentTimeMillis()
-        } else {
-            finish()
-            exitProcess(0)
-        }
+        setStatusBarAppearance(true)
     }
 
     override fun onDestroy() {
@@ -135,18 +119,20 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     private fun setupDrawer(toolbar: Toolbar) {
         val header = layoutInflater.inflate(R.layout.nav_header, binding.navigationView, false)
         binding.navigationView.addHeaderView(header)
+
         binding.appVersion.text = BuildConfig.VERSION_NAME
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(
+        ActionBarDrawerToggle(
             this,
             binding.drawerView,
             toolbar,
             R.string.open_drawer,
             R.string.close_drawer
-        )
-        binding.drawerView.addDrawerListener(toggle)
-        toggle.syncState()
+        ).apply {
+            binding.drawerView.addDrawerListener(this)
+            syncState()
+        }
 
         binding.navigationView.setNavigationItemSelectedListener { item ->
             binding.drawerView.closeDrawer(GravityCompat.START)
@@ -161,7 +147,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 true
             }
             R.id.nav_item_release -> {
-                onMessageEvent(OpenArticleEvent(AppConfig.getAppReleaseUrl()))
+                onOpenArticleEvent(OpenArticleEvent(AppConfig.getAppReleaseUrl()))
                 true
             }
             R.id.nav_item_portal -> {
@@ -190,35 +176,25 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 DiscoverFragment::class.java.simpleName -> view.selectedItemId = R.id.action_forum_navigation
                 MeFragment::class.java.simpleName -> view.selectedItemId = R.id.action_about_me
             }
-        } catch (ese: EmptyStackException) {
+        } catch (_: EmptyStackException) {
             view.selectedItemId = R.id.action_home
         } finally {
             view.setOnItemSelectedListener(this)
         }
     }
 
-    private fun setStatusBarIconColorForFragment(fragmentSimpleName: String) {
-        val isLightStatusBar = when (fragmentSimpleName) {
-            RecommendFragment::class.java.simpleName,
-            MessageFragment::class.java.simpleName,
-            DiscoverFragment::class.java.simpleName,
-            MeFragment::class.java.simpleName,
-            ArticleFragment::class.java.simpleName ->
-                true
-            else ->
-                true
+    private fun setStatusBarAppearance(isLight: Boolean) {
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = isLight
         }
-
-        binding.statusBarBackground.setBackgroundColor(resources.getColor(R.color.white, theme))
-
-        WindowCompat.getInsetsController(window, window.decorView)?.apply {
-            isAppearanceLightStatusBars = isLightStatusBar
-        }
+        binding.statusBarBackground.setBackgroundColor(
+            if (isLight) ContextCompat.getColor(this, R.color.white)
+            else ContextCompat.getColor(this, R.color.black)
+        )
     }
 
-    // EventBus 订阅方法
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: OpenArticleEvent) {
+    fun onOpenArticleEvent(event: OpenArticleEvent) {
         if (AppConfig.articleShowInWebView) {
             WebViewActivity.startWebViewWith(SERVER_BASE_URL + event.url, this)
         } else {
@@ -226,26 +202,30 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         }
     }
 
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: OpenForumEvent) {
-        showFragment(newInstance(event.title, event.url, event.showTab))
+    fun onOpenForumEvent(event: OpenForumEvent) {
+        showFragment(ForumArticlesFragment.newInstance(event.title, event.url, event.showTab))
     }
 
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: NewMessageEvent) {
+    fun onNewMessageEvent(event: NewMessageEvent) {
         if (event.notificationInfo.isNotEmpty()) {
             showMessage(getString(R.string.notification_arrival))
-            showBubbleView(PRIVATE_MESSAGE_POS)
+            binding.bottomNavigation.getOrCreateBadge(R.id.action_message).isVisible = true
         }
     }
 
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onShowFragmentEvent(clazz: Class<TopFragment>) {
+    fun onShowFragmentEvent(clazz: Class<out TopFragment>) {
         showFragment(clazz)
     }
 
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: OpenLargeImageViewEvent) {
+    fun onOpenLargeImageViewEvent(event: OpenLargeImageViewEvent) {
         if (event.url.isNotEmpty()) {
             LargeImageDialog.newInstance(event.url).show(
                 supportFragmentManager,
@@ -256,28 +236,11 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         }
     }
 
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onOpenHalfScreenWebViewEvent(event: OpenHalfWebViewFragmentEvent) {
         HalfScreenWebViewFragment.newInstance(event.html)
-            .show(supportFragmentManager, HalfScreenWebViewFragment::class.simpleName)
-    }
-
-    private fun showBubbleView(pos: Int) {
-        binding.bottomNavigation.getOrCreateBadge(bottomNavItemId(pos)).isVisible = true
-    }
-
-    private fun removeBubbleView(pos: Int) {
-        binding.bottomNavigation.removeBadge(bottomNavItemId(pos))
-    }
-
-    private fun bottomNavItemId(pos: Int): Int {
-        return when (pos) {
-            0 -> R.id.action_home
-            1 -> R.id.action_forum_navigation
-            2 -> R.id.action_message
-            3 -> R.id.action_about_me
-            else -> R.id.action_home
-        }
+            .show(supportFragmentManager, HalfScreenWebViewFragment::class.java.simpleName)
     }
 
     private fun showFragmentWithTag(tag: String): Boolean {
@@ -288,14 +251,23 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                     mFragmentTags.pop()
                     d--
                 }
-                setStatusBarIconColorForFragment(tag)
+                setStatusBarAppearance(
+                    when (tag) {
+                        RecommendFragment::class.java.simpleName,
+                        MessageFragment::class.java.simpleName,
+                        DiscoverFragment::class.java.simpleName,
+                        MeFragment::class.java.simpleName,
+                        ArticleFragment::class.java.simpleName -> true
+                        else -> false
+                    }
+                )
                 return true
             }
         }
         return false
     }
 
-    private fun showFragment(clazz: Class<*>) {
+    private fun showFragment(clazz: Class<out Fragment>) {
         if (!showFragmentWithTag(clazz.simpleName)) {
             val fragment = clazz.getConstructor().newInstance() as Fragment
             addFragmentInActivity(
@@ -303,7 +275,16 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 fragment,
                 R.id.fragment_container
             )
-            setStatusBarIconColorForFragment(clazz.simpleName)
+            setStatusBarAppearance(
+                when (clazz.simpleName) {
+                    RecommendFragment::class.java.simpleName,
+                    MessageFragment::class.java.simpleName,
+                    DiscoverFragment::class.java.simpleName,
+                    MeFragment::class.java.simpleName,
+                    ArticleFragment::class.java.simpleName -> true
+                    else -> false
+                }
+            )
         }
     }
 
@@ -313,7 +294,16 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             fragment,
             R.id.fragment_container
         )
-        setStatusBarIconColorForFragment(fragment.javaClass.simpleName)
+        setStatusBarAppearance(
+            when (fragment.javaClass.simpleName) {
+                RecommendFragment::class.java.simpleName,
+                MessageFragment::class.java.simpleName,
+                DiscoverFragment::class.java.simpleName,
+                MeFragment::class.java.simpleName,
+                ArticleFragment::class.java.simpleName -> true
+                else -> false
+            }
+        )
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -326,7 +316,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 binding.toolbar.visibility = View.GONE
                 when (item.itemId) {
                     R.id.action_message -> {
-                        removeBubbleView(PRIVATE_MESSAGE_POS)
+                        binding.bottomNavigation.removeBadge(R.id.action_message)
                         MessageFragment::class.java
                     }
                     R.id.action_forum_navigation -> DiscoverFragment::class.java
@@ -357,9 +347,5 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 showMessage(R.string.permission_denied)
             }
         }
-    }
-
-    companion object {
-        private const val PRIVATE_MESSAGE_POS = 2
     }
 }

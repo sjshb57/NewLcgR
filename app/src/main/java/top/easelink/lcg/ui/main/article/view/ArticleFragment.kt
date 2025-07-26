@@ -1,6 +1,5 @@
 package top.easelink.lcg.ui.main.article.view
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,7 +41,7 @@ class ArticleFragment : TopFragment(), ControllableFragment {
         }
 
         private const val ARTICLE_URL = "article_url"
-        const val REPLY_POST_RESULT = 1000
+        private const val REPLY_POST_REQUEST_KEY = "reply_post_request"
     }
 
     private lateinit var viewModel: ArticleViewModel
@@ -146,11 +145,31 @@ class ArticleFragment : TopFragment(), ControllableFragment {
         }
     }
 
+    @Suppress("DEPRECATION")
+    private fun Bundle.safeGetPost(key: String): Post? {
+        return when {
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU -> {
+                getParcelable(key, Post::class.java)
+            }
+            else -> getParcelable(key) as? Post
+        }
+    }
+
     private fun showCommentDialog(replyUrl: String) {
         try {
+            parentFragmentManager.setFragmentResultListener(
+                REPLY_POST_REQUEST_KEY,
+                viewLifecycleOwner
+            ) { _, bundle ->
+                bundle.safeGetPost("post")?.let { post ->
+                    viewModel.addPostToTop(post)
+                    binding.postRecyclerView.scrollToPosition(1)
+                    showMessage(R.string.reply_post_succeed)
+                } ?: showMessage(R.string.reply_post_failed)
+            }
+
             val dialog = CommentArticleDialog.newInstance(replyUrl)
-            dialog.setTargetFragment(this@ArticleFragment, REPLY_POST_RESULT)
-            dialog.show(if (isAdded) parentFragmentManager else childFragmentManager, "CommentArticleDialog")
+            dialog.show(parentFragmentManager, "CommentArticleDialog")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -158,7 +177,9 @@ class ArticleFragment : TopFragment(), ControllableFragment {
 
     private fun setupToolBar() {
         binding.articleToolbar.apply {
-            setNavigationOnClickListener { activity?.onBackPressed() }
+            setNavigationOnClickListener {
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+            }
             inflateMenu(R.menu.article)
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -188,25 +209,7 @@ class ArticleFragment : TopFragment(), ControllableFragment {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            REPLY_POST_RESULT -> handleReplyPostResult(resultCode, data)
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
-    private fun handleReplyPostResult(resultCode: Int, data: Intent?) {
-        if (resultCode == 1) {
-            data?.getBundleExtra("post")?.getParcelable<Post>("post")?.let { post ->
-                viewModel.addPostToTop(post)
-                binding.postRecyclerView.scrollToPosition(1)
-                showMessage(R.string.reply_post_succeed)
-            }
-        } else {
-            showMessage(R.string.reply_post_failed)
-        }
-    }
-
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: ReplyPostEvent) {
         try {
@@ -219,6 +222,7 @@ class ArticleFragment : TopFragment(), ControllableFragment {
         }
     }
 
+    @Suppress("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: ScreenCaptureEvent) {
         try {

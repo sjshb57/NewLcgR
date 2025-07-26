@@ -3,6 +3,7 @@ package top.easelink.lcg.ui.main.articles.viewmodel
 import androidx.lifecycle.MutableLiveData
 import top.easelink.lcg.ui.main.source.model.Article
 
+@Suppress("unused")
 class ArticleItemViewModel internal constructor(article: Article) {
     val title: MutableLiveData<String> = MutableLiveData(article.title)
     val author: MutableLiveData<String> = MutableLiveData(article.author)

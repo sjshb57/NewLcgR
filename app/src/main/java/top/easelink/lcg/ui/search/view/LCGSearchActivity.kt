@@ -2,6 +2,7 @@ package top.easelink.lcg.ui.search.view
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -25,7 +26,6 @@ import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.showMessage
 
-
 class LCGSearchActivity : TopActivity() {
 
     companion object {
@@ -34,6 +34,7 @@ class LCGSearchActivity : TopActivity() {
 
     private lateinit var mSearchViewModel: LCGSearchViewModel
     private lateinit var binding: ActivitySearchLcgBinding
+    private lateinit var backPressedCallback: OnBackPressedCallback
 
     private val threadRegex by lazy {
         Regex(
@@ -46,6 +47,13 @@ class LCGSearchActivity : TopActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySearchLcgBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        backPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackPress()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
+
         EventBus.getDefault().register(this)
         mSearchViewModel = ViewModelProvider(this)[LCGSearchViewModel::class.java]
         setUp()
@@ -57,10 +65,11 @@ class LCGSearchActivity : TopActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        backPressedCallback.remove()
         EventBus.getDefault().unregister(this)
     }
 
-    override fun onBackPressed() {
+    private fun handleBackPress() {
         if (mFragmentTags.isNotEmpty() && mFragmentTags.size >= 1) {
             while (onFragmentDetached(mFragmentTags.pop()).also {
                     mFragmentTags.clear()
@@ -72,7 +81,7 @@ class LCGSearchActivity : TopActivity() {
                 return
             }
         }
-        super.onBackPressed()
+        finish()
     }
 
     private fun setUp() {

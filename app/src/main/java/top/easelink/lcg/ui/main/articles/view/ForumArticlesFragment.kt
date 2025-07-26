@@ -34,9 +34,8 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
         return R.layout.fragment_forum_articles
     }
 
-    override fun getViewModel(): ForumArticlesViewModel {
-        return ViewModelProvider(this).get(ForumArticlesViewModel::class.java)
-    }
+    override fun getViewModel(): ForumArticlesViewModel =
+        ViewModelProvider(this)[ForumArticlesViewModel::class.java]
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,7 +92,6 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
     }
 
     private fun setUpTabLayout(forumThreadList: List<ForumThread>?) {
-        // hide tab if showTab has been set to false or there's no tab item
         if (forumThreadList.isNullOrEmpty() || !showTab) {
             viewDataBinding.forumTab.apply {
                 visibility = View.GONE
@@ -130,19 +128,14 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                     ContextCompat.getColor(it, R.color.colorPrimaryDark)
                 )
             }
-            // Set the scrolling view in the custom SwipeRefreshLayout.
             setScrollUpChild(
                 viewDataBinding.recyclerView.apply {
                     layoutManager = LinearLayoutManager(context).apply {
                         orientation = RecyclerView.VERTICAL
                     }
                     itemAnimator = DefaultItemAnimator()
-                    adapter = ArticlesAdapter(
-                        viewModel
-                    ).also {
-                        it.setFragmentManager(
-                            fragmentManager ?: baseActivity.supportFragmentManager
-                        )
+                    adapter = ArticlesAdapter(viewModel).also {
+                        it.setFragmentManager(childFragmentManager)  // 使用childFragmentManager替代
                     }
                 }
             )
@@ -150,14 +143,12 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                 viewModel.fetchArticles(ArticleFetcher.FetchType.FETCH_INIT) {}
             }
         }
-        // Add articles observer
         viewModel.articles.observe(viewLifecycleOwner, Observer { articleList ->
             if (articleList.isEmpty() && viewModel.isLoading.value == true) {
                 viewDataBinding.recyclerView.visibility = View.GONE
             } else {
                 viewDataBinding.recyclerView.visibility = View.VISIBLE
                 (viewDataBinding.recyclerView.adapter as? ArticlesAdapter)?.apply {
-                    // a workaround for distinguish fetch_init / fetch_more / thread
                     clearItems()
                     addItems(articleList)
                 }
@@ -169,6 +160,9 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
         private const val ARG_PARAM = "url"
         private const val ARG_TITLE = "title"
         private const val ARG_SHOW_TAB = "showTab"
+        private const val DATE_LINE_ORDER = "dateline"
+        private const val LAST_POST_ORDER = "lastpost"
+        private const val DEFAULT_ORDER = ""
 
         @JvmStatic
         fun newInstance(
@@ -176,13 +170,13 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
             param: String,
             showTab: Boolean = true
         ): ForumArticlesFragment {
-            val args = Bundle()
-            args.putString(ARG_PARAM, param)
-            args.putString(ARG_TITLE, title)
-            args.putBoolean(ARG_SHOW_TAB, showTab)
-            val fragment = ForumArticlesFragment()
-            fragment.arguments = args
-            return fragment
+            return ForumArticlesFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM, param)
+                    putString(ARG_TITLE, title)
+                    putBoolean(ARG_SHOW_TAB, showTab)
+                }
+            }
         }
     }
 }

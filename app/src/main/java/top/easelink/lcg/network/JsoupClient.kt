@@ -1,13 +1,13 @@
 package top.easelink.lcg.network
 
-import android.annotation.SuppressLint
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
-import top.easelink.framework.threadpool.BackGroundPool
 import top.easelink.lcg.BuildConfig
 import top.easelink.lcg.ui.main.source.checkMessages
 import top.easelink.lcg.ui.main.source.extractFormHash
@@ -16,25 +16,17 @@ import top.easelink.lcg.utils.getCookies
 import top.easelink.lcg.utils.updateCookies
 import java.io.IOException
 import java.net.SocketTimeoutException
-import java.security.SecureRandom
-import java.security.cert.X509Certificate
-import javax.net.ssl.*
 
 object JsoupClient : ApiRequest {
+    private val clientScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private const val followRedirectsEnable = true
+    private const val FOLLOW_REDIRECTS_ENABLE = true
 
     var formHash: String? = null
         set(value) {
-            Timber.d("formhash = $value")
+            Timber.d("formHash = $value")
             field = value
         }
-
-    init {
-        if (BuildConfig.DEBUG) {
-            trustAll()
-        }
-    }
 
     private var lastTime = 0L
     private val CHECK_INTERVAL = if (BuildConfig.DEBUG) 60 * 1000 else 30 * 1000
@@ -49,7 +41,7 @@ object JsoupClient : ApiRequest {
             .ignoreHttpErrors(true)
             .cookies(getCookies())
             .method(Connection.Method.GET)
-            .followRedirects(followRedirectsEnable)
+            .followRedirects(FOLLOW_REDIRECTS_ENABLE)
             .execute()
             .let {
                 updateCookies(it.cookies())
@@ -74,7 +66,6 @@ object JsoupClient : ApiRequest {
             }
     }
 
-
     override fun sendGetRequestWithUrl(url: String): Document {
         return Jsoup
             .connect(url)
@@ -82,7 +73,7 @@ object JsoupClient : ApiRequest {
             .ignoreHttpErrors(true)
             .cookies(getCookies())
             .method(Connection.Method.GET)
-            .followRedirects(followRedirectsEnable)
+            .followRedirects(FOLLOW_REDIRECTS_ENABLE)
             .execute()
             .let {
                 updateCookies(it.cookies())
@@ -112,56 +103,22 @@ object JsoupClient : ApiRequest {
             }
     }
 
-    private fun checkResponse(doc: Document) = GlobalScope.launch(BackGroundPool) {
-        // try update from hash which is used to send post request, ex: replay
-        if (formHash.isNullOrEmpty()) {
-            formHash = extractFormHash(doc)
-        }
-        if (System.currentTimeMillis() - lastTime > CHECK_INTERVAL) {
-            lastTime = System.currentTimeMillis()
-            try {
-                // TODO check login state is not stable
-//                    checkLoginState(doc)
-                checkMessages(doc)
-            } catch (e: Exception) {
-                Timber.e(e)
+    private fun checkResponse(doc: Document) {
+        clientScope.launch {
+            // try update from hash which is used to send post request, ex: replay
+            if (formHash.isNullOrEmpty()) {
+                formHash = extractFormHash(doc)
             }
-        }
-    }
-
-    private fun trustAll() {
-        try { // Create a trust manager that does not validate certificate chains
-            val trustAllCerts =
-                arrayOf<TrustManager>(object : X509TrustManager {
-                    override fun getAcceptedIssuers(): Array<X509Certificate>? {
-                        return null
-                    }
-
-                    @SuppressLint("TrustAllX509TrustManager")
-                    override fun checkClientTrusted(
-                        certs: Array<X509Certificate>,
-                        authType: String
-                    ) {
-                    }
-
-                    @SuppressLint("TrustAllX509TrustManager")
-                    override fun checkServerTrusted(
-                        certs: Array<X509Certificate>,
-                        authType: String
-                    ) {
-                    }
+            if (System.currentTimeMillis() - lastTime > CHECK_INTERVAL) {
+                lastTime = System.currentTimeMillis()
+                try {
+                    // TODO check login state is not stable
+                    // checkLoginState(doc)
+                    checkMessages(doc)
+                } catch (e: Exception) {
+                    Timber.e(e)
                 }
-                )
-            // Install the all-trusting trust manager
-            val sc = SSLContext.getInstance("SSL")
-            sc.init(null, trustAllCerts, SecureRandom())
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
-            // Create all-trusting host name verifier
-            val allHostsValid = HostnameVerifier { _, _ -> true }
-            // Install the all-trusting host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid)
-        } catch (e: Exception) {
-            Timber.e(e)
+            }
         }
     }
 }

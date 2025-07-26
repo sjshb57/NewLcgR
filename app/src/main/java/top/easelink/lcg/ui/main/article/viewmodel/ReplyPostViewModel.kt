@@ -2,12 +2,11 @@ package top.easelink.lcg.ui.main.article.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import timber.log.Timber
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.network.JsoupClient
 import top.easelink.lcg.utils.WebsiteConstant.CHECK_RULE_URL
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
@@ -20,33 +19,35 @@ class ReplyPostViewModel : ViewModel() {
 
     fun sendReply(query: String?, content: String, callback: (Boolean) -> Unit) {
         sending.value = true
-        GlobalScope.launch(IOPool) {
-            sendReplyAsync(query, content, callback)
+        viewModelScope.launch {
+            try {
+                sendReplyAsync(query, content, callback)
+            } catch (e: Exception) {
+                Timber.e(e)
+                callback(false)
+                sending.value = false
+            }
         }
     }
 
     private fun sendReplyAsync(query: String?, content: String, callback: (Boolean) -> Unit) {
         Timber.d(content)
         if (query.isNullOrEmpty() || content.isBlank()) {
+            sending.value = false
             return
         }
-        val queryMap = mutableMapOf<String, String>()
-        query
-            .split("&")
-            .toMutableList()
-            .forEach {
+
+        val queryMap = mutableMapOf<String, String>().apply {
+            query.split("&").forEach {
                 val l = it.split("=")
-                if (l.size == 2) {
-                    queryMap[l[0]] = l[1]
-                } else {
-                    queryMap[l[0]] = ""
-                }
+                put(l[0], if (l.size == 2) l[1] else "")
             }
+        }
+
         try {
             JsoupClient
                 .sendGetRequestWithQuery(query)
                 .run {
-                    // 对所有 selectFirst 后的 attr("value") 进行安全调用或提供默认值
                     val noticeauthormsg = selectFirst("input[name=noticeauthormsg]")?.attr("value").orEmpty()
                     val noticetrimstr = selectFirst("input[name=noticetrimstr]")?.attr("value").orEmpty()
                     val noticeauthor = selectFirst("input[name=noticeauthor]")?.attr("value").orEmpty()
@@ -62,10 +63,12 @@ class ReplyPostViewModel : ViewModel() {
                         .cookies(getCookies())
                         .method(Connection.Method.GET)
                         .execute()
+
                     if (response.statusCode() in 200 until 300) {
                         updateCookies(response.cookies())
                         val url = "${SERVER_BASE_URL}forum.php?mod=post&infloat=yes&action=reply" +
                                 "&fid=${queryMap["fid"]}&extra=${queryMap["extra"]}&tid=${queryMap["tid"]}&replysubmit=yes&inajax=1"
+
                         response = Jsoup
                             .connect(url)
                             .cookies(getCookies())
@@ -84,17 +87,16 @@ class ReplyPostViewModel : ViewModel() {
                             .postDataCharset("gbk")
                             .method(Connection.Method.POST)
                             .execute()
+
                         updateCookies(response.cookies())
-                        callback.invoke(response.statusCode() in 200 until 300)
+                        callback(response.statusCode() in 200 until 300)
                     } else {
                         Timber.e(response.body())
+                        callback(false)
                     }
                 }
-        } catch (e: Exception) {
-            Timber.e(e)
-            callback.invoke(false)
         } finally {
-            sending.postValue(false)
+            sending.value = false
         }
     }
 }

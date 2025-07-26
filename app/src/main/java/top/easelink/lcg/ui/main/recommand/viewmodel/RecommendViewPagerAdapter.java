@@ -1,26 +1,22 @@
 package top.easelink.lcg.ui.main.recommand.viewmodel;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 import java.util.ArrayList;
 import java.util.List;
-
 import top.easelink.lcg.R;
 import top.easelink.lcg.ui.main.articles.view.ArticlesFragment;
 import top.easelink.lcg.ui.main.model.TabModel;
 
-public class RecommendViewPagerAdapter extends FragmentPagerAdapter {
+public class RecommendViewPagerAdapter extends FragmentStateAdapter {
 
     private final List<TabModel> tabModels;
 
-    public RecommendViewPagerAdapter(FragmentManager fm, Context context) {
-        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+    public RecommendViewPagerAdapter(@NonNull FragmentActivity fragmentActivity, Context context) {
+        super(fragmentActivity);
         tabModels = new ArrayList<>();
         tabModels.add(new TabModel(context.getString(R.string.tab_title_new_thread), "newthread"));
         tabModels.add(new TabModel(context.getString(R.string.tab_title_tech), "tech"));
@@ -29,20 +25,18 @@ public class RecommendViewPagerAdapter extends FragmentPagerAdapter {
         tabModels.add(new TabModel(context.getString(R.string.tab_title_help), "help"));
     }
 
-    @Override
     @NonNull
-    public Fragment getItem(int position) {
+    @Override
+    public Fragment createFragment(int position) {
         return ArticlesFragment.newInstance(tabModels.get(position).getUrl(), false);
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         return tabModels.size();
     }
 
-    @Nullable
-    @Override
-    public CharSequence getPageTitle(int position) {
+    public String getTabTitle(int position) {
         return tabModels.get(position).getTitle();
     }
 }

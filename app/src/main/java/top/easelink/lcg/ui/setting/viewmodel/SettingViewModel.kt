@@ -1,12 +1,13 @@
 package top.easelink.lcg.ui.setting.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.work.WorkManager
 import top.easelink.lcg.config.AppConfig
 import top.easelink.lcg.service.work.SignInWorker
 
-class SettingViewModel : ViewModel() {
+class SettingViewModel(application: Application) : AndroidViewModel(application) {
     val autoSignInEnable = MutableLiveData<Boolean>()
     val syncFavoriteEnable = MutableLiveData<Boolean>()
     val searchEngineSelected = MutableLiveData<Int>()
@@ -29,15 +30,15 @@ class SettingViewModel : ViewModel() {
 
     fun scheduleJob(enable: Boolean) {
         AppConfig.autoSignEnable = enable
+        val context = getApplication<Application>().applicationContext
         if (enable) {
-            SignInWorker.startSignInWork()
+            SignInWorker.startSignInWork(context)
         } else {
-            WorkManager.getInstance().cancelAllWorkByTag(SignInWorker.TAG)
+            WorkManager.getInstance(context).cancelAllWorkByTag(SignInWorker.TAG)
         }
     }
 
     fun setSyncFavorite(enable: Boolean) {
         AppConfig.syncFavorites = enable
     }
-
 }
