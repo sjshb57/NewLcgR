@@ -23,7 +23,7 @@
         app:tabMode="fixed"
         app:tabTextAppearance="@style/Widget.Design.TabLayout"
         />
-    <androidx.viewpager.widget.ViewPager
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/follow_view_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

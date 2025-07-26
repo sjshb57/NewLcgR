@@ -3,7 +3,7 @@ package top.easelink.lcg.ui.main.articles.viewmodel
 import androidx.annotation.MainThread
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import top.easelink.framework.threadpool.IOPool
@@ -15,7 +15,9 @@ import top.easelink.lcg.ui.main.source.remote.ArticlesRemoteDataSource.getForumA
 import top.easelink.lcg.utils.WebsiteConstant.FORUM_URL_QUERY
 import top.easelink.lcg.utils.showMessage
 
+@Suppress("unused")
 const val LAST_POST_ORDER = "&orderby=lastpost"
+@Suppress("unused")
 const val DATE_LINE_ORDER = "&orderby=dateline"
 const val DEFAULT_ORDER = ""
 
@@ -24,7 +26,6 @@ class ForumArticlesViewModel : ViewModel(), ArticleFetcher {
     private var mFetchType = ArticleFetcher.FetchType.FETCH_INIT
     private var orderType = DEFAULT_ORDER
     private var mCurrentPage = 1
-
     private var isTabSet = false
 
     val title = MutableLiveData<String>()
@@ -37,12 +38,11 @@ class ForumArticlesViewModel : ViewModel(), ArticleFetcher {
         fetchType: ArticleFetcher.FetchType,
         order: String = DEFAULT_ORDER
     ) {
-        //Fabrice: add a workaround to  map forum-16-1.html to forum.php?mod=forumdisplay&fid=16
         mUrl = if (url.startsWith("forum-") && url.endsWith("html")) {
             try {
                 String.format(FORUM_URL_QUERY, url.split("-")[1])
             } catch (e: Exception) {
-                Timber.e(e)
+                Timber.e(e, "Forum URL parse failed")
                 url
             }
         } else {
@@ -68,48 +68,47 @@ class ForumArticlesViewModel : ViewModel(), ArticleFetcher {
 
     override fun fetchArticles(fetchType: ArticleFetcher.FetchType, callback: (Boolean) -> Unit) {
         isLoading.value = true
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch(IOPool) {
             try {
                 val query = composeUrlByRequestType(fetchType)
-                val forumPage = getForumArticles(
-                    query,
-                    fetchType == ArticleFetcher.FetchType.FETCH_INIT
-                )
-                if (forumPage != null) {
-                    val articleList = forumPage.articleList
-                    if (articleList.isNotEmpty().also(callback)) {
-                        val list = articles.value
-                        if ((fetchType == ArticleFetcher.FetchType.FETCH_MORE) && !list.isNullOrEmpty()) {
-                            val articleA = articleList[articleList.size - 1]
-                            val articleB = list[list.size - 1]
-                            if (articleA.title == articleB.title) {
-                                showMessage(R.string.no_more_content)
-                            } else {
-                                articles.postValue(list.plus(articleList))
-                            }
-                        } else {
-                            articles.postValue(articleList)
-                        }
-                    }
-                    if (!isTabSet) {
-                        forumPage.threadList.let {
-                            threadList.postValue(
-                                if (it.isNotEmpty())
-                                    it
-                                else
-                                    emptyList()
-                            )
-                        }
-                        isTabSet = true
+                getForumArticles(query, fetchType == ArticleFetcher.FetchType.FETCH_INIT)?.let { forumPage ->
+                    forumPage.articleList.takeIf { it.isNotEmpty() }?.let { articleList ->
+                        handleArticleList(fetchType, articleList, callback)
                     }
 
+                    if (!isTabSet) {
+                        threadList.postValue(forumPage.threadList.ifEmpty { emptyList() })
+                        isTabSet = true
+                    }
                 }
-            } catch (e: LoginRequiredException) {
+            } catch (_: LoginRequiredException) {
                 showMessage(R.string.login_required_error)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 showMessage(R.string.error)
             } finally {
                 isLoading.postValue(false)
+            }
+        }
+    }
+
+    private fun handleArticleList(
+        fetchType: ArticleFetcher.FetchType,
+        newList: List<Article>,
+        callback: (Boolean) -> Unit
+    ) {
+        val currentList = articles.value
+        when {
+            fetchType != ArticleFetcher.FetchType.FETCH_MORE || currentList.isNullOrEmpty() -> {
+                articles.postValue(newList)
+                callback(true)
+            }
+            newList.last().title == currentList.last().title -> {
+                showMessage(R.string.no_more_content)
+                callback(false)
+            }
+            else -> {
+                articles.postValue(currentList + newList)
+                callback(true)
             }
         }
     }

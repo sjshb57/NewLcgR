@@ -2,16 +2,16 @@ package top.easelink.lcg.ui.main.follow.view
 
 import android.content.Context
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import top.easelink.lcg.R
 import top.easelink.lcg.ui.main.message.model.MessageTabModel
 import top.easelink.lcg.utils.WebsiteConstant
 
-class FollowViewPagerAdapter internal constructor(
-    fm: FragmentManager,
+class FollowViewPagerAdapter(
+    fragmentActivity: FragmentActivity,
     context: Context
-) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+) : FragmentStateAdapter(fragmentActivity) {
 
     private val tabModels: List<MessageTabModel> = listOf(
         MessageTabModel(context.getString(R.string.tab_title_following_feed), ""),
@@ -25,21 +25,12 @@ class FollowViewPagerAdapter internal constructor(
         )
     )
 
-    override fun getItem(position: Int): Fragment {
+    override fun getItemCount(): Int = tabModels.size
+
+    override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> FollowingContentFragment()
-            else -> {
-                FollowDetailFragment(tabModels[position].url)
-            }
+            else -> FollowDetailFragment(tabModels[position].url)
         }
     }
-
-    override fun getCount(): Int {
-        return tabModels.size
-    }
-
-    override fun getPageTitle(position: Int): CharSequence {
-        return tabModels[position].title
-    }
-
 }
