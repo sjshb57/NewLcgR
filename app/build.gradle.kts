@@ -56,11 +56,6 @@ android {
         }
     }
 
-    packaging {
-        resources.excludes += "**/libc++_shared.so"
-        resources.excludes += "**/libmmkv.so"
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -71,6 +66,8 @@ android {
     }
 
     packaging {
+        resources.excludes += "**/libc++_shared.so"
+        resources.excludes += "**/libmmkv.so"
         resources {
             excludes.add("META-INF/DEPENDENCIES")
             excludes.add("META-INF/*android*")
