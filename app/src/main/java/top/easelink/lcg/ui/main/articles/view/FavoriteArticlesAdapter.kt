@@ -16,10 +16,11 @@ import top.easelink.lcg.ui.main.articles.viewmodel.FavoriteArticlesViewModel
 import top.easelink.lcg.ui.main.model.OpenArticleEvent
 import top.easelink.lcg.ui.main.source.model.ArticleEntity
 import top.easelink.lcg.utils.getDateFrom
-
+import java.util.Collections
 
 class FavoriteArticlesAdapter(private var favoriteArticlesViewModel: FavoriteArticlesViewModel) :
-    RecyclerView.Adapter<BaseViewHolder>(), onMoveAndSwipedListener {
+    RecyclerView.Adapter<BaseViewHolder>(), ItemTouchHelperCallback.onMoveAndSwipedListener {
+
     private val mArticleEntities: MutableList<ArticleEntity> = mutableListOf()
 
     override fun getItemCount(): Int {
@@ -74,11 +75,11 @@ class FavoriteArticlesAdapter(private var favoriteArticlesViewModel: FavoriteArt
         mArticleEntities.clear()
     }
 
-    inner class ArticleViewHolder internal constructor(private val binding: ItemFavoriteArticleViewV2Binding) : BaseViewHolder(binding.root) {
+    inner class ArticleViewHolder(private val binding: ItemFavoriteArticleViewV2Binding) :
+        BaseViewHolder(binding.root) {
 
         private fun onItemClick(url: String) {
-            val event = OpenArticleEvent(url)
-            EventBus.getDefault().post(event)
+            EventBus.getDefault().post(OpenArticleEvent(url))
         }
 
         override fun onBind(position: Int) {
@@ -96,19 +97,16 @@ class FavoriteArticlesAdapter(private var favoriteArticlesViewModel: FavoriteArt
                 titleTextView.text = articleEntity.title
                 dateTime.text = getDateFrom(articleEntity.timestamp)
 
-                if (articleEntity.author.isNotBlank()) {
-                    authorTextView.apply {
-                        text = articleEntity.author
-                        visibility = View.VISIBLE
-                    }
-                } else {
-                    authorTextView.visibility = View.GONE
+                authorTextView.apply {
+                    text = articleEntity.author
+                    visibility = if (articleEntity.author.isNotBlank()) View.VISIBLE else View.GONE
                 }
             }
         }
     }
 
-    inner class EmptyViewHolder internal constructor(private val binding: ItemFavoriteArticleEmptyViewBinding) : BaseViewHolder(binding.root) {
+    inner class EmptyViewHolder(private val binding: ItemFavoriteArticleEmptyViewBinding) :
+        BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {
             binding.syncFavorites.setOnClickListener {
                 favoriteArticlesViewModel.syncFavorites()
@@ -116,27 +114,35 @@ class FavoriteArticlesAdapter(private var favoriteArticlesViewModel: FavoriteArt
         }
     }
 
-    inner class LoadMoreViewHolder internal constructor(private val binding: ItemLoadMoreViewBinding) : BaseViewHolder(binding.root) {
+    inner class LoadMoreViewHolder(private val binding: ItemLoadMoreViewBinding) :
+        BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {
             binding.loading.visibility = View.VISIBLE
             favoriteArticlesViewModel.fetchArticles(ArticleFetcher.FetchType.FETCH_MORE) {
-                binding.root.post {
-                    binding.loading.visibility = View.GONE
-                }
+                binding.root.post { binding.loading.visibility = View.GONE }
             }
         }
+    }
+
+    override fun onItemRemove(position: Int) {
+        if (position in mArticleEntities.indices) {
+            mArticleEntities.removeAt(position)
+            notifyItemRemoved(position)
+        }
+    }
+
+    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
+        if (fromPosition in mArticleEntities.indices && toPosition in mArticleEntities.indices) {
+            Collections.swap(mArticleEntities, fromPosition, toPosition)
+            notifyItemMoved(fromPosition, toPosition)
+            return true
+        }
+        return false
     }
 
     companion object {
         const val VIEW_TYPE_EMPTY = 0
         const val VIEW_TYPE_NORMAL = 1
         const val VIEW_TYPE_LOAD_MORE = 2
-    }
-
-    override fun onItemRemove(position: Int) {
-    }
-
-    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        return false
     }
 }

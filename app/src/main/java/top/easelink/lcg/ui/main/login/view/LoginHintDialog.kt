@@ -21,7 +21,7 @@ class LoginHintDialog : TopDialog() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         dialog?.window?.setWindowAnimations(R.style.BottomInOutAnim)
         _binding = DialogLoginHintBinding.inflate(inflater, container, false)
         return binding.root
@@ -29,29 +29,28 @@ class LoginHintDialog : TopDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.loginHintInstruction.setHtml(R.raw.login_instruction)
-        binding.loginHintBtn.setOnClickListener {
-            WebViewActivity.openLoginPage(mContext)
-            dismissDialog()
-        }
-        binding.qqLogin.setOnClickListener {
-            WebViewActivity.openQQLoginPage(mContext)
-            dismissDialog()
-        }
-        binding.loginCancelBtn.setOnClickListener {
-            dismissDialog()
-        }
-    }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        val window = dialog?.window
-        if (window != null) {
-            val windowParam = window.attributes
-            windowParam.width = WindowManager.LayoutParams.MATCH_PARENT
-            windowParam.height = WindowManager.LayoutParams.WRAP_CONTENT
-            windowParam.gravity = Gravity.BOTTOM
-            window.attributes = windowParam
+        dialog?.window?.apply {
+            attributes = attributes.also {
+                it.width = WindowManager.LayoutParams.MATCH_PARENT
+                it.height = WindowManager.LayoutParams.WRAP_CONTENT
+                it.gravity = Gravity.BOTTOM
+            }
+        }
+
+        binding.apply {
+            loginHintInstruction.setHtml(R.raw.login_instruction)
+            loginHintBtn.setOnClickListener {
+                WebViewActivity.openLoginPage(mContext)
+                dismissDialog()
+            }
+            qqLogin.setOnClickListener {
+                WebViewActivity.openQQLoginPage(mContext)
+                dismissDialog()
+            }
+            loginCancelBtn.setOnClickListener {
+                dismissDialog()
+            }
         }
     }
 

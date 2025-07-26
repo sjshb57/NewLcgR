@@ -50,7 +50,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     private var lastBackPressed = 0L
     private lateinit var binding: ActivityMainBinding
-    private var currentTabId: Int = R.id.action_home // 记录当前选中的Tab
+    private var currentTabId: Int = R.id.action_home
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +90,6 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // 优先处理Fragment返回栈
                 if (supportFragmentManager.backStackEntryCount > 0) {
                     supportFragmentManager.popBackStack()
                     showBottomNavigation()
@@ -122,13 +121,11 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         EventBus.getDefault().unregister(this)
     }
 
-    // 新增方法：隐藏底部导航
     fun hideBottomNavigation() {
         binding.bottomNavigation.visibility = View.GONE
         binding.fragmentContainer.updatePadding(bottom = 0)
     }
 
-    // 新增方法：显示底部导航
     fun showBottomNavigation() {
         binding.bottomNavigation.visibility = View.VISIBLE
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
@@ -233,12 +230,10 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         if (AppConfig.articleShowInWebView) {
             WebViewActivity.startWebViewWith(SERVER_BASE_URL + event.url, this)
         } else {
-            // 修改为使用新的showArticleFragment方法
             showArticleFragment(ArticleFragment.newInstance(event.url))
         }
     }
 
-    // 新增方法：专门用于显示文章Fragment
     private fun showArticleFragment(fragment: Fragment) {
         hideBottomNavigation()
         supportFragmentManager.beginTransaction()
@@ -356,7 +351,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             return false
         }
 
-        currentTabId = item.itemId // 记录当前选中的Tab
+        currentTabId = item.itemId
 
         return when (item.itemId) {
             R.id.action_message, R.id.action_forum_navigation, R.id.action_about_me -> {
