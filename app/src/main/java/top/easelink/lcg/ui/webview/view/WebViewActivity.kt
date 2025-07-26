@@ -7,16 +7,18 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.Animatable
-import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.*
 import android.webkit.*
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ShareCompat
+import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.airbnb.lottie.LottieAnimationView
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
@@ -42,9 +44,8 @@ import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
 import top.easelink.lcg.utils.showMessage
 import top.easelink.lcg.utils.updateCookies
-import kotlin.coroutines.CoroutineContext
 
-class WebViewActivity : AppCompatActivity(), CoroutineScope {
+class WebViewActivity : AppCompatActivity() {
 
     private lateinit var mWebView: WebView
     private lateinit var animationView: LottieAnimationView
@@ -54,6 +55,9 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
     private var mHtml: String? = null
     private var mForceEnableJs = true
     private var isOpenLoginEvent = false
+    private val coroutineScope = CoroutineScope(SupervisorJob() + CoroutineExceptionHandler { _, e ->
+        Timber.e(e)
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,19 +65,33 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
         initContentView()
         initActionBar()
         initWebView()
+        initBackPressHandler()
+    }
+
+    private fun initBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (mWebView.canGoBack()) {
+                    mWebView.goBack()
+                } else {
+                    finish()
+                }
+            }
+        })
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (Intent.ACTION_VIEW == intent.action && intent.data != null) {
-            val url = intent.data.toString()
-            mWebView.loadUrl(url)
+        if (Intent.ACTION_VIEW == intent.action) {
+            intent.data?.toString()?.let { url ->
+                mWebView.loadUrl(url)
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // safe remove webview refers : https://stackoverflow.com/questions/5267639/how-to-safely-turn-webview-zooming-on-and-off-as-needed
+        coroutineScope.cancel()
         (mWebView.parent as? ViewGroup)?.removeView(mWebView)
         mWebView.destroy()
     }
@@ -86,40 +104,43 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun openInSystemBrowser(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.addCategory(Intent.CATEGORY_BROWSABLE)
-        intent.data = Uri.parse(url)
-        startActivity(intent)
+        Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+            addCategory(Intent.CATEGORY_BROWSABLE)
+            startActivity(this)
+        }
     }
 
     private fun initWebView() {
         mWebView.webViewClient = webViewClient
         mWebView.webChromeClient = InnerChromeClient()
-        mWebView.setDownloadListener { url: String, _: String?, _: String?, _: String?, _: Long ->
+        mWebView.setDownloadListener { url, _, _, _, _ ->
             openInSystemBrowser(url)
         }
-        val intent = intent
-        // load url from intent data
-        isOpenLoginEvent = getIntent().getBooleanExtra(OPEN_LOGIN_PAGE, false)
+
+        isOpenLoginEvent = intent.getBooleanExtra(OPEN_LOGIN_PAGE, false)
         mForceEnableJs = intent.getBooleanExtra(FORCE_ENABLE_JS_KEY, false)
-        if (!TextUtils.isEmpty(mUrl)) {
-            updateWebViewSettingsRemote()
-            if (isOpenLoginEvent) {
-                mWebView.removeJavascriptInterface(HOOK_NAME)
-                mWebView.addJavascriptInterface(WebViewHook(), HOOK_NAME)
+
+        when {
+            !mUrl.isNullOrEmpty() -> {
+                updateWebViewSettingsRemote()
+                if (isOpenLoginEvent) {
+                    mWebView.removeJavascriptInterface(HOOK_NAME)
+                    mWebView.addJavascriptInterface(WebViewHook(), HOOK_NAME)
+                }
+                mWebView.loadUrl(mUrl!!)
             }
-            mWebView.loadUrl(mUrl!!)
-        } else if (!TextUtils.isEmpty(mHtml)) {
-            updateWebViewSettingsLocal()
-            mWebView.loadDataWithBaseURL("", mHtml!!, "text/html", "UTF-8", "")
+            !mHtml.isNullOrEmpty() -> {
+                updateWebViewSettingsLocal()
+                mWebView.loadDataWithBaseURL("", mHtml!!, "text/html", "UTF-8", "")
+            }
         }
     }
 
-    inner class WebViewHook: HookInterface {
+    inner class WebViewHook : HookInterface {
         @JavascriptInterface
         override fun processHtml(html: String?) {
             if (html.isNullOrBlank()) return
-            launch(CalcPool) {
+            coroutineScope.launch(CalcPool) {
                 val doc = Jsoup.parse(html)
                 doc.selectFirst("div.avt") ?: return@launch
                 isLoggedIn.postValue(true)
@@ -130,7 +151,7 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
                 withContext(IOPool) {
                     requestUserInfo()?.let(::updateUserInfo)
                 }
-                launch(Main) {
+                withContext(Main) {
                     startActivity(Intent(mWebView.context, MainActivity::class.java))
                     finish()
                 }
@@ -139,94 +160,73 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun initData() {
-        val intent = intent
-        val uri = intent.data
-        if (uri != null && uri.scheme == "lcg") {
-            mUrl = uri.toString().replace("lcg:", SERVER_BASE_URL)
-            return
-        }
-        mUrl = intent.getStringExtra(URL_KEY)
-        if (TextUtils.isEmpty(mUrl) && uri != null) {
+        intent.data?.let { uri ->
+            if (uri.scheme == "lcg") {
+                mUrl = uri.toString().replace("lcg:", SERVER_BASE_URL)
+                return
+            }
             mUrl = uri.toString()
         }
+        mUrl = mUrl ?: intent.getStringExtra(URL_KEY)
         mHtml = intent.getStringExtra(EXTRA_TABLE_HTML)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menu.clear()
         menuInflater.inflate(R.menu.webview, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val drawable = item.icon
-        if (drawable is Animatable) {
-            (drawable as Animatable).start()
-        }
-        when (item.itemId) {
+        (item.icon as? Animatable)?.start()
+        return when (item.itemId) {
             R.id.action_share -> {
-                val shareIntent = shareIntent
-                startActivity(shareIntent)
-                return true
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.share_title)))
+                true
             }
             R.id.action_open_in_webview -> {
-                val url = mWebView.url
-                if (url != null) {
-                    openInSystemBrowser(url)
-                } else {
-                    showMessage(R.string.general_error)
-                }
-                return true
+                mWebView.url?.let(::openInSystemBrowser) ?: showMessage(R.string.general_error)
+                true
             }
             android.R.id.home -> {
                 finish()
-                return true
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     private val shareIntent: Intent
-        get() = ShareCompat.IntentBuilder.from(this)
-            .setText(getString(R.string.share_template, mWebView.title, mWebView.url))
-            .setSubject(mWebView.title)
-            .setChooserTitle(getString(R.string.share_title))
-            .setType("text/plain")
-            .createChooserIntent()
-
-    override fun onBackPressed() {
-        if (mWebView.canGoBack()) {
-            mWebView.goBack()
-        } else {
-            super.onBackPressed()
+        get() = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_template, mWebView.title, mWebView.url))
+            putExtra(Intent.EXTRA_SUBJECT, mWebView.title)
         }
-    }
 
     private fun initActionBar() {
-        val toolbar = findViewById<Toolbar>(R.id.web_view_toolbar)
-        setSupportActionBar(toolbar)
-        if (supportActionBar != null) {
-            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-            supportActionBar!!.setHomeButtonEnabled(true)
-            supportActionBar!!.setDisplayShowHomeEnabled(true)
-            val title = intent.getIntExtra(TITLE_KEY, 0)
-            if (title != 0) {
-                supportActionBar!!.setTitle(title)
+        findViewById<Toolbar>(R.id.web_view_toolbar)?.let { toolbar ->
+            setSupportActionBar(toolbar)
+            supportActionBar?.apply {
+                setDisplayHomeAsUpEnabled(true)
+                setHomeButtonEnabled(true)
+                setDisplayShowHomeEnabled(true)
+                intent.getIntExtra(TITLE_KEY, 0).takeIf { it != 0 }?.let(::setTitle)
             }
         }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onConfigurationChanged(config: Configuration) {
         super.onConfigurationChanged(config)
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         when (config.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
-                window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+                insetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             Configuration.ORIENTATION_PORTRAIT -> {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-                window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
+                insetsController.show(WindowInsetsCompat.Type.systemBars())
+            }
+            else -> {
+                // 处理其他方向情况
             }
         }
     }
@@ -241,79 +241,77 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun updateWebViewSettingsLocal() {
-        val settings = mWebView.settings
-        if (mWebView is HorizontalScrollDisableWebView) {
-            (mWebView as HorizontalScrollDisableWebView).setScrollEnable(true)
+        mWebView.settings.apply {
+            if (mWebView is HorizontalScrollDisableWebView) {
+                (mWebView as HorizontalScrollDisableWebView).setScrollEnable(true)
+            }
+            javaScriptEnabled = mForceEnableJs
+            setSupportZoom(true)
+            builtInZoomControls = true
+            displayZoomControls = false
+            blockNetworkImage = false
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
+            defaultTextEncodingName = "UTF-8"
+            cacheMode = WebSettings.LOAD_NO_CACHE
         }
-        settings.javaScriptEnabled = mForceEnableJs
-        // Zoom Setting
-        settings.setSupportZoom(true)
-        settings.builtInZoomControls = true
-        settings.displayZoomControls = false
-        settings.blockNetworkImage = false
-        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
-        settings.defaultTextEncodingName = "UTF-8"
-        settings.builtInZoomControls = true
-        settings.setSupportZoom(true)
-        settings.cacheMode = WebSettings.LOAD_NO_CACHE
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun updateWebViewSettingsRemote() {
-        val settings = mWebView.settings
-        settings.javaScriptEnabled = mForceEnableJs
-        settings.domStorageEnabled = true
-        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        settings.useWideViewPort = true
-        settings.loadWithOverviewMode = true
-        settings.defaultTextEncodingName = "UTF-8"
-        settings.builtInZoomControls = false
-        settings.setSupportZoom(false)
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
-        settings.blockNetworkImage = true
+        mWebView.settings.apply {
+            javaScriptEnabled = mForceEnableJs
+            domStorageEnabled = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            defaultTextEncodingName = "UTF-8"
+            builtInZoomControls = false
+            setSupportZoom(false)
+            cacheMode = WebSettings.LOAD_DEFAULT
+            blockNetworkImage = true
+        }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private inner class InnerChromeClient : WebChromeClient() {
         private var mCustomViewCallback: CustomViewCallback? = null
-
-        //  横屏时，显示视频的view
         private var mCustomView: View? = null
 
         override fun onShowCustomView(view: View, callback: CustomViewCallback) {
-            super.onShowCustomView(view, callback)
-            //如果view 已经存在，则隐藏
             if (mCustomView != null) {
                 callback.onCustomViewHidden()
                 return
             }
-            mCustomView = view
-            view.visibility = View.VISIBLE
+            mCustomView = view.apply { visibility = View.VISIBLE }
             mCustomViewCallback = callback
             videoLayout.addView(view)
             videoLayout.bringToFront()
 
-            //设置横屏
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            insetsController.hide(WindowInsetsCompat.Type.systemBars())
+            insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
 
         override fun onHideCustomView() {
-            super.onHideCustomView()
-            if (mCustomView == null) return
-            mCustomView?.visibility = View.GONE
-            videoLayout.removeView(mCustomView)
-            mCustomView = null
-            try {
+            mCustomView?.let {
+                it.visibility = View.GONE
+                videoLayout.removeView(it)
+                mCustomView = null
                 mCustomViewCallback?.onCustomViewHidden()
-            } catch (ignored: Exception) {
+
+                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.show(WindowInsetsCompat.Type.systemBars())
+
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT //竖屏
         }
     }
 
     private inner class InnerWebViewClient : WebViewClient() {
         override fun onPageCommitVisible(view: WebView, url: String) {
-            super.onPageCommitVisible(view, url)
             setLoading(false)
             CookieManager.getInstance().getCookie(url)?.let {
                 updateCookies(it, isOpenLoginEvent)
@@ -325,27 +323,22 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
         }
 
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            super.onPageStarted(view, url, favicon)
             view.settings.blockNetworkImage = true
             setLoading(true)
         }
 
         override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
-            handler.proceed()
+            // 考虑显示警告对话框后再决定是否继续
+            handler.cancel() // 改为 cancel() 提高安全性
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            val url = request.url.toString()
-            when {
-                TextUtils.isEmpty(url) -> return false
-                url.startsWith("wtloginmqq://ptlogin/qlogin") -> {
-                    runCatching {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            request.url.toString().let { url ->
+                when {
+                    url.startsWith("wtloginmqq://ptlogin/qlogin") -> runCatching {
+                        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
                     }
-                    return true
-                }
-                url.startsWith("bdnetdisk") -> {
-                    showMessage(R.string.baidu_net_disk_not_support)
+                    url.startsWith("bdnetdisk") -> showMessage(R.string.baidu_net_disk_not_support)
                 }
             }
             return false
@@ -354,39 +347,35 @@ class WebViewActivity : AppCompatActivity(), CoroutineScope {
 
     companion object {
         private const val HOOK_NAME = "hook"
+
         fun startWebViewWith(url: String, context: Context?) {
-            val intent = Intent(context, WebViewActivity::class.java)
-            intent.putExtra(URL_KEY, url)
-            intent.putExtra(FORCE_ENABLE_JS_KEY, true)
-            val c = context ?: LCGApp.context
-            c.startActivity(intent)
+            Intent(context ?: LCGApp.context, WebViewActivity::class.java).apply {
+                putExtra(URL_KEY, url)
+                putExtra(FORCE_ENABLE_JS_KEY, true)
+            }.also { (context ?: LCGApp.context).startActivity(it) }
         }
 
+        @Suppress("unused")
         fun startWebViewWithHtml(html: String, context: Context) {
-            val intent = Intent(context, WebViewActivity::class.java)
-            intent.putExtra(EXTRA_TABLE_HTML, html)
-            context.startActivity(intent)
+            Intent(context, WebViewActivity::class.java).apply {
+                putExtra(EXTRA_TABLE_HTML, html)
+            }.also { context.startActivity(it) }
         }
 
         fun openLoginPage(context: Context) {
-            val intent = Intent(context, WebViewActivity::class.java)
-            intent.putExtra(URL_KEY, SERVER_BASE_URL + LOGIN_QUERY)
-            intent.putExtra(FORCE_ENABLE_JS_KEY, true)
-            intent.putExtra(OPEN_LOGIN_PAGE, true)
-            context.startActivity(intent)
+            Intent(context, WebViewActivity::class.java).apply {
+                putExtra(URL_KEY, SERVER_BASE_URL + LOGIN_QUERY)
+                putExtra(FORCE_ENABLE_JS_KEY, true)
+                putExtra(OPEN_LOGIN_PAGE, true)
+            }.also { context.startActivity(it) }
         }
 
         fun openQQLoginPage(context: Context) {
-            val intent = Intent(context, WebViewActivity::class.java)
-            intent.putExtra(URL_KEY, QQ_LOGIN_URL)
-            intent.putExtra(FORCE_ENABLE_JS_KEY, true)
-            intent.putExtra(OPEN_LOGIN_PAGE, true)
-            context.startActivity(intent)
+            Intent(context, WebViewActivity::class.java).apply {
+                putExtra(URL_KEY, QQ_LOGIN_URL)
+                putExtra(FORCE_ENABLE_JS_KEY, true)
+                putExtra(OPEN_LOGIN_PAGE, true)
+            }.also { context.startActivity(it) }
         }
     }
-
-    override val coroutineContext: CoroutineContext
-        get() = SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
-            Timber.e(throwable)
-        }
 }
