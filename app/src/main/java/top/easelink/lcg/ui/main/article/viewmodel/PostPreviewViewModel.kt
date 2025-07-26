@@ -2,9 +2,8 @@ package top.easelink.lcg.ui.main.article.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.R
 import top.easelink.lcg.ui.main.model.BlockException
 import top.easelink.lcg.ui.main.source.remote.ArticlesRemoteDataSource
@@ -19,7 +18,7 @@ class PostPreviewViewModel : ViewModel() {
 
     fun initUrl(query: String) {
         loadingResult.value = R.string.preview_loading
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch {
             try {
                 val post = ArticlesRemoteDataSource.getPostPreview(query)
                 if (post != null) {
@@ -34,13 +33,11 @@ class PostPreviewViewModel : ViewModel() {
                 } else {
                     loadingResult.postValue(R.string.preview_fail_info_post_deleted)
                 }
-            } catch (block: BlockException) {
+            } catch (_: BlockException) {
                 loadingResult.postValue(R.string.preview_fail_info_post_deleted)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 loadingResult.postValue(R.string.preview_fail_info)
             }
         }
-
     }
 }
-

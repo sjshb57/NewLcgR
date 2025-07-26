@@ -6,7 +6,7 @@ import androidx.fragment.app.DialogFragment
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.size.OriginalSize
+import coil.size.Size
 import timber.log.Timber
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.DialogScreenCaptureBinding
@@ -62,7 +62,7 @@ class ScreenCaptureDialog : DialogFragment() {
     private fun loadImage(path: String) {
         ImageRequest.Builder(requireContext())
             .data(path)
-            .size(OriginalSize)
+            .size(Size.ORIGINAL)
             .diskCachePolicy(CachePolicy.DISABLED)
             .target(binding.imgScreenCapture)
             .let { Coil.imageLoader(requireContext()).enqueue(it.build()) }

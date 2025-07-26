@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import top.easelink.framework.topbase.TopDialog
 import top.easelink.lcg.R
@@ -41,12 +42,15 @@ class DownloadLinkDialog : TopDialog() {
                 binding.downloadLinkList.run {
                     adapter = ArrayAdapter(
                         mContext,
-                        R.layout.download_link_item_view, linkList
+                        R.layout.download_link_item_view,
+                        linkList
                     )
                     onItemClickListener =
                         AdapterView.OnItemClickListener { _: AdapterView<*>?, itemView: View, position: Int, _: Long ->
                             copy(linkList[position])
-                            itemView.setBackgroundColor(mContext.resources.getColor(R.color.colorAccent))
+                            itemView.setBackgroundColor(
+                                ContextCompat.getColor(requireContext(), R.color.colorAccent)
+                            )
                         }
                 }
             }
