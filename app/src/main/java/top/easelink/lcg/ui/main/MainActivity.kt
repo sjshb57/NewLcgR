@@ -50,6 +50,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     private var lastBackPressed = 0L
     private lateinit var binding: ActivityMainBinding
+    private var currentTabId: Int = R.id.action_home // 记录当前选中的Tab
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +90,12 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (mFragmentTags.size > 1) {
+                // 优先处理Fragment返回栈
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                    showBottomNavigation()
+                    syncBottomViewNavItemState()
+                } else if (mFragmentTags.size > 1) {
                     while (onFragmentDetached(mFragmentTags.pop())) {
                         syncBottomViewNavItemState()
                         return
@@ -114,6 +120,22 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+    }
+
+    // 新增方法：隐藏底部导航
+    fun hideBottomNavigation() {
+        binding.bottomNavigation.visibility = View.GONE
+        binding.fragmentContainer.updatePadding(bottom = 0)
+    }
+
+    // 新增方法：显示底部导航
+    fun showBottomNavigation() {
+        binding.bottomNavigation.visibility = View.VISIBLE
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
     }
 
     private fun setupDrawer(toolbar: Toolbar) {
@@ -171,13 +193,26 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         try {
             view.setOnItemSelectedListener(null)
             when (mFragmentTags.peek()) {
-                RecommendFragment::class.java.simpleName -> view.selectedItemId = R.id.action_home
-                MessageFragment::class.java.simpleName -> view.selectedItemId = R.id.action_message
-                DiscoverFragment::class.java.simpleName -> view.selectedItemId = R.id.action_forum_navigation
-                MeFragment::class.java.simpleName -> view.selectedItemId = R.id.action_about_me
+                RecommendFragment::class.java.simpleName -> {
+                    view.selectedItemId = R.id.action_home
+                    currentTabId = R.id.action_home
+                }
+                MessageFragment::class.java.simpleName -> {
+                    view.selectedItemId = R.id.action_message
+                    currentTabId = R.id.action_message
+                }
+                DiscoverFragment::class.java.simpleName -> {
+                    view.selectedItemId = R.id.action_forum_navigation
+                    currentTabId = R.id.action_forum_navigation
+                }
+                MeFragment::class.java.simpleName -> {
+                    view.selectedItemId = R.id.action_about_me
+                    currentTabId = R.id.action_about_me
+                }
             }
         } catch (_: EmptyStackException) {
             view.selectedItemId = R.id.action_home
+            currentTabId = R.id.action_home
         } finally {
             view.setOnItemSelectedListener(this)
         }
@@ -198,8 +233,18 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         if (AppConfig.articleShowInWebView) {
             WebViewActivity.startWebViewWith(SERVER_BASE_URL + event.url, this)
         } else {
-            showFragment(ArticleFragment.newInstance(event.url))
+            // 修改为使用新的showArticleFragment方法
+            showArticleFragment(ArticleFragment.newInstance(event.url))
         }
+    }
+
+    // 新增方法：专门用于显示文章Fragment
+    private fun showArticleFragment(fragment: Fragment) {
+        hideBottomNavigation()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     @Suppress("unused")
@@ -310,6 +355,8 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         if (binding.bottomNavigation.selectedItemId == item.itemId) {
             return false
         }
+
+        currentTabId = item.itemId // 记录当前选中的Tab
 
         return when (item.itemId) {
             R.id.action_message, R.id.action_forum_navigation, R.id.action_about_me -> {
