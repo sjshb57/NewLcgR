@@ -77,12 +77,11 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
             getFirstPost(doc)
         } catch (e: HttpStatusException) {
             if (e.statusCode == 404) {
-                null // 404表示帖子不存在
+                null
             } else {
                 throw e
             }
         } catch (e: BlockException) {
-            // 只有当明确是删除提示时才返回null
             if (e.message?.contains("删除") == true) {
                 null
             } else {

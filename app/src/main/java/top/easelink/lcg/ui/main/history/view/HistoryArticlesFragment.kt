@@ -12,7 +12,6 @@ import top.easelink.framework.threadpool.IOPool
 import top.easelink.framework.threadpool.Main
 import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
-import top.easelink.lcg.R
 import top.easelink.lcg.databinding.FragmentHistoryArticlesBinding
 import top.easelink.lcg.ui.main.history.model.HistoryModel
 import top.easelink.lcg.ui.main.source.local.ArticlesDatabase
@@ -21,6 +20,7 @@ class HistoryArticlesFragment : TopFragment(), ControllableFragment {
 
     private var _binding: FragmentHistoryArticlesBinding? = null
     private val binding get() = _binding!!
+    private lateinit var mAdapter: HistoryArticlesAdapter
 
     companion object {
         fun newInstance(): HistoryArticlesFragment {
@@ -55,34 +55,35 @@ class HistoryArticlesFragment : TopFragment(), ControllableFragment {
     }
 
     private fun setUpRecyclerView() {
-        binding.recyclerView.apply {
-            val mLayoutManager = LinearLayoutManager(context).also {
-                it.orientation = RecyclerView.VERTICAL
-            }
-            layoutManager = mLayoutManager
-            itemAnimator = DefaultItemAnimator()
-            val mAdapter = HistoryArticlesAdapter().also {
-                it.setFragmentManager(childFragmentManager)
-            }
-            adapter = mAdapter
-            ArticlesDatabase
-                .getInstance()
-                .articlesDao()
-                .getHistories()
-                .observe(viewLifecycleOwner) { list ->
-                    launch(Main) {
-                        mAdapter.clearItems()
-                        mAdapter.addItems(list.map {
-                            HistoryModel(
-                                url = it.url,
-                                author = it.author,
-                                title = it.title,
-                                timeStamp = it.timestamp
-                            )
-                        })
-                    }
-                }
+        mAdapter = HistoryArticlesAdapter().apply {
+            setFragmentManager(childFragmentManager)
         }
+
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(context).apply {
+                orientation = RecyclerView.VERTICAL
+            }
+            itemAnimator = DefaultItemAnimator()
+            adapter = mAdapter
+            setHasFixedSize(true)
+        }
+
+        ArticlesDatabase
+            .getInstance()
+            .articlesDao()
+            .getHistories()
+            .observe(viewLifecycleOwner) { list ->
+                launch(Main) {
+                    mAdapter.submitList(list.map {
+                        HistoryModel(
+                            url = it.url,
+                            author = it.author,
+                            title = it.title,
+                            timeStamp = it.timestamp
+                        )
+                    })
+                }
+            }
     }
 
     override fun onDestroyView() {

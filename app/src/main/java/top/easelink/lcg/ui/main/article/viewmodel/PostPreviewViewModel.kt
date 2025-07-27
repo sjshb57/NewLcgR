@@ -29,7 +29,7 @@ class PostPreviewViewModel : ViewModel() {
 
     fun initUrl(query: String) {
         currentQuery = query
-        loadJob?.cancel() // 取消之前的加载任务
+        loadJob?.cancel()
         _loadingResult.value = R.string.preview_loading
 
         loadJob = viewModelScope.launch {
@@ -43,7 +43,7 @@ class PostPreviewViewModel : ViewModel() {
                     _avatar.postValue(it.avatar)
                     _date.postValue(it.date)
                     _content.postValue(it.content)
-                    _loadingResult.postValue(-1) // -1表示加载成功
+                    _loadingResult.postValue(-1)
                 } ?: run {
                     _loadingResult.postValue(R.string.preview_fail_info)
                 }
