@@ -22,7 +22,14 @@ class LogoutHintDialog(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        dialog?.window?.setWindowAnimations(R.style.FadeInOutAnim)
+        dialog?.window?.apply {
+            setWindowAnimations(R.style.FadeInOutAnim)
+            val windowParam = attributes
+            windowParam.width = 300.dpToPx(LCGApp.context).toInt()
+            windowParam.height = WindowManager.LayoutParams.WRAP_CONTENT
+            windowParam.gravity = Gravity.CENTER
+            attributes = windowParam
+        }
         _binding = DialogLogoutHintBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,18 +44,6 @@ class LogoutHintDialog(
         binding.cancelBtn.setOnClickListener {
             negative?.invoke()
             dismissDialog()
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        val window = dialog?.window
-        if (window != null) {
-            val windowParam = window.attributes
-            windowParam.width = 300.dpToPx(LCGApp.context).toInt()
-            windowParam.height = WindowManager.LayoutParams.WRAP_CONTENT
-            windowParam.gravity = Gravity.CENTER
-            window.attributes = windowParam
         }
     }
 

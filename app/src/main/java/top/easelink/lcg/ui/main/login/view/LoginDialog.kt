@@ -22,19 +22,21 @@ class LoginDialog : TopDialog() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_login, container, false)
-    }
+        val view = inflater.inflate(R.layout.dialog_login, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        val window = dialog?.window
-        if (window != null) {
-            val windowParam = window.attributes
+        dialog?.window?.apply {
+            val windowParam = attributes
             windowParam.width = WindowManager.LayoutParams.MATCH_PARENT
             windowParam.height = WindowManager.LayoutParams.WRAP_CONTENT
             windowParam.gravity = Gravity.BOTTOM
-            window.attributes = windowParam
+            attributes = windowParam
         }
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         viewModel.fetchLoginPage()
     }
 }

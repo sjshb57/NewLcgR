@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.tabs.TabLayoutMediator
 import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.framework.utils.addFragmentInFragment
@@ -15,7 +16,6 @@ import top.easelink.lcg.ui.main.login.view.LoginHintFragment
 class MessageFragment : TopFragment(), ControllableFragment {
 
     private var _binding: FragmentMessageBinding? = null
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -37,12 +37,19 @@ class MessageFragment : TopFragment(), ControllableFragment {
             if (isLoggedIn) {
                 binding.messageTab.visibility = View.VISIBLE
                 binding.messageViewPager.visibility = View.VISIBLE
-                binding.messageViewPager.adapter =
-                    MessageViewPagerAdapter(
-                        childFragmentManager,
-                        mContext
-                    )
-                binding.messageTab.setupWithViewPager(binding.messageViewPager)
+
+                binding.messageViewPager.adapter = MessageViewPagerAdapter(
+                    requireActivity(),
+                    requireContext()
+                )
+
+                TabLayoutMediator(binding.messageTab, binding.messageViewPager) { tab, position ->
+                    tab.text = when(position) {
+                        0 -> getString(R.string.tab_title_notification)
+                        1 -> getString(R.string.tab_title_private_message)
+                        else -> ""
+                    }
+                }.attach()
             } else {
                 binding.messageTab.visibility = View.GONE
                 binding.messageViewPager.visibility = View.GONE

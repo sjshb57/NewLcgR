@@ -3,8 +3,7 @@ package top.easelink.lcg.ui.main.largeimg.view
 import android.os.Bundle
 import android.view.*
 import coil.load
-import coil.size.OriginalSize
-import coil.size.SizeResolver
+import coil.size.Size
 import top.easelink.framework.topbase.TopDialog
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.DialogLargeImageBinding
@@ -33,23 +32,20 @@ class LargeImageDialog : TopDialog() {
     ): View? {
         dialog?.window?.setWindowAnimations(R.style.FadeInOutAnim)
         _binding = DialogLargeImageBinding.inflate(inflater, container, false)
-        return binding.root // 返回绑定类的根视图
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         arguments?.getString(IMAGE_URL)?.let {
             binding.photo.load(it) {
-                size(SizeResolver(OriginalSize))
+                size(Size.ORIGINAL)
             }
         }
         binding.exit.setOnClickListener {
             dismissDialog()
         }
-    }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         val window = dialog?.window
         if (window != null) {
             val windowParam = window.attributes

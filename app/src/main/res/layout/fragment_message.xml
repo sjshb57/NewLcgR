@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -9,8 +8,8 @@
     android:orientation="vertical"
     android:focusable="true"
     android:clickable="true"
-    android:gravity="center"
-    android:background="@color/white" >
+    android:background="@color/white">
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/message_tab"
         android:layout_width="match_parent"
@@ -22,13 +21,15 @@
         app:tabTextColor="@color/gray"
         app:tabSelectedTextColor="@color/colorAccent"
         app:tabMode="fixed"
-        app:tabTextAppearance="@style/Widget.Design.TabLayout"
-        />
-    <androidx.viewpager.widget.ViewPager
+        app:tabTextAppearance="@style/Widget.Design.TabLayout"/>
+
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/message_view_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:focusableInTouchMode="true"
         android:focusable="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
 </LinearLayout>

@@ -1,11 +1,11 @@
 package top.easelink.lcg.ui.setting.view
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.CompoundButton
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
 import top.easelink.framework.topbase.TopActivity
 import top.easelink.lcg.R
@@ -27,15 +27,19 @@ class SettingActivity : TopActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mViewModel = ViewModelProvider(this)[SettingViewModel::class.java]
+
+        // 处理返回按钮的新方式
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        })
+
         setUp()
     }
 
     override fun onResume() {
         super.onResume()
-        // 根据屏幕方向调整布局
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // 横屏可能需要特殊处理
-        }
     }
 
     private fun setUp() {
@@ -56,7 +60,7 @@ class SettingActivity : TopActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
