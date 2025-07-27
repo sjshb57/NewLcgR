@@ -41,8 +41,9 @@ class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
     })
 
     override fun getItemCount(): Int {
-        return if (differ.currentList.isEmpty()) 1 else differ.currentList.size
+        return differ.currentList.size.takeIf { it > 0 } ?: 1
     }
+
 
     override fun getItemViewType(position: Int): Int {
         return if (differ.currentList.isEmpty()) VIEW_TYPE_EMPTY else VIEW_TYPE_NORMAL
@@ -51,7 +52,7 @@ class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         when (holder) {
             is ArticleViewHolder -> {
-                if (position < differ.currentList.size) {
+                if (differ.currentList.isNotEmpty() && position < differ.currentList.size) {
                     holder.bind(differ.currentList[position])
                 }
             }
@@ -79,12 +80,7 @@ class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
     }
 
     fun submitList(newList: List<HistoryModel>) {
-        val listToSubmit = if (newList.isEmpty()) emptyList() else ArrayList(newList)
-        differ.submitList(listToSubmit) {
-            if (listToSubmit.isEmpty()) {
-                notifyItemChanged(0)
-            }
-        }
+        differ.submitList(if (newList.isEmpty()) emptyList() else ArrayList(newList))
     }
 
     fun setFragmentManager(fragmentManager: FragmentManager) {

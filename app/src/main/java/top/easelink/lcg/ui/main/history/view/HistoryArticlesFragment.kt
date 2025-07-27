@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -62,8 +61,10 @@ class HistoryArticlesFragment : TopFragment(), ControllableFragment {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = RecyclerView.VERTICAL
+                isItemPrefetchEnabled = false
+                initialPrefetchItemCount = 0
             }
-            itemAnimator = DefaultItemAnimator()
+            itemAnimator = null
             adapter = mAdapter
             setHasFixedSize(true)
         }

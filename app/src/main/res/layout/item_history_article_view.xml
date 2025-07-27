@@ -18,8 +18,7 @@
         android:layout_marginTop="@dimen/dp_5"
         android:paddingEnd="@dimen/dp_15"
         android:paddingStart="@dimen/dp_3"
-        android:paddingBottom="@dimen/dp_5"
-        tools:targetApi="m">
+        android:paddingBottom="@dimen/dp_5">
 
         <TextView
             android:id="@+id/title_text_view"
