@@ -58,7 +58,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
 
     private fun setUpToolbar() {
         binding.articleToolbar.apply {
-            title = viewModel.title.value ?: getString(R.string.ic_my_articles)
+            title = arguments?.getString(ARG_TITLE) ?: getString(R.string.ic_my_articles)
 
             inflateMenu(R.menu.forum_articles)
             setOnMenuItemClickListener { menuItem ->

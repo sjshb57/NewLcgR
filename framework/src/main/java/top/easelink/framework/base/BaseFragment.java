@@ -43,7 +43,7 @@ public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> e
     protected abstract T initViewBinding(@NonNull LayoutInflater inflater, ViewGroup container);
 
     @Override
-    @SuppressWarnings("rawtypes")  // 仅在此处抑制警告
+    @SuppressWarnings("rawtypes")
     public void onAttach(@NotNull Context context) {
         super.onAttach(context);
 
