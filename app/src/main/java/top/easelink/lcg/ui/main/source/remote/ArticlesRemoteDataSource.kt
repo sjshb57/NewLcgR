@@ -56,7 +56,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
     override fun getHomePageArticles(param: String, pageNum: Int): List<Article> {
         return try {
             getArticles("$FORUM_BASE_QUERY$param&page=$pageNum")
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }
@@ -65,18 +65,30 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
     @WorkerThread
     override fun getPostPreview(query: String): PreviewPost? {
         return try {
-            val doc = PreviewCacheManager.findDocOrNull(query) ?: let {
-                JsoupClient.sendGetRequestWithQuery(query).also {
-                    PreviewCacheManager.saveToDisk(query, it.html())
+            val doc = PreviewCacheManager.findDocOrNull(query) ?: run {
+                val freshDoc = JsoupClient.sendGetRequestWithQuery(query)
+                if (freshDoc.selectFirst("div.pcb") == null &&
+                    freshDoc.select(".alert_error").isNotEmpty()) {
+                    return null
                 }
+                PreviewCacheManager.saveToDisk(query, freshDoc.html())
+                freshDoc
             }
             getFirstPost(doc)
-        } catch (e: Exception) {
-            when (e) {
-                is BlockException,
-                is HttpStatusException -> throw e
+        } catch (e: HttpStatusException) {
+            if (e.statusCode == 404) {
+                null // 404表示帖子不存在
+            } else {
+                throw e
             }
-            Timber.w(e)
+        } catch (e: BlockException) {
+            // 只有当明确是删除提示时才返回null
+            if (e.message?.contains("删除") == true) {
+                null
+            } else {
+                throw e
+            }
+        } catch (_: Exception) {
             null
         }
     }
@@ -91,7 +103,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                     try {
                         val json = it.html().trim().replace("\u00a0".toRegex(), "")
                         return@let gson.fromJson(json, ArticleAbstractResponse::class.java)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                     }
                     null
                 }
@@ -220,7 +232,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                         } else {
                             helpCoin = try {
                                 helpInfo.toInt()
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 0
                             }
                         }
@@ -293,20 +305,16 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                     val reply = extractFrom(element, "td.num", "a.xi2").toIntOrNull() ?: 0
                     val view = extractFrom(element, "td.num", "em").toIntOrNull() ?: 0
                     val title = extractFrom(element, "th.new", ".xst").let {
-                        if (it.isBlank()) {
+                        it.ifBlank {
                             extractFrom(element, "th.common", ".xst")
-                        } else {
-                            it
                         }
 
                     }
                     val author = extractFrom(element, "td.by", "a[href*=uid]")
                     val date = extractFrom(element, "td.by", "span")
                     val url = extractAttrFrom(element, "href", "th.new", "a.xst").let {
-                        if (it.isBlank()) {
+                        it.ifBlank {
                             extractAttrFrom(element, "href", "th.common", "a.xst")
-                        } else {
-                            it
                         }
                     }
                     val origin = extractFrom(element, "td.by", "a[target]")
@@ -331,7 +339,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                             try {
                                 val element = elementByTag.getElementsByTag("a").firstOrNull()
                                 elements = element?.getElementsByTag("span") ?: Elements()
-                                if (elements.size > 0) {
+                                if (elements.isNotEmpty()) {
                                     elements.remove()
                                 }
                                 val threadUrl = element?.attr("href").orEmpty()
@@ -339,7 +347,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                                 if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(threadUrl)) {
                                     return@mapNotNull ForumThread(name, threadUrl)
                                 }
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                             }
                             null
                         }
