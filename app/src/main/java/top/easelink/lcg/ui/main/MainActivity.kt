@@ -66,6 +66,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         setupDrawer(binding.toolbar)
         setupBottomNavMenu()
         setupBackPressHandler()
+        setupFragmentBackStackListener()
 
         EventBus.getDefault().register(this)
 
@@ -112,6 +113,44 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 }
             }
         })
+    }
+
+    private fun setupFragmentBackStackListener() {
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                showBottomNavigation()
+                supportFragmentManager.fragments.firstOrNull { !it.isHidden }?.let {
+                    updateUIForFragment(it)
+                } ?: run {
+                    restoreCurrentTabFragment()
+                }
+            }
+        }
+    }
+
+    private fun restoreCurrentTabFragment() {
+        val targetFragment = when (currentTabId) {
+            R.id.action_home -> supportFragmentManager.findFragmentByTag(RecommendFragment::class.java.simpleName)
+            R.id.action_message -> supportFragmentManager.findFragmentByTag(MessageFragment::class.java.simpleName)
+            R.id.action_forum_navigation -> supportFragmentManager.findFragmentByTag(DiscoverFragment::class.java.simpleName)
+            R.id.action_about_me -> supportFragmentManager.findFragmentByTag(MeFragment::class.java.simpleName)
+            else -> null
+        }
+
+        targetFragment?.let {
+            supportFragmentManager.commit {
+                show(it)
+                setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+            }
+            updateUIForFragment(it)
+        } ?: run {
+            when (currentTabId) {
+                R.id.action_home -> showFragment(RecommendFragment::class.java)
+                R.id.action_message -> showFragment(MessageFragment::class.java)
+                R.id.action_forum_navigation -> showFragment(DiscoverFragment::class.java)
+                R.id.action_about_me -> showFragment(MeFragment::class.java)
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -259,15 +298,21 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     fun hideBottomNavigation() {
         binding.bottomNavigation.visibility = View.GONE
-        binding.fragmentContainer.updatePadding(bottom = 0)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fragmentContainer) { view, insets ->
+            view.updatePadding(
+                bottom = 0
+            )
+            insets
+        }
     }
 
-    @Suppress("unused")
     fun showBottomNavigation() {
         binding.bottomNavigation.visibility = View.VISIBLE
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fragmentContainer) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
+            view.updatePadding(
+                bottom = systemBars.bottom
+            )
             insets
         }
     }
@@ -292,11 +337,15 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     }
 
     private fun showArticleFragment(fragment: Fragment) {
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container, fragment)
+            addToBackStack(null)
+            setReorderingAllowed(true)
+            supportFragmentManager.fragments.firstOrNull { !it.isHidden }?.let {
+                hide(it)
+            }
+        }
         hideBottomNavigation()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 
     @Suppress("unused")
