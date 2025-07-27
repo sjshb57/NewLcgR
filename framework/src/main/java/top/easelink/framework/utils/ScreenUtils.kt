@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
-import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.View
 import timber.log.Timber
@@ -17,12 +16,6 @@ fun Int.dpToPx(context: Context) = TypedValue.applyDimension(
 
 fun Float.dpToPx(context: Context) =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics)
-
-fun px2dp(px: Float, context: Context): Float {
-    val resources = context.resources
-    val metrics = resources.displayMetrics
-    return px / (metrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
-}
 
 fun dp2px(context: Context, dp: Float): Float {
     return dp * context.resources.displayMetrics.density

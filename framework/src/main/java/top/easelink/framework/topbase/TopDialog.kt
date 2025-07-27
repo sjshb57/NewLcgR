@@ -3,15 +3,14 @@ package top.easelink.framework.topbase
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.RelativeLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import timber.log.Timber
+import androidx.core.graphics.drawable.toDrawable
 
 abstract class TopDialog : DialogFragment() {
 
@@ -37,7 +36,7 @@ abstract class TopDialog : DialogFragment() {
         return Dialog(mContext).apply {
             requestWindowFeature(Window.FEATURE_NO_TITLE)
             setContentView(root)
-            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
             window?.setLayout(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -62,14 +61,14 @@ abstract class TopDialog : DialogFragment() {
             val mDismissed = clazz.getDeclaredField("mDismissed")
             mDismissed.isAccessible = true
             mDismissed.set(this, false)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
 
         try {
             val mShownByMe = clazz.getDeclaredField("mShownByMe")
             mShownByMe.isAccessible = true
             mShownByMe.set(this, true)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
 
         showCatchException(fragmentManager, tag)

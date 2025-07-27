@@ -105,7 +105,7 @@
     <string name="login_successfully">登陆成功，处理数据中请稍等…</string>
 
     <!--Logout Dialog-->
-    <string name="logout_confirm_message">退出账号@%s？</string>
+    <string name="logout_confirm_message">是否退出账号 @%s</string>
     <string name="logout_confirm_btn">是的</string>
     <string name="clear_cookie">本地信息已清除</string>
 

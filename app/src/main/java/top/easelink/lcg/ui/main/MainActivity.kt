@@ -222,6 +222,9 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 show(fragment)
             } else {
                 add(R.id.fragment_container, fragment, tag)
+                if (fragment is ForumArticlesFragment) {
+                    addToBackStack(tag)
+                }
             }
 
             setCustomAnimations(
@@ -245,6 +248,9 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 show(fragment)
             } else {
                 add(R.id.fragment_container, fragment, tag)
+                if (fragment is ForumArticlesFragment) {
+                    addToBackStack(tag)
+                }
             }
 
             setCustomAnimations(
@@ -263,7 +269,8 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             is MessageFragment,
             is DiscoverFragment,
             is MeFragment,
-            is ArticleFragment -> true
+            is ArticleFragment,
+            is ForumArticlesFragment -> true
             else -> false
         }
         setStatusBarAppearance(isLightStatusBar)
