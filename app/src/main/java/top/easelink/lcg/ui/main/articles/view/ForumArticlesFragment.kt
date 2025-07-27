@@ -1,7 +1,9 @@
 package top.easelink.lcg.ui.main.articles.view
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -11,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import timber.log.Timber
 import top.easelink.framework.base.BaseFragment
-import top.easelink.lcg.BR
 import top.easelink.lcg.R
 import top.easelink.lcg.appinit.LCGApp
 import top.easelink.lcg.databinding.FragmentForumArticlesBinding
@@ -20,22 +21,31 @@ import top.easelink.lcg.ui.main.source.model.ForumThread
 
 class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumArticlesViewModel>() {
 
+    private var _binding: FragmentForumArticlesBinding? = null
+    private val binding get() = _binding!!
+
     private var showTab = false
 
-    override fun isControllable(): Boolean {
-        return true
-    }
+    override fun isControllable(): Boolean = true
 
-    override fun getBindingVariable(): Int {
-        return BR.viewModel
-    }
+    override fun getLayoutId(): Int = R.layout.fragment_forum_articles
 
-    override fun getLayoutId(): Int {
-        return R.layout.fragment_forum_articles
+    override fun initViewBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentForumArticlesBinding {
+        return FragmentForumArticlesBinding.inflate(inflater, container, false).also {
+            _binding = it
+        }
     }
 
     override fun getViewModel(): ForumArticlesViewModel =
         ViewModelProvider(this)[ForumArticlesViewModel::class.java]
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -47,7 +57,9 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
     }
 
     private fun setUpToolbar() {
-        viewDataBinding.articleToolbar.apply {
+        binding.articleToolbar.apply {
+            title = viewModel.title.value ?: getString(R.string.ic_my_articles)
+
             inflateMenu(R.menu.forum_articles)
             setOnMenuItemClickListener { menuItem ->
                 val order = when (menuItem.itemId) {
@@ -56,7 +68,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                     else -> DEFAULT_ORDER
                 }
                 try {
-                    val pos = viewDataBinding.forumTab.selectedTabPosition
+                    val pos = binding.forumTab.selectedTabPosition
                     viewModel
                         .threadList
                         .value
@@ -72,7 +84,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                 } catch (e: Exception) {
                     Timber.e(e)
                 }
-                return@setOnMenuItemClickListener true
+                true
             }
         }
     }
@@ -93,13 +105,13 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
 
     private fun setUpTabLayout(forumThreadList: List<ForumThread>?) {
         if (forumThreadList.isNullOrEmpty() || !showTab) {
-            viewDataBinding.forumTab.apply {
+            binding.forumTab.apply {
                 visibility = View.GONE
                 removeAllTabs()
             }
             return
         }
-        viewDataBinding.forumTab.apply {
+        binding.forumTab.apply {
             visibility = View.VISIBLE
             removeAllTabs()
             forumThreadList.forEach {
@@ -120,7 +132,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
     }
 
     private fun setUpRecyclerView() {
-        viewDataBinding.refreshLayout.apply {
+        binding.refreshLayout.apply {
             LCGApp.context.let {
                 setColorSchemeColors(
                     ContextCompat.getColor(it, R.color.colorPrimary),
@@ -129,13 +141,13 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                 )
             }
             setScrollUpChild(
-                viewDataBinding.recyclerView.apply {
+                binding.recyclerView.apply {
                     layoutManager = LinearLayoutManager(context).apply {
                         orientation = RecyclerView.VERTICAL
                     }
                     itemAnimator = DefaultItemAnimator()
                     adapter = ArticlesAdapter(viewModel).also {
-                        it.setFragmentManager(childFragmentManager)  // 使用childFragmentManager替代
+                        it.setFragmentManager(childFragmentManager)
                     }
                 }
             )
@@ -145,10 +157,10 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
         }
         viewModel.articles.observe(viewLifecycleOwner, Observer { articleList ->
             if (articleList.isEmpty() && viewModel.isLoading.value == true) {
-                viewDataBinding.recyclerView.visibility = View.GONE
+                binding.recyclerView.visibility = View.GONE
             } else {
-                viewDataBinding.recyclerView.visibility = View.VISIBLE
-                (viewDataBinding.recyclerView.adapter as? ArticlesAdapter)?.apply {
+                binding.recyclerView.visibility = View.VISIBLE
+                (binding.recyclerView.adapter as? ArticlesAdapter)?.apply {
                     clearItems()
                     addItems(articleList)
                 }

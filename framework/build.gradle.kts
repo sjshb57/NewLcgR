@@ -1,7 +1,6 @@
 plugins {
     id("com.android.library")
     alias(libs.plugins.parcelize)
-//    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlin.android)
 }
 
@@ -28,8 +27,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
+    kotlin {
+        jvmToolchain(21)
     }
 
     buildFeatures {

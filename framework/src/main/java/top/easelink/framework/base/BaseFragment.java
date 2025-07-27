@@ -10,22 +10,19 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
+import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 
 import top.easelink.framework.topbase.ControllableFragment;
 import top.easelink.framework.topbase.TopActivity;
 
-public abstract class BaseFragment<T extends ViewDataBinding, V extends ViewModel> extends Fragment implements ControllableFragment {
+public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> extends Fragment implements ControllableFragment {
 
-    private AppCompatActivity mActivity;
-    private T mViewDataBinding;
-    private V mViewModel;
-
+    private AppCompatActivity activity;
+    private T viewBinding;
 
     @Override
     public boolean isControllable() {
@@ -38,41 +35,27 @@ public abstract class BaseFragment<T extends ViewDataBinding, V extends ViewMode
         return this.getClass().getSimpleName();
     }
 
-    /**
-     * Override for set binding variable
-     *
-     * @return variable id
-     */
-    public abstract int getBindingVariable();
-
-    /**
-     * @return layout resource id
-     */
-    public abstract
     @LayoutRes
-    int getLayoutId();
+    public abstract int getLayoutId();
 
-    /**
-     * Override for set view model
-     *
-     * @return view model instance
-     */
     public abstract V getViewModel();
 
+    protected abstract T initViewBinding(@NonNull LayoutInflater inflater, ViewGroup container);
+
     @Override
+    @SuppressWarnings("rawtypes")  // 仅在此处抑制警告
     public void onAttach(@NotNull Context context) {
         super.onAttach(context);
-        if (context instanceof BaseActivity) {
-            BaseActivity activity = (BaseActivity) context;
-            this.mActivity = activity;
+
+        if (context instanceof AppCompatActivity) {
+            this.activity = (AppCompatActivity) context;
+
             if (this.isControllable()) {
-                activity.onFragmentAttached(getBackStackTag());
-            }
-        } else if (context instanceof TopActivity) {
-            TopActivity topActivity = (TopActivity) context;
-            this.mActivity = topActivity;
-            if (isControllable()) {
-                topActivity.onFragmentAttached(getBackStackTag());
+                if (context instanceof BaseActivity) {
+                    ((BaseActivity) context).onFragmentAttached(getBackStackTag());
+                } else if (context instanceof TopActivity) {
+                    ((TopActivity) context).onFragmentAttached(getBackStackTag());
+                }
             }
         }
     }
@@ -80,37 +63,34 @@ public abstract class BaseFragment<T extends ViewDataBinding, V extends ViewMode
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = getViewModel();
-        setHasOptionsMenu(false);
+        getViewModel();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mViewDataBinding = DataBindingUtil.inflate(inflater, getLayoutId(), container, false);
-        View mRootView = mViewDataBinding.getRoot();
-        mViewDataBinding.setLifecycleOwner(getActivity());
-        return mRootView;
+        viewBinding = initViewBinding(inflater, container);
+        return viewBinding.getRoot();
     }
 
     @Override
     public void onDetach() {
-        mActivity = null;
+        activity = null;
         super.onDetach();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mViewDataBinding.setVariable(getBindingVariable(), mViewModel);
-        mViewDataBinding.setLifecycleOwner(this);
-        mViewDataBinding.executePendingBindings();
+    public void onDestroyView() {
+        super.onDestroyView();
+        viewBinding = null;
     }
 
+    @SuppressWarnings("unused")
     protected AppCompatActivity getBaseActivity() {
-        return mActivity;
+        return activity;
     }
 
-    protected T getViewDataBinding() {
-        return mViewDataBinding;
+    @SuppressWarnings("unused")
+    protected T getViewBinding() {
+        return viewBinding;
     }
 }

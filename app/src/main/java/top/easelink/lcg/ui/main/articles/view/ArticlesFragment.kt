@@ -1,7 +1,9 @@
 package top.easelink.lcg.ui.main.articles.view
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -9,7 +11,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import top.easelink.framework.base.BaseFragment
-import top.easelink.lcg.BR
 import top.easelink.lcg.R
 import top.easelink.lcg.appinit.LCGApp
 import top.easelink.lcg.databinding.FragmentArticlesBinding
@@ -18,27 +19,37 @@ import top.easelink.lcg.ui.main.articles.viewmodel.ArticlesViewModel
 
 class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel>() {
 
+    private var _binding: FragmentArticlesBinding? = null
+    private val binding get() = _binding!!
+
     var controllableFlag: Boolean = true
 
     override fun isControllable(): Boolean {
         return controllableFlag
     }
 
-    override fun getBindingVariable(): Int {
-        return BR.viewModel
-    }
-
     override fun getLayoutId(): Int {
         return R.layout.fragment_articles
+    }
+
+    override fun initViewBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentArticlesBinding {
+        return FragmentArticlesBinding.inflate(inflater, container, false).also {
+            _binding = it
+        }
     }
 
     override fun getViewModel(): ArticlesViewModel {
         return ViewModelProvider(this)[ArticlesViewModel::class.java]
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun scrollToTop() {
-        viewDataBinding.backToTop.playAnimation()
-        viewDataBinding.recyclerView.let {
+        binding.backToTop.playAnimation()
+        binding.recyclerView.let {
             val pos =
                 (it.layoutManager as? LinearLayoutManager)?.findLastCompletelyVisibleItemPosition()
             if (pos != null && pos > 30) {
@@ -60,10 +71,10 @@ class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel
         arguments?.getString(ARG_PARAM)?.let {
             viewModel.articles.observe(viewLifecycleOwner, Observer { articleList ->
                 if (articleList.isEmpty() && viewModel.isLoading.value == true) {
-                    viewDataBinding.recyclerView.visibility = View.GONE
+                    binding.recyclerView.visibility = View.GONE
                 } else {
-                    viewDataBinding.recyclerView.visibility = View.VISIBLE
-                    (viewDataBinding.recyclerView.adapter as? ArticlesAdapter)?.apply {
+                    binding.recyclerView.visibility = View.VISIBLE
+                    (binding.recyclerView.adapter as? ArticlesAdapter)?.apply {
                         clearItems()
                         addItems(articleList)
                     }
@@ -71,17 +82,17 @@ class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel
             })
             viewModel.initUrl(it)
         }
-        viewDataBinding.backToTop.setOnClickListener {
+        binding.backToTop.setOnClickListener {
             scrollToTop()
         }
-        viewDataBinding.refreshLayout.run {
+        binding.refreshLayout.run {
             val context = context ?: LCGApp.context
             setColorSchemeColors(
                 ContextCompat.getColor(context, R.color.colorPrimary),
                 ContextCompat.getColor(context, R.color.colorAccent),
                 ContextCompat.getColor(context, R.color.colorPrimaryDark)
             )
-            setScrollUpChild(viewDataBinding.recyclerView)
+            setScrollUpChild(binding.recyclerView)
             setOnRefreshListener {
                 viewModel.fetchArticles(ArticleFetcher.FetchType.FETCH_INIT) {}
             }
@@ -89,7 +100,7 @@ class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel
     }
 
     private fun setupRecyclerView() {
-        viewDataBinding.recyclerView.apply {
+        binding.recyclerView.apply {
             val mLayoutManager = LinearLayoutManager(context).also {
                 it.orientation = RecyclerView.VERTICAL
             }
@@ -105,7 +116,7 @@ class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel
                     recyclerView: RecyclerView,
                     newState: Int
                 ) {
-                    viewDataBinding.backToTop.let {
+                    binding.backToTop.let {
                         if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                             if (mLayoutManager.findFirstVisibleItemPosition() <= 1) {
                                 it.visibility = View.GONE
