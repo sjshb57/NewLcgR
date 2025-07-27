@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.updatePadding
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import com.google.android.material.navigation.NavigationBarView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -24,8 +25,6 @@ import org.greenrobot.eventbus.ThreadMode
 import top.easelink.framework.topbase.TopActivity
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.framework.utils.WRITE_EXTERNAL_CODE
-import top.easelink.framework.utils.addFragmentInActivity
-import top.easelink.framework.utils.popBackFragmentUntil
 import top.easelink.lcg.BuildConfig
 import top.easelink.lcg.R
 import top.easelink.lcg.config.AppConfig
@@ -44,13 +43,13 @@ import top.easelink.lcg.ui.webview.view.HalfScreenWebViewFragment
 import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.showMessage
-import java.util.EmptyStackException
 
 class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     private var lastBackPressed = 0L
     private lateinit var binding: ActivityMainBinding
     private var currentTabId: Int = R.id.action_home
+    private val fragmentTags = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +62,19 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupWindowInsets()
+        setupDrawer(binding.toolbar)
+        setupBottomNavMenu()
+        setupBackPressHandler()
+
+        EventBus.getDefault().register(this)
+
+        if (savedInstanceState == null) {
+            showInitialFragment()
+        }
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -72,11 +84,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             }
 
             binding.toolbar.updatePadding(top = 0)
-
-            binding.fragmentContainer.updatePadding(
-                top = 0,
-                bottom = systemBars.bottom
-            )
+            binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
 
             (binding.bottomNavigation.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
                 bottomMargin = systemBars.bottom
@@ -84,55 +92,31 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
             insets
         }
+    }
 
-        setupDrawer(binding.toolbar)
-        setupBottomNavMenu()
+    private fun showInitialFragment() {
+        showFragment(RecommendFragment::class.java)
+        setStatusBarAppearance(true)
+    }
 
+    private fun setupBackPressHandler() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (supportFragmentManager.backStackEntryCount > 0) {
                     supportFragmentManager.popBackStack()
-                    showBottomNavigation()
-                    syncBottomViewNavItemState()
-                } else if (mFragmentTags.size > 1) {
-                    while (onFragmentDetached(mFragmentTags.pop())) {
-                        syncBottomViewNavItemState()
-                        return
-                    }
+                } else if (System.currentTimeMillis() - lastBackPressed > 2000) {
+                    showMessage(R.string.app_exit_tip)
+                    lastBackPressed = System.currentTimeMillis()
                 } else {
-                    if (System.currentTimeMillis() - lastBackPressed > 2000) {
-                        showMessage(R.string.app_exit_tip)
-                        lastBackPressed = System.currentTimeMillis()
-                    } else {
-                        finishAffinity()
-                    }
+                    finish()
                 }
             }
         })
-
-        EventBus.getDefault().register(this)
-
-        showFragment(RecommendFragment::class.java)
-        setStatusBarAppearance(true)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
-    }
-
-    fun hideBottomNavigation() {
-        binding.bottomNavigation.visibility = View.GONE
-        binding.fragmentContainer.updatePadding(bottom = 0)
-    }
-
-    fun showBottomNavigation() {
-        binding.bottomNavigation.visibility = View.VISIBLE
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
-            insets
-        }
     }
 
     private fun setupDrawer(toolbar: Toolbar) {
@@ -185,33 +169,106 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         binding.bottomNavigation.setOnItemSelectedListener(this)
     }
 
-    private fun syncBottomViewNavItemState() {
-        val view = binding.bottomNavigation
-        try {
-            view.setOnItemSelectedListener(null)
-            when (mFragmentTags.peek()) {
-                RecommendFragment::class.java.simpleName -> {
-                    view.selectedItemId = R.id.action_home
-                    currentTabId = R.id.action_home
-                }
-                MessageFragment::class.java.simpleName -> {
-                    view.selectedItemId = R.id.action_message
-                    currentTabId = R.id.action_message
-                }
-                DiscoverFragment::class.java.simpleName -> {
-                    view.selectedItemId = R.id.action_forum_navigation
-                    currentTabId = R.id.action_forum_navigation
-                }
-                MeFragment::class.java.simpleName -> {
-                    view.selectedItemId = R.id.action_about_me
-                    currentTabId = R.id.action_about_me
-                }
+    private fun showFragment(clazz: Class<out Fragment>) {
+        val tag = clazz.simpleName
+        val existingFragment = supportFragmentManager.findFragmentByTag(tag)
+        val fragment = existingFragment ?: clazz.getConstructor().newInstance()
+
+        supportFragmentManager.commit {
+            supportFragmentManager.fragments.forEach {
+                if (it != fragment) hide(it)
             }
-        } catch (_: EmptyStackException) {
-            view.selectedItemId = R.id.action_home
-            currentTabId = R.id.action_home
-        } finally {
-            view.setOnItemSelectedListener(this)
+
+            if (fragment.isAdded) {
+                show(fragment)
+            } else {
+                add(R.id.fragment_container, fragment, tag)
+            }
+
+            setCustomAnimations(
+                R.anim.fade_in,
+                R.anim.fade_out
+            )
+        }
+
+        updateUIForFragment(fragment)
+        updateFragmentTags(tag)
+    }
+
+    private fun showFragment(fragment: Fragment) {
+        val tag = fragment.javaClass.simpleName
+        supportFragmentManager.commit {
+            supportFragmentManager.fragments.forEach {
+                if (it != fragment) hide(it)
+            }
+
+            if (fragment.isAdded) {
+                show(fragment)
+            } else {
+                add(R.id.fragment_container, fragment, tag)
+            }
+
+            setCustomAnimations(
+                R.anim.fade_in,
+                R.anim.fade_out
+            )
+        }
+
+        updateUIForFragment(fragment)
+        updateFragmentTags(tag)
+    }
+
+    private fun updateUIForFragment(fragment: Fragment) {
+        val isLightStatusBar = when (fragment) {
+            is RecommendFragment,
+            is MessageFragment,
+            is DiscoverFragment,
+            is MeFragment,
+            is ArticleFragment -> true
+            else -> false
+        }
+        setStatusBarAppearance(isLightStatusBar)
+
+        binding.toolbar.visibility = when (fragment) {
+            is RecommendFragment -> View.VISIBLE
+            else -> View.GONE
+        }
+
+        syncBottomNavigation(fragment)
+    }
+
+    private fun syncBottomNavigation(fragment: Fragment) {
+        binding.bottomNavigation.post {
+            binding.bottomNavigation.setOnItemSelectedListener(null)
+            binding.bottomNavigation.selectedItemId = when (fragment) {
+                is RecommendFragment -> R.id.action_home
+                is MessageFragment -> R.id.action_message
+                is DiscoverFragment -> R.id.action_forum_navigation
+                is MeFragment -> R.id.action_about_me
+                else -> R.id.action_home
+            }
+            binding.bottomNavigation.setOnItemSelectedListener(this@MainActivity)
+        }
+    }
+
+    private fun updateFragmentTags(tag: String) {
+        if (!fragmentTags.contains(tag)) {
+            fragmentTags.add(tag)
+        }
+    }
+
+    fun hideBottomNavigation() {
+        binding.bottomNavigation.visibility = View.GONE
+        binding.fragmentContainer.updatePadding(bottom = 0)
+    }
+
+    @Suppress("unused")
+    fun showBottomNavigation() {
+        binding.bottomNavigation.visibility = View.VISIBLE
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
+            insets
         }
     }
 
@@ -283,69 +340,6 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             .show(supportFragmentManager, HalfScreenWebViewFragment::class.java.simpleName)
     }
 
-    private fun showFragmentWithTag(tag: String): Boolean {
-        supportFragmentManager.findFragmentByTag(tag)?.let {
-            if (popBackFragmentUntil(supportFragmentManager, tag)) {
-                var d = mFragmentTags.search(tag)
-                while (d > 1) {
-                    mFragmentTags.pop()
-                    d--
-                }
-                setStatusBarAppearance(
-                    when (tag) {
-                        RecommendFragment::class.java.simpleName,
-                        MessageFragment::class.java.simpleName,
-                        DiscoverFragment::class.java.simpleName,
-                        MeFragment::class.java.simpleName,
-                        ArticleFragment::class.java.simpleName -> true
-                        else -> false
-                    }
-                )
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun showFragment(clazz: Class<out Fragment>) {
-        if (!showFragmentWithTag(clazz.simpleName)) {
-            val fragment = clazz.getConstructor().newInstance() as Fragment
-            addFragmentInActivity(
-                supportFragmentManager,
-                fragment,
-                R.id.fragment_container
-            )
-            setStatusBarAppearance(
-                when (clazz.simpleName) {
-                    RecommendFragment::class.java.simpleName,
-                    MessageFragment::class.java.simpleName,
-                    DiscoverFragment::class.java.simpleName,
-                    MeFragment::class.java.simpleName,
-                    ArticleFragment::class.java.simpleName -> true
-                    else -> false
-                }
-            )
-        }
-    }
-
-    private fun showFragment(fragment: Fragment) {
-        addFragmentInActivity(
-            supportFragmentManager,
-            fragment,
-            R.id.fragment_container
-        )
-        setStatusBarAppearance(
-            when (fragment.javaClass.simpleName) {
-                RecommendFragment::class.java.simpleName,
-                MessageFragment::class.java.simpleName,
-                DiscoverFragment::class.java.simpleName,
-                MeFragment::class.java.simpleName,
-                ArticleFragment::class.java.simpleName -> true
-                else -> false
-            }
-        )
-    }
-
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (binding.bottomNavigation.selectedItemId == item.itemId) {
             return false
@@ -354,23 +348,20 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
         currentTabId = item.itemId
 
         return when (item.itemId) {
-            R.id.action_message, R.id.action_forum_navigation, R.id.action_about_me -> {
-                binding.toolbar.visibility = View.GONE
-                when (item.itemId) {
-                    R.id.action_message -> {
-                        binding.bottomNavigation.removeBadge(R.id.action_message)
-                        MessageFragment::class.java
-                    }
-                    R.id.action_forum_navigation -> DiscoverFragment::class.java
-                    R.id.action_about_me -> MeFragment::class.java
-                    else -> null
-                }?.let {
-                    showFragment(it)
-                    true
-                } ?: false
+            R.id.action_message -> {
+                binding.bottomNavigation.removeBadge(R.id.action_message)
+                showFragment(MessageFragment::class.java)
+                true
+            }
+            R.id.action_forum_navigation -> {
+                showFragment(DiscoverFragment::class.java)
+                true
+            }
+            R.id.action_about_me -> {
+                showFragment(MeFragment::class.java)
+                true
             }
             R.id.action_home -> {
-                binding.toolbar.visibility = View.VISIBLE
                 showFragment(RecommendFragment::class.java)
                 true
             }
