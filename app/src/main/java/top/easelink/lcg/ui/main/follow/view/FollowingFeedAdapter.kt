@@ -9,14 +9,13 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.load
 import coil.request.ImageRequest
-import coil.size.OriginalSize
-import coil.size.SizeResolver
+import coil.size.Size
 import coil.transform.RoundedCornersTransformation
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import top.easelink.framework.base.BaseViewHolder
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.framework.utils.dpToPx
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.ItemEmptyViewBinding
@@ -27,12 +26,12 @@ import top.easelink.lcg.ui.main.follow.viewmodel.FollowingFeedViewModel
 import top.easelink.lcg.ui.main.model.OpenArticleEvent
 import top.easelink.lcg.ui.main.model.OpenLargeImageViewEvent
 
-
 class FollowingFeedAdapter(
     private val followingFeedViewModel: FollowingFeedViewModel
 ) : RecyclerView.Adapter<BaseViewHolder>() {
 
     private val mFeeds: MutableList<FeedInfo> = mutableListOf()
+    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     override fun getItemCount(): Int {
         return if (mFeeds.isEmpty()) {
@@ -75,8 +74,9 @@ class FollowingFeedAdapter(
     }
 
     fun addItems(follows: List<FeedInfo>) {
+        val startPosition = mFeeds.size
         mFeeds.addAll(follows)
-        notifyDataSetChanged()
+        notifyItemRangeInserted(startPosition, follows.size)
     }
 
     fun appendItems(follows: List<FeedInfo>) {
@@ -86,7 +86,9 @@ class FollowingFeedAdapter(
     }
 
     fun clearItems() {
+        val size = mFeeds.size
         mFeeds.clear()
+        notifyItemRangeRemoved(0, size)
     }
 
     override fun onViewRecycled(holder: BaseViewHolder) {
@@ -99,7 +101,7 @@ class FollowingFeedAdapter(
     inner class ArticleViewHolder internal constructor(
         private val binding: ItemFollowContentViewBinding
     ) : BaseViewHolder(binding.root) {
-        @SuppressLint("SetTextI19n")
+        @SuppressLint("SetTextI18n")
         override fun onBind(position: Int) {
             val feed = mFeeds[position]
             binding.apply {
@@ -124,7 +126,8 @@ class FollowingFeedAdapter(
                 username.text = feed.username
                 dateTime.text = feed.dateTime
                 title.text = feed.title
-                forum.text = "#${feed.forum}"
+                forum.text = root.context.getString(R.string.forum_name_format, feed.forum)
+
                 if (feed.quote.isNotBlank()) {
                     content.setHtml(feed.quote)
                     preview.visibility = View.INVISIBLE
@@ -140,10 +143,10 @@ class FollowingFeedAdapter(
                             EventBus.getDefault().post(OpenLargeImageViewEvent(images[0]))
                         }
                         preview.visibility = View.VISIBLE
-                        GlobalScope.launch(IOPool) {
+                        ioScope.launch {
                             ImageRequest.Builder(root.context)
                                 .data(images[0])
-                                .size(SizeResolver(OriginalSize))
+                                .size(Size.ORIGINAL)
                                 .transformations(RoundedCornersTransformation(round))
                                 .target {
                                     val newH =

@@ -1,15 +1,15 @@
 package top.easelink.lcg.ui.main.history.view
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import top.easelink.framework.base.BaseViewHolder
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.ItemArticleEmptyViewBinding
 import top.easelink.lcg.databinding.ItemHistoryArticleViewBinding
@@ -25,123 +25,102 @@ import java.lang.ref.WeakReference
 class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
 
     private var mFragmentManager: WeakReference<FragmentManager>? = null
-    private val mHistoryList: MutableList<HistoryModel> = mutableListOf()
+    private val mHistoryList = mutableListOf<HistoryModel>()
+    private val job = Job()
+    private val ioScope = CoroutineScope(Dispatchers.IO + job)
 
-    override fun getItemCount(): Int {
-        return when {
-            mHistoryList.isEmpty() -> 1
-            else -> mHistoryList.size
-        }
-    }
+    override fun getItemCount() = if (mHistoryList.isEmpty()) 1 else mHistoryList.size
 
-    override fun getItemViewType(position: Int): Int {
-        return if (mHistoryList.isEmpty()) {
-            VIEW_TYPE_EMPTY
-        } else {
-            VIEW_TYPE_NORMAL
-        }
-    }
+    override fun getItemViewType(position: Int) =
+        if (mHistoryList.isEmpty()) VIEW_TYPE_EMPTY else VIEW_TYPE_NORMAL
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         holder.onBind(position)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-        return when (viewType) {
-            VIEW_TYPE_NORMAL -> {
-                val binding = ItemHistoryArticleViewBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-                ArticleViewHolder(binding)
-            }
-            VIEW_TYPE_EMPTY -> {
-                val emptyViewBinding =
-                    ItemArticleEmptyViewBinding.inflate(
-                        LayoutInflater.from(parent.context),
-                        parent, false
-                    )
-                EmptyViewHolder(
-                    emptyViewBinding
-                )
-            }
-            else -> {
-                val emptyViewBinding =
-                    ItemArticleEmptyViewBinding.inflate(
-                        LayoutInflater.from(parent.context),
-                        parent, false
-                    )
-                EmptyViewHolder(emptyViewBinding)
-            }
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
+        VIEW_TYPE_NORMAL -> ArticleViewHolder(
+            ItemHistoryArticleViewBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
+        else -> EmptyViewHolder(
+            ItemArticleEmptyViewBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
 
     fun addItems(articleList: List<HistoryModel>) {
+        val startPosition = mHistoryList.size
         mHistoryList.addAll(articleList)
-        notifyDataSetChanged()
-    }
-
-    fun appendItems(notifications: List<HistoryModel>) {
-        val count = itemCount
-        mHistoryList.addAll(notifications)
-        notifyItemRangeInserted(count - 1, notifications.size)
+        notifyItemRangeInserted(startPosition, articleList.size)
     }
 
     fun clearItems() {
+        val size = mHistoryList.size
         mHistoryList.clear()
+        notifyItemRangeRemoved(0, size)
     }
 
     fun setFragmentManager(fragmentManager: FragmentManager) {
-        this.mFragmentManager = WeakReference(fragmentManager)
+        mFragmentManager = WeakReference(fragmentManager)
     }
 
-    inner class ArticleViewHolder internal constructor(
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        job.cancel()
+    }
+
+    inner class ArticleViewHolder(
         private val binding: ItemHistoryArticleViewBinding
     ) : BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {
             val article = mHistoryList[position]
-            binding.titleTextView.apply {
-                setOnLongClickListener {
+            with(binding) {
+                titleTextView.text = article.title
+                titleTextView.setOnClickListener {
+                    EventBus.getDefault().post(OpenArticleEvent(article.url))
+                }
+                titleTextView.setOnLongClickListener {
                     showMessage("长按预览文章")
-                    mFragmentManager?.get()?.let {
-                        PostPreviewDialog.newInstance(
-                            mHistoryList[position].url
-                        ).show(it, PostPreviewDialog.TAG)
+                    mFragmentManager?.get()?.let { fm ->
+                        PostPreviewDialog.newInstance(article.url).show(fm, PostPreviewDialog.TAG)
                     }
                     true
                 }
-                setOnClickListener {
-                    EventBus.getDefault().post(OpenArticleEvent(article.url))
-                }
-            }
-            binding.titleTextView.text = article.title
-            binding.authorTextView.text = article.author
-            binding.removeButton.setOnClickListener {
-                GlobalScope.launch(IOPool) {
-                    ArticlesDatabase.getInstance().articlesDao().deleteHistory(article.url)
+                authorTextView.text = article.author
+                removeButton.setOnClickListener {
+                    ioScope.launch {
+                        ArticlesDatabase.getInstance().articlesDao().deleteHistory(article.url)
+                    }
                 }
             }
         }
     }
 
-    inner class EmptyViewHolder internal constructor(
-        private val mBinding: ItemArticleEmptyViewBinding
-    ) : BaseViewHolder(mBinding.root), ArticleEmptyItemViewModelListener {
+    inner class EmptyViewHolder(
+        binding: ItemArticleEmptyViewBinding
+    ) : BaseViewHolder(binding.root), ArticleEmptyItemViewModelListener {
+        init {
+            binding.viewModel = ArticleEmptyItemViewModel(this)
+        }
+
         override fun onBind(position: Int) {
-            val emptyItemViewModel = ArticleEmptyItemViewModel(this)
-            mBinding.viewModel = emptyItemViewModel
+            // 空实现
         }
 
         override fun onRetryClick() {
             showMessage(R.string.history_articles_empty_tips)
         }
-
     }
 
     companion object {
         private const val VIEW_TYPE_EMPTY = 0
         private const val VIEW_TYPE_NORMAL = 1
     }
-
 }

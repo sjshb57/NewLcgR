@@ -6,6 +6,9 @@ import android.graphics.Canvas
 import android.os.Build
 import android.util.TypedValue
 import android.view.View
+import android.view.WindowInsets
+import androidx.annotation.RequiresApi
+import androidx.core.graphics.createBitmap
 import timber.log.Timber
 
 fun Int.dpToPx(context: Context) = TypedValue.applyDimension(
@@ -23,34 +26,25 @@ fun dp2px(context: Context, dp: Float): Float {
 
 fun convertViewToBitmap(view: View?, config: Bitmap.Config = Bitmap.Config.ARGB_8888): Bitmap? {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // not supported yet
         return null
-    } else {
-        view?.apply {
-            try {
-                val bitmap = Bitmap.createBitmap(
-                    measuredWidth,
-                    measuredHeight,
-                    config
-                )
-                val canvas = Canvas(bitmap)
+    }
+    view?.apply {
+        try {
+            return createBitmap(width, height, config).apply {
+                val canvas = Canvas(this)
                 layout(left, top, right, bottom)
                 draw(canvas)
-                return bitmap
-            } catch (re: RuntimeException) {
-                Timber.e(re)
-            } catch (e: Exception) {
-                Timber.e(e)
             }
+        } catch (re: RuntimeException) {
+            Timber.e(re)
+        } catch (e: Exception) {
+            Timber.e(e)
         }
     }
     return null
 }
 
-fun getStatusBarHeight(context: Context): Int {
-    return context.resources.getIdentifier("status_bar_height", "dimen", "android").takeIf {
-        it > 0
-    }?.let {
-        context.resources.getDimensionPixelSize(it)
-    }?:0
+@RequiresApi(Build.VERSION_CODES.R)
+fun getStatusBarHeight(view: View): Int {
+    return view.rootWindowInsets?.getInsets(WindowInsets.Type.statusBars())?.top ?: 0
 }

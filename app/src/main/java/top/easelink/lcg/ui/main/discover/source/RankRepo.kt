@@ -1,21 +1,20 @@
 package top.easelink.lcg.ui.main.discover.source
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
-import top.easelink.framework.threadpool.BackGroundPool
 import top.easelink.lcg.cache.HotTopicCacheManager
 import top.easelink.lcg.network.JsoupClient
 import top.easelink.lcg.ui.main.discover.model.RankListModel
 import top.easelink.lcg.ui.main.discover.model.RankModel
 import top.easelink.lcg.utils.WebsiteConstant.RANK_QUERY
 
-
 fun fetchRank(rankType: RankType, dateType: DateType): RankListModel {
     var doc = HotTopicCacheManager.findTodayHotTopic(rankType = rankType.value, dateType = dateType.value)
     if (doc == null) {
         doc = JsoupClient.sendGetRequestWithQuery(RANK_QUERY.format(rankType.value, dateType.value))
-        GlobalScope.launch(BackGroundPool) {
+        CoroutineScope(Dispatchers.IO).launch {
             HotTopicCacheManager.saveToDisk(
                 rankType = rankType.value,
                 dateType = dateType.value,
@@ -31,9 +30,9 @@ fun parseRankModelInfo(document: Document, rankType: RankType): RankListModel {
     return with(document) {
         val time = selectFirst("div.notice")?.text().orEmpty()
         val list = getElementsByTag("table")
-            ?.select("tbody")
-            ?.select("tr")
-            ?.mapNotNull { tr ->
+            .select("tbody")
+            .select("tr")
+            .mapNotNull { tr ->
                 try {
                     val index = tr.child(0).let {
                         if (it.childrenSize() > 0) {
@@ -60,20 +59,16 @@ fun parseRankModelInfo(document: Document, rankType: RankType): RankListModel {
                         forum = forum,
                         type = rankType
                     )
-
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
             }
-            .orEmpty()
         RankListModel(list, time)
     }
 }
 
 enum class DateType(val value: String) {
     TODAY("today"),
-    ALL("all"),
-    MONTH("thismonth"),
     WEEK("thisweek")
 }
 

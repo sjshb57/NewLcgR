@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">吾爱破解</string>
     <string name="todo_tips">未完成的功能</string>
     <string name="login_required_error">请求页面失败，请确认是否登陆</string>
@@ -42,7 +42,7 @@
 
     <!--Drawer-->
     <string name="open_drawer">Drawer Open</string>
-    <string name="close_drawer">Drawer Close</string>
+    <string name="close_drawer" tools:ignore="PrivateResource">Drawer Close</string>
 
     <!--Drawer Menus-->
     <string name="setting">『应用设置』</string>
@@ -240,4 +240,5 @@
     <string name="invalid_url_format">无效的URL格式</string>
     <string name="empty_response">服务器返回空响应</string>
     <string name="no_content_available">暂无内容</string>
+    <string name="forum_name_format">#%s</string>
 </resources>

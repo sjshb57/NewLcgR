@@ -2,11 +2,10 @@ package top.easelink.lcg.ui.main.follow.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
 import timber.log.Timber
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.network.JsoupClient
 import top.easelink.lcg.ui.main.follow.model.FollowInfo
 import top.easelink.lcg.ui.main.follow.model.FollowResult
@@ -23,16 +22,19 @@ class FollowListViewModel : ViewModel() {
         } else {
             isLoading.value = true
         }
-        GlobalScope.launch(IOPool) {
+
+        viewModelScope.launch {
             try {
-                parseFollows(JsoupClient.sendGetRequestWithQuery(url))
+                val document = JsoupClient.sendGetRequestWithQuery(url)
+                parseFollows(document)
             } catch (e: Exception) {
                 Timber.e(e)
-            }
-            if (isLoadMore) {
-                isLoadingForLoadMore.postValue(false)
-            } else {
-                isLoading.postValue(false)
+            } finally {
+                if (isLoadMore) {
+                    isLoadingForLoadMore.value = false
+                } else {
+                    isLoading.value = false
+                }
             }
         }
     }
@@ -43,15 +45,15 @@ class FollowListViewModel : ViewModel() {
                 val avatarUrl = it.selectFirst("img")?.attr("src").orEmpty()
                 val username = it.getElementById("edit_avt")?.attr("title").orEmpty()
                 val lastAction = it.selectFirst("p")?.text().orEmpty()
-                val url = it.selectFirst("a[id^=a_followmod]")?.attr("href").orEmpty() // 注意：这里原代码是 .text()，通常链接是 .attr("href")
-                var following: Int = 0
-                var follower: Int = 0
-                it.select("strong.xi2").let { e ->
-                    if (e.size == 2) {
-                        follower = e[0].text().toIntOrNull() ?: 0
-                        following = e[1].text().toIntOrNull() ?: 0
-                    }
+                val url = it.selectFirst("a[id^=a_followmod]")?.attr("href").orEmpty()
+
+                var follower = 0
+                var following = 0
+                it.select("strong.xi2").takeIf { e -> e.size == 2 }?.let { e ->
+                    follower = e[0].text().toIntOrNull() ?: 0
+                    following = e[1].text().toIntOrNull() ?: 0
                 }
+
                 FollowInfo(
                     avatar = avatarUrl,
                     lastAction = lastAction,
@@ -61,10 +63,9 @@ class FollowListViewModel : ViewModel() {
                     followOrUnFollowUrl = url
                 )
             }
+
             val nextPageUrl = selectFirst("a.nxt")?.attr("href")
-            follows.postValue(FollowResult(followInfos, nextPageUrl))
+            follows.value = FollowResult(followInfos, nextPageUrl)
         }
-
     }
-
 }
