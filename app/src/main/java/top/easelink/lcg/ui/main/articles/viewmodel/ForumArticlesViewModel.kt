@@ -15,10 +15,6 @@ import top.easelink.lcg.ui.main.source.remote.ArticlesRemoteDataSource.getForumA
 import top.easelink.lcg.utils.WebsiteConstant.FORUM_URL_QUERY
 import top.easelink.lcg.utils.showMessage
 
-@Suppress("unused")
-const val LAST_POST_ORDER = "&orderby=lastpost"
-@Suppress("unused")
-const val DATE_LINE_ORDER = "&orderby=dateline"
 const val DEFAULT_ORDER = ""
 
 class ForumArticlesViewModel : ViewModel(), ArticleFetcher {

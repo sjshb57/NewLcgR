@@ -21,7 +21,6 @@ import top.easelink.framework.topbase.TopActivity;
 
 public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> extends Fragment implements ControllableFragment {
 
-    private AppCompatActivity activity;
     private T viewBinding;
 
     @Override
@@ -48,7 +47,6 @@ public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> e
         super.onAttach(context);
 
         if (context instanceof AppCompatActivity) {
-            this.activity = (AppCompatActivity) context;
 
             if (this.isControllable()) {
                 if (context instanceof BaseActivity) {
@@ -74,7 +72,6 @@ public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> e
 
     @Override
     public void onDetach() {
-        activity = null;
         super.onDetach();
     }
 
@@ -82,15 +79,5 @@ public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> e
     public void onDestroyView() {
         super.onDestroyView();
         viewBinding = null;
-    }
-
-    @SuppressWarnings("unused")
-    protected AppCompatActivity getBaseActivity() {
-        return activity;
-    }
-
-    @SuppressWarnings("unused")
-    protected T getViewBinding() {
-        return viewBinding;
     }
 }

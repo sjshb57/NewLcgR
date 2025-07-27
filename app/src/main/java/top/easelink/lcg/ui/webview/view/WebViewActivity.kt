@@ -355,13 +355,6 @@ class WebViewActivity : AppCompatActivity() {
             }.also { (context ?: LCGApp.context).startActivity(it) }
         }
 
-        @Suppress("unused")
-        fun startWebViewWithHtml(html: String, context: Context) {
-            Intent(context, WebViewActivity::class.java).apply {
-                putExtra(EXTRA_TABLE_HTML, html)
-            }.also { context.startActivity(it) }
-        }
-
         fun openLoginPage(context: Context) {
             Intent(context, WebViewActivity::class.java).apply {
                 putExtra(URL_KEY, SERVER_BASE_URL + LOGIN_QUERY)

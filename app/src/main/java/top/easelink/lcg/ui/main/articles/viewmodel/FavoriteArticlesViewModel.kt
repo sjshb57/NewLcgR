@@ -86,9 +86,4 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
     private fun rewindPageNum() {
         mCurrentPage = 0
     }
-
-    @Suppress("unused")
-    private fun nextPage() {
-        mCurrentPage++
-    }
 }

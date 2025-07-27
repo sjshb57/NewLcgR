@@ -2,6 +2,7 @@ package top.easelink.lcg.utils
 
 import android.webkit.CookieManager
 import java.util.*
+import androidx.core.content.edit
 
 fun getCookies() = SharedPreferencesHelper
     .getCookieSp()
@@ -21,7 +22,7 @@ fun updateCookies(cookieUrl: String, commit: Boolean) {
     val itemList = ArrayList<SharedPreferencesHelper.SpItem<*>>()
     for (cookie in cookies) {
         val cookiePair = cookie.split("=".toRegex(), 2).toTypedArray()
-        itemList.add(SharedPreferencesHelper.SpItem<String>(cookiePair[0], cookiePair[1]))
+        itemList.add(SharedPreferencesHelper.SpItem(cookiePair[0], cookiePair[1]))
     }
     if (commit) {
         SharedPreferencesHelper.commitPreferenceWithList(
@@ -48,6 +49,6 @@ fun updateCookies(cookies: Map<String, String>) {
 }
 
 fun clearCookies() {
-    SharedPreferencesHelper.getCookieSp().edit().clear().apply()
+    SharedPreferencesHelper.getCookieSp().edit { clear() }
     CookieManager.getInstance().removeAllCookies(null)
 }

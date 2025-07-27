@@ -19,9 +19,10 @@ class RecommendFragment : Fragment(R.layout.fragment_recommend) {
         val adapter = RecommendViewPagerAdapter(requireActivity(), requireContext())
         binding.viewPager.adapter = adapter
 
+        binding.viewPager.setCurrentItem(2, false)
+
         TabLayoutMediator(binding.mainTab, binding.viewPager) { tab, position ->
             tab.text = adapter.getTabTitle(position)
-            // 直接使用字符串模板替代资源引用
             tab.contentDescription = "Tab ${position + 1}"
         }.attach()
     }
