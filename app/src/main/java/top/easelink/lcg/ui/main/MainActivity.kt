@@ -273,19 +273,13 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             else -> View.GONE
         }
 
-        syncBottomNavigation(fragment)
+        syncBottomNavigation()
     }
 
-    private fun syncBottomNavigation(fragment: Fragment) {
+    private fun syncBottomNavigation() {
         binding.bottomNavigation.post {
             binding.bottomNavigation.setOnItemSelectedListener(null)
-            binding.bottomNavigation.selectedItemId = when (fragment) {
-                is RecommendFragment -> R.id.action_home
-                is MessageFragment -> R.id.action_message
-                is DiscoverFragment -> R.id.action_forum_navigation
-                is MeFragment -> R.id.action_about_me
-                else -> R.id.action_home
-            }
+            binding.bottomNavigation.selectedItemId = currentTabId
             binding.bottomNavigation.setOnItemSelectedListener(this@MainActivity)
         }
     }
