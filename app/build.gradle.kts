@@ -8,8 +8,8 @@ plugins {
 }
 
 val versionMajor = 2
-val versionMinor = 0
-val versionPatch = 2
+val versionMinor = 1
+val versionPatch = 0
 
 android {
     namespace = "top.easelink.lcg"
@@ -65,6 +65,14 @@ android {
 
     kotlin {
         jvmToolchain(21)
+    }
+
+    lint {
+        warningsAsErrors = true
+        abortOnError = true
+        checkDependencies = true
+        disable += "CoroutineCreationDuringComposition"
+        abortOnError = false
     }
 
     packaging {

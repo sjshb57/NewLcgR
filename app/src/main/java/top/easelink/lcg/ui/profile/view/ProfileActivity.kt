@@ -27,10 +27,6 @@ class ProfileActivity : TopActivity() {
 
     private fun setUp() {
         setupToolBar()
-        // 修复 Argument type mismatch 错误：
-        // 1. 使用 ?.let {} 安全地处理可能为 null 的 StringExtra，并只在不为 null 时创建 Fragment。
-        // 2. 或者，如果 ProfileFragment.newInstance 确实只接受非null String，可以提供一个默认值（例如空字符串 ""）。
-        // 这里采用提供默认空字符串的方式，假设 ProfileFragment可以处理空字符串。
         val profileUrl = intent.getStringExtra(KEY_PROFILE_URL) ?: ""
         showFragment(ProfileFragment.newInstance(profileUrl))
     }
@@ -39,7 +35,7 @@ class ProfileActivity : TopActivity() {
         addFragmentInActivity(
             supportFragmentManager,
             fragment,
-            R.id.profile_root // This ID should be correct as it's defined in your layout
+            R.id.profile_root
         )
     }
 
