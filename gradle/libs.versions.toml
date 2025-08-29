@@ -1,19 +1,19 @@
 [versions]
 # Build tools
-agp = "8.12.0"
-kotlin = "2.2.0"
-ksp = "2.2.0-2.0.2"
+agp = "8.12.2"
+kotlin = "2.2.10"
+ksp = "2.2.10-2.0.2"
 # AndroidX
 androidxAppCompat = "1.7.1"
 androidx-annotation = "1.9.1"
 androidxCardView = "1.0.0"
-androidxCore = "1.16.0"
+androidxCore = "1.17.0"
 androidxConstraintLayout = "2.2.1"
-androidxLifecycle = "2.9.2"
+androidxLifecycle = "2.9.3"
 androidxRecyclerView = "1.4.0"
 androidxRoom = "2.7.2"
 androidxVectorDrawable = "1.2.0"
-androidxWork = "2.10.2"
+androidxWork = "2.10.3"
 androidxSwipeRefreshLayout = "1.1.0"
 androidx-tracing = "1.3.0"
 
@@ -27,7 +27,7 @@ easypermissions = "3.0.0"
 eventbus = "3.3.1"
 gson = "2.13.1"
 guava = "33.4.8-android"
-jsoup = "1.21.1"
+jsoup = "1.21.2"
 lottie = "6.6.7"
 multiType = "4.3.0"
 okhttp = "5.1.0"
@@ -41,7 +41,7 @@ debugDB = "1.0.6"
 # Shiply
 shiply = "2.2.0"
 
-fragment = "1.8.8"
+fragment = "1.8.9"
 junit = "4.13.2"
 
 [libraries]

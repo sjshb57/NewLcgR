@@ -88,7 +88,7 @@ dependencies {
     api(libs.eventbus)
 
     // kotlin
-    api(kotlin("stdlib-jdk8"))
+    api(libs.kotlin.stdlib.jdk8)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
 }
