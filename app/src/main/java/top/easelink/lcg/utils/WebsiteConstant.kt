@@ -10,7 +10,8 @@ object WebsiteConstant {
     const val EXTRA_TABLE_HTML = "EXTRA_TABLE_HTML"
 
 
-    const val SERVER_BASE_URL = "https://www.52pojie.cn/"
+    const val SERVER_HOST = "www.52pojie.cn"
+    const val SERVER_BASE_URL = "https://$SERVER_HOST/"
     const val FORUM_BASE_QUERY = "forum.php?mod=guide&view="
     const val BAIDU_SEARCH_BASE_URL = "http://zhannei.baidu.com/cse/"
     const val SEARCH_QUERY = "http://zhannei.baidu.com/cse/site?q=%s&click=1&cc=52pojie.cn&s=&nsid="
