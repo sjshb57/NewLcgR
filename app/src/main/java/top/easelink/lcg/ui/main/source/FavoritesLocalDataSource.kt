@@ -13,4 +13,5 @@ interface FavoritesLocalDataSource {
     fun addArticleToFavorite(articleEntity: ArticleEntity): Boolean
     fun delArticleFromFavorite(id: String): Boolean
     fun delAllArticlesFromFavorite(): Boolean
+    fun isArticleInFavorites(id: String): Boolean
 }

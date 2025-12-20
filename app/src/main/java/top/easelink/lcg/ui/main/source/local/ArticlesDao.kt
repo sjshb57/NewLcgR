@@ -49,6 +49,15 @@ interface ArticlesDao {
     @Query("DELETE FROM articles")
     fun deleteArticles()
 
+    /**
+     * Check if an article is already in favorites.
+     *
+     * @param id the article id to check.
+     * @return 1 if exists, 0 otherwise.
+     */
+    @Query("SELECT COUNT(*) FROM articles WHERE id = :id")
+    fun isArticleInFavorites(id: String): Int
+
     //endregion
 
     //region History Management

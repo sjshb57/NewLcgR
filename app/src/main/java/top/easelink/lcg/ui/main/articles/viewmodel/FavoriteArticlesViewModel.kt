@@ -62,6 +62,25 @@ class FavoriteArticlesViewModel : ViewModel(), ArticleFetcher {
         }
     }
 
+    fun removeFavorite(articleEntity: ArticleEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                if (ArticlesLocalDataSource.delArticleFromFavorite(articleEntity.id)) {
+                    // 更新LiveData，移除删除的文章
+                    val currentList = articles.value.orEmpty().toMutableList()
+                    currentList.remove(articleEntity)
+                    articles.postValue(currentList)
+                    showMessage(R.string.remove_all_favorites_successfully)
+                } else {
+                    showMessage(R.string.remove_all_favorites_failed)
+                }
+            } catch (e: Exception) {
+                Timber.e(e)
+                showMessage(R.string.remove_all_favorites_failed)
+            }
+        }
+    }
+
     fun syncFavorites() {
         isLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {

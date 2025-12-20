@@ -89,6 +89,7 @@ class ArticleFragment : TopFragment(), ControllableFragment {
         setupToolBar()
         viewModel.setUrl(articleUrl)
         viewModel.fetchArticlePost(FETCH_POST_INIT)
+        viewModel.checkIsFavorited()
     }
 
     override fun onDetach() {
@@ -117,6 +118,9 @@ class ArticleFragment : TopFragment(), ControllableFragment {
         }
         viewModel.isLoading.observe(viewLifecycleOwner) {
             binding.fetchingProgressBar.visibility = if (it) View.VISIBLE else View.GONE
+        }
+        viewModel.isFavorited.observe(viewLifecycleOwner) {
+            updateFavoriteMenuItem(it)
         }
     }
 
@@ -200,11 +204,21 @@ class ArticleFragment : TopFragment(), ControllableFragment {
                         }
                     }
                     R.id.action_add_to_my_favorite -> {
-                        viewModel.addToFavorite()
+                        viewModel.toggleFavorite()
                     }
                     else -> { /* Do nothing */ }
                 }
                 true
+            }
+        }
+    }
+
+    private fun updateFavoriteMenuItem(isFavorited: Boolean) {
+        binding.articleToolbar.menu.findItem(R.id.action_add_to_my_favorite)?.let {
+            it.title = if (isFavorited) {
+                getString(R.string.remove_from_favorite)
+            } else {
+                getString(R.string.add_to_my_favorite)
             }
         }
     }
