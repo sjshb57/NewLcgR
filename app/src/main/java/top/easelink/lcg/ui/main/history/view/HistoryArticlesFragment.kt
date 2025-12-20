@@ -14,6 +14,7 @@ import top.easelink.framework.topbase.TopFragment
 import top.easelink.lcg.databinding.FragmentHistoryArticlesBinding
 import top.easelink.lcg.ui.main.history.model.HistoryModel
 import top.easelink.lcg.ui.main.source.local.ArticlesDatabase
+import top.easelink.lcg.utils.setStatusBarPadding
 
 class HistoryArticlesFragment : TopFragment(), ControllableFragment {
 
@@ -45,6 +46,7 @@ class HistoryArticlesFragment : TopFragment(), ControllableFragment {
         savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
+        binding.root.setStatusBarPadding()
         binding.clearAll.setOnClickListener {
             launch(IOPool) {
                 ArticlesDatabase.getInstance().articlesDao().deleteHistories()

@@ -9,6 +9,7 @@ import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.FragmentFollowBinding
+import top.easelink.lcg.utils.setStatusBarPadding
 
 class FollowFragment : TopFragment(), ControllableFragment {
 
@@ -29,6 +30,7 @@ class FollowFragment : TopFragment(), ControllableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.followTab.setStatusBarPadding()
 
         binding.followViewPager.adapter = FollowViewPagerAdapter(
             requireActivity(),

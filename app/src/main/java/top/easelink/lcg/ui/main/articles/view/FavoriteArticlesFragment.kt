@@ -18,6 +18,7 @@ import top.easelink.lcg.ui.main.articles.viewmodel.FavoriteArticlesViewModel
 import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.GET_FAVORITE_QUERY
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
+import top.easelink.lcg.utils.setStatusBarPadding
 
 class FavoriteArticlesFragment :
     BaseFragment<FragmentFavoriteArticlesBinding, FavoriteArticlesViewModel>() {
@@ -73,6 +74,7 @@ class FavoriteArticlesFragment :
     }
 
     private fun setupToolBar() {
+        binding.articleToolbar.setStatusBarPadding()
         binding.articleToolbar.apply {
             inflateMenu(R.menu.favorite_articles)
             setOnMenuItemClickListener { menuItem ->
