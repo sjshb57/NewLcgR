@@ -4,16 +4,17 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
+import android.content.pm.PackageManager
 import android.webkit.WebSettings
 import top.easelink.lcg.R
 
 fun isApplicationAvailable(context: Context, packageName: String): Boolean {
-    context.packageManager.getInstalledPackages(0).forEach {
-        if (packageName == it.packageName) {
-            return true
-        }
+    return try {
+        context.packageManager.getPackageInfo(packageName, 0)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
     }
-    return false
 }
 
 const val WECHAT_PACKAGE_NAME = "com.tencent.mm"
