@@ -11,11 +11,16 @@
     android:gravity="center"
     android:background="@color/white">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:padding="@dimen/dp_3"
-        android:id="@+id/notification_recycler_view"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/notification_swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:padding="@dimen/dp_3"
+            android:id="@+id/notification_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.airbnb.lottie.LottieAnimationView
         android:layout_gravity="center"

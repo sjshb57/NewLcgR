@@ -34,7 +34,16 @@ class NotificationFragment : TopFragment() {
         super.onViewCreated(view, savedInstanceState)
         notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
         setupRecyclerView()
+        setUpSwipeRefresh()
         notificationViewModel.fetchNotifications()
+    }
+
+    private fun setUpSwipeRefresh() {
+        binding.notificationSwipeRefresh.setOnRefreshListener {
+            // 清除现有数据并重新加载
+            (binding.notificationRecyclerView.adapter as NotificationsAdapter).clearItems()
+            notificationViewModel.fetchNotifications()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -59,6 +68,7 @@ class NotificationFragment : TopFragment() {
                 })
                 notifications
                     .observe(viewLifecycleOwner, Observer { model ->
+                        binding.notificationSwipeRefresh.isRefreshing = false
                         (adapter as NotificationsAdapter).run {
                             if (itemCount > 1) {
                                 appendItems(model.notifications)

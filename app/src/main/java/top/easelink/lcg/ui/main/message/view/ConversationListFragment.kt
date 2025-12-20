@@ -40,7 +40,20 @@ class ConversationListFragment : TopFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUpRV()
+        setUpSwipeRefresh()
         mConversationVM.fetchConversations()
+    }
+
+    private fun setUpSwipeRefresh() {
+        binding.conversationSwipeRefresh.setOnRefreshListener {
+            // 清除现有数据并重新加载
+            (binding.conversationList.adapter as ConversationListAdapter).clearItems()
+            mConversationVM.fetchConversations()
+            // 监听数据加载完成后停止刷新
+            mConversationVM.conversations.observe(viewLifecycleOwner, Observer {
+                binding.conversationSwipeRefresh.isRefreshing = false
+            })
+        }
     }
 
     private fun setUpRV() {

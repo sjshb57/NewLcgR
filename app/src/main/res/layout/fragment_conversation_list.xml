@@ -8,8 +8,13 @@
     android:clickable="true"
     android:gravity="center"
     android:background="@color/white">
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/conversation_list"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/conversation_swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/conversation_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>
