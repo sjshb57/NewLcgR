@@ -31,6 +31,7 @@ import top.easelink.lcg.config.AppConfig
 import top.easelink.lcg.databinding.ActivityMainBinding
 import top.easelink.lcg.ui.main.about.view.AboutFragment
 import top.easelink.lcg.ui.main.article.view.ArticleFragment
+import top.easelink.lcg.ui.main.articles.view.FavoriteArticlesFragment
 import top.easelink.lcg.ui.main.articles.view.ForumArticlesFragment
 import top.easelink.lcg.ui.main.discover.view.DiscoverFragment
 import top.easelink.lcg.ui.main.largeimg.view.LargeImageDialog
@@ -270,7 +271,8 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             is DiscoverFragment,
             is MeFragment,
             is ArticleFragment,
-            is ForumArticlesFragment -> true
+            is ForumArticlesFragment,
+            is FavoriteArticlesFragment -> true
             else -> false
         }
         setStatusBarAppearance(isLightStatusBar)
@@ -339,12 +341,15 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     private fun showArticleFragment(fragment: Fragment) {
         supportFragmentManager.commit {
-            replace(R.id.fragment_container, fragment)
+            supportFragmentManager.fragments.forEach {
+                if (it.isVisible) {
+                    hide(it)
+                }
+            }
+            add(R.id.fragment_container, fragment, fragment.javaClass.simpleName)
             addToBackStack(null)
             setReorderingAllowed(true)
-            supportFragmentManager.fragments.firstOrNull { !it.isHidden }?.let {
-                hide(it)
-            }
+            setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
         }
         hideBottomNavigation()
     }
