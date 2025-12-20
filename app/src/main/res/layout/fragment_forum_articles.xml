@@ -35,8 +35,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/articleToolbar"
+                android:minHeight="@dimen/dp_40"
+                android:background="@color/white"
                 android:visibility="gone"
-                app:tabMode="scrollable"/>
+                app:tabIndicatorColor="@color/colorAccent"
+                app:tabIndicatorHeight="@dimen/dp_3"
+                app:tabTextColor="@color/gray"
+                app:tabSelectedTextColor="@color/colorAccent"
+                app:tabMode="scrollable"
+                app:tabTextAppearance="@style/AppTab.TextAppearance"/>
 
             <top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
                 android:id="@+id/refreshLayout"
