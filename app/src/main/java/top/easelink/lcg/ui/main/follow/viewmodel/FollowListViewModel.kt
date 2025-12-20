@@ -4,8 +4,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
+import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.network.JsoupClient
 import top.easelink.lcg.ui.main.follow.model.FollowInfo
 import top.easelink.lcg.ui.main.follow.model.FollowResult
@@ -23,7 +25,7 @@ class FollowListViewModel : ViewModel() {
             isLoading.value = true
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(IOPool) {
             try {
                 val document = JsoupClient.sendGetRequestWithQuery(url)
                 parseFollows(document)
@@ -31,9 +33,9 @@ class FollowListViewModel : ViewModel() {
                 Timber.e(e)
             } finally {
                 if (isLoadMore) {
-                    isLoadingForLoadMore.value = false
+                    isLoadingForLoadMore.postValue(false)
                 } else {
-                    isLoading.value = false
+                    isLoading.postValue(false)
                 }
             }
         }
@@ -65,7 +67,7 @@ class FollowListViewModel : ViewModel() {
             }
 
             val nextPageUrl = selectFirst("a.nxt")?.attr("href")
-            follows.value = FollowResult(followInfos, nextPageUrl)
+            follows.postValue(FollowResult(followInfos, nextPageUrl))
         }
     }
 }

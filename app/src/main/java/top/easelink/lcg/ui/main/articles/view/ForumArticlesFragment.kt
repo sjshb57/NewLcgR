@@ -49,6 +49,8 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         arguments?.run {
             showTab = getBoolean(ARG_SHOW_TAB, true)
         }
@@ -69,18 +71,15 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                 }
                 try {
                     val pos = binding.forumTab.selectedTabPosition
-                    viewModel
-                        .threadList
-                        .value
-                        ?.get(pos)
-                        ?.threadUrl
-                        ?.let {
+                    viewModel.threadList.value?.takeIf { pos >= 0 && pos < it.size }?.let { threadList ->
+                        threadList[pos].threadUrl?.let {
                             viewModel.initUrlAndFetch(
                                 url = it,
                                 fetchType = ArticleFetcher.FetchType.FETCH_INIT,
                                 order = order
                             )
                         }
+                    }
                 } catch (e: Exception) {
                     Timber.e(e)
                 }
@@ -119,6 +118,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
             }
             addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab) {
+                    (activity as? top.easelink.lcg.ui.main.MainActivity)?.showBottomNavigation()
                     viewModel.initUrlAndFetch(
                         url = forumThreadList[tab.position].threadUrl,
                         fetchType = ArticleFetcher.FetchType.FETCH_INIT

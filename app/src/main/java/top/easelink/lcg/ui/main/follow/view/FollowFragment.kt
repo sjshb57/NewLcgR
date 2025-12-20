@@ -48,6 +48,12 @@ class FollowFragment : TopFragment(), ControllableFragment {
                 else -> ""
             }
         }.apply { attach() }
+
+        binding.followViewPager.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                (activity as? top.easelink.lcg.ui.main.MainActivity)?.showBottomNavigation()
+            }
+        })
     }
 
     override fun onDestroyView() {
