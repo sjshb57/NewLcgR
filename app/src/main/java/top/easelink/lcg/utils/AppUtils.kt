@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
+import android.webkit.WebSettings
 import top.easelink.lcg.R
 
 fun isApplicationAvailable(context: Context, packageName: String): Boolean {
@@ -36,6 +37,16 @@ fun getScreenWidthDp(context: Context): Int {
 fun getScreenHeightDp(context: Context): Int {
     val displayMetrics = context.resources.displayMetrics
     return (displayMetrics.heightPixels / displayMetrics.density).toInt()
+}
+
+/**
+ * Get the device's real User-Agent
+ *
+ */
+fun getDeviceUserAgent(context: Context): String {
+    // 显示UA信息
+    // showMessage(WebSettings.getDefaultUserAgent(context))
+    return WebSettings.getDefaultUserAgent(context)
 }
 
 fun getScreenWidth(context: Context): Int = context.resources.displayMetrics.widthPixels

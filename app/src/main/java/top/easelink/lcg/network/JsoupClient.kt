@@ -9,10 +9,12 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
 import top.easelink.lcg.BuildConfig
+import top.easelink.lcg.appinit.LCGApp
 import top.easelink.lcg.ui.main.source.checkMessages
 import top.easelink.lcg.ui.main.source.extractFormHash
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.getCookies
+import top.easelink.lcg.utils.getDeviceUserAgent
 import top.easelink.lcg.utils.updateCookies
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -32,6 +34,7 @@ object JsoupClient : ApiRequest {
     private val CHECK_INTERVAL = if (BuildConfig.DEBUG) 60 * 1000 else 30 * 1000
     private const val TIME_OUT_LIMIT = 15 * 1000
     private const val BASE_URL = SERVER_BASE_URL
+    private val USER_AGENT = getDeviceUserAgent(LCGApp.context)
 
     @Throws(SocketTimeoutException::class, IOException::class)
     override fun sendGetRequestWithQuery(query: String): Document {
@@ -40,6 +43,7 @@ object JsoupClient : ApiRequest {
             .timeout(TIME_OUT_LIMIT)
             .ignoreHttpErrors(true)
             .cookies(getCookies())
+            .userAgent(USER_AGENT)
             .method(Connection.Method.GET)
             .followRedirects(FOLLOW_REDIRECTS_ENABLE)
             .execute()
@@ -57,6 +61,7 @@ object JsoupClient : ApiRequest {
             .timeout(TIME_OUT_LIMIT)
             .ignoreHttpErrors(true)
             .cookies(getCookies())
+            .userAgent(USER_AGENT)
             .method(Connection.Method.GET)
             .followRedirects(false)
             .execute()
@@ -72,6 +77,7 @@ object JsoupClient : ApiRequest {
             .timeout(TIME_OUT_LIMIT)
             .ignoreHttpErrors(true)
             .cookies(getCookies())
+            .userAgent(USER_AGENT)
             .method(Connection.Method.GET)
             .followRedirects(FOLLOW_REDIRECTS_ENABLE)
             .execute()
@@ -90,6 +96,7 @@ object JsoupClient : ApiRequest {
         return Jsoup
             .connect(url)
             .cookies(getCookies())
+            .userAgent(USER_AGENT)
             .apply {
                 if (form != null) {
                     data(form)
