@@ -44,6 +44,7 @@ import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
 import top.easelink.lcg.utils.showMessage
 import top.easelink.lcg.utils.updateCookies
+import top.easelink.lcg.utils.setStatusBarPadding
 
 class WebViewActivity : AppCompatActivity() {
 
@@ -204,6 +205,7 @@ class WebViewActivity : AppCompatActivity() {
 
     private fun initActionBar() {
         findViewById<Toolbar>(R.id.web_view_toolbar)?.let { toolbar ->
+            toolbar.setStatusBarPadding()
             setSupportActionBar(toolbar)
             supportActionBar?.apply {
                 setDisplayHomeAsUpEnabled(true)

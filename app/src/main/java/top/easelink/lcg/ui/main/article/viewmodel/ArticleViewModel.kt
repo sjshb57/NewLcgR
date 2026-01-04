@@ -33,6 +33,7 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
     val shouldDisplayPosts = MutableLiveData<Boolean>()
     val articleTitle = MutableLiveData<String>()
     val isLoading = MutableLiveData<Boolean>()
+    val isFavorited = MutableLiveData<Boolean>(false)
 
     private var mUrl: String? = null
     private var nextPageUrl: String? = null
@@ -134,6 +135,23 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
         }
     }
 
+    fun checkIsFavorited() {
+        val url = mUrl ?: return
+        viewModelScope.launch(IOPool) {
+            val isFav = ArticlesLocalDataSource.isArticleInFavorites(url)
+            safeUpdate(isFavorited, isFav)
+        }
+    }
+
+    fun toggleFavorite() {
+        val isCurrentlyFavorited = isFavorited.value ?: false
+        if (isCurrentlyFavorited) {
+            removeFromFavorite()
+        } else {
+            addToFavorite()
+        }
+    }
+
     fun addToFavorite() {
         val currentPosts = posts.value ?: run {
             showMessage(R.string.add_to_favorite_failed)
@@ -170,10 +188,32 @@ class ArticleViewModel : ViewModel(), ArticleAdapterListener {
                     if (!AppConfig.syncFavorites) {
                         showMessage(if (res) R.string.add_to_favorite_successfully else R.string.add_to_favorite_failed)
                     }
+                    safeUpdate(isFavorited, true)
                 } catch (e: Exception) {
                     Timber.e(e)
                     showMessage(R.string.add_to_favorite_failed)
                 }
+            } catch (e: Exception) {
+                Timber.e(e)
+                showMessage(R.string.add_to_favorite_failed)
+            }
+        }
+    }
+
+    fun removeFromFavorite() {
+        val url = mUrl ?: return
+        viewModelScope.launch(IOPool) {
+            try {
+                if (AppConfig.syncFavorites && UserDataRepo.isLoggedIn) {
+                    val threadId = extractThreadId(mUrl)
+                    if (threadId != null && mFormHash != null) {
+                        // Note: There's no removeFavorites method in ArticlesRemoteDataSource, but we'll still handle local removal
+                    }
+                }
+
+                val res = ArticlesLocalDataSource.delArticleFromFavorite(url)
+                showMessage(if (res) R.string.remove_all_favorites_successfully else R.string.add_to_favorite_failed)
+                safeUpdate(isFavorited, false)
             } catch (e: Exception) {
                 Timber.e(e)
                 showMessage(R.string.add_to_favorite_failed)

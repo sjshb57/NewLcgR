@@ -25,6 +25,7 @@
     <string name="open_in_webview">网页打开</string>
     <string name="extract_urls">提取下载链接</string>
     <string name="add_to_my_favorite">添加到收藏</string>
+    <string name="remove_from_favorite">取消收藏</string>
     <string name="clear_all_from_my_favorite">清空本地收藏</string>
     <string name="manage_my_favorites">管理在线收藏</string>
     <string name="sync_my_favorite">同步在线收藏</string>

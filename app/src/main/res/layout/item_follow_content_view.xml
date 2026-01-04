@@ -115,6 +115,13 @@
         android:layout_height="wrap_content"
         android:textSize="@dimen/sp_14"
         android:lineSpacingExtra="@dimen/dp_4"
+        android:maxLines="6"
+        android:ellipsize="end"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:singleLine="false"
+        android:scrollHorizontally="false"
+        android:isScrollContainer="false"
         app:layout_constraintStart_toStartOf="@id/username"
         app:layout_constraintTop_toBottomOf="@id/preview"
         app:layout_constraintEnd_toEndOf="parent"/>

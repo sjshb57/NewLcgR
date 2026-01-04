@@ -196,4 +196,17 @@ public class HtmlTextView extends MaterialTextView {
         }
         return super.dispatchTouchEvent(event);
     }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // 禁止内容滑动，只允许点击链接
+        if (getMovementMethod() instanceof LocalLinkMovementMethod) {
+            // 只处理点击事件，不处理滚动
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_DOWN) {
+                return ((LocalLinkMovementMethod) getMovementMethod()).onTouchEvent(this, (Spannable) getText(), event);
+            }
+        }
+        // 禁止其他触摸事件，防止滚动
+        return false;
+    }
 }

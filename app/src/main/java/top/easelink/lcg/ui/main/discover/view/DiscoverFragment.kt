@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.drakeet.multitype.MultiTypeAdapter
 import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
+import top.easelink.lcg.R
 import top.easelink.lcg.databinding.FragmentDiscoverBinding
 import top.easelink.lcg.ui.main.discover.model.ForumListModel
 import top.easelink.lcg.ui.main.discover.model.RankListModel
@@ -46,12 +48,29 @@ class DiscoverFragment : TopFragment(), ControllableFragment {
         savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
+        binding.viewModel = mViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         setUp()
     }
 
     private fun setUp() {
         setUpRV()
+        setUpRefreshLayout()
         mViewModel.initOptions(mContext)
+    }
+
+    private fun setUpRefreshLayout() {
+        binding.refreshLayout.run {
+            setColorSchemeColors(
+                ContextCompat.getColor(mContext, R.color.colorPrimary),
+                ContextCompat.getColor(mContext, R.color.colorAccent),
+                ContextCompat.getColor(mContext, R.color.colorPrimaryDark)
+            )
+            setScrollUpChild(binding.forumRv)
+            setOnRefreshListener {
+                mViewModel.refreshOptions(mContext)
+            }
+        }
     }
 
     private fun setUpRV() {

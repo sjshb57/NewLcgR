@@ -19,9 +19,16 @@ import java.net.SocketTimeoutException
 
 class DiscoverViewModel : ViewModel() {
     val aggregationModels = MutableLiveData<MutableList<DiscoverModel>>()
+    val isLoading = MutableLiveData(false)
 
     @MainThread
     fun initOptions(context: Context) {
+        refreshOptions(context)
+    }
+
+    @MainThread
+    fun refreshOptions(context: Context) {
+        isLoading.value = true
         aggregationModels.value = mutableListOf(ForumListModel(generateAllForums(context)))
         viewModelScope.launch(IOPool) {
             runCatching {
@@ -36,6 +43,8 @@ class DiscoverViewModel : ViewModel() {
                     is SocketTimeoutException -> showMessage(R.string.network_error)
                     else -> showMessage(R.string.error)
                 }
+            }.also {
+                isLoading.postValue(false)
             }
         }
     }

@@ -39,4 +39,9 @@ object ArticlesLocalDataSource : FavoritesLocalDataSource {
         mArticlesDao.deleteArticles()
         return true
     }
+
+    @WorkerThread
+    override fun isArticleInFavorites(id: String): Boolean {
+        return mArticlesDao.isArticleInFavorites(id) > 0
+    }
 }

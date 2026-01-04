@@ -2,6 +2,7 @@ package top.easelink.lcg.account
 
 import top.easelink.lcg.utils.SharedPreferencesHelper
 import top.easelink.lcg.utils.clearCookies
+import androidx.core.content.edit
 
 object UserDataRepo {
 
@@ -63,7 +64,7 @@ object UserDataRepo {
 
     fun clearAll() {
         clearCookies()
-        SharedPreferencesHelper.getUserSp().edit().clear().apply()
+        SharedPreferencesHelper.getUserSp().edit { clear() }
         isLoggedIn = false
         updateUserInfo(UserInfo.getDefaultUserInfo())
     }

@@ -8,6 +8,9 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/web_view_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
         style="@style/Toolbar"
         app:subtitleTextColor="@color/black"
         app:title="@string/app_name"

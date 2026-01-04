@@ -69,22 +69,7 @@ class SettingActivity : TopActivity() {
 
     private fun setupComponents() {
         // 账户状态相关UI设置
-        if (!UserDataRepo.isLoggedIn) {
-            with(binding) {
-                syncFavoritesSwitch.isEnabled = false
-                autoSignSwitch.isEnabled = false
-                accountBtn.text = getString(R.string.login_btn)
-                accountBtn.setOnClickListener {
-                    LoginHintDialog().show(supportFragmentManager, null)
-                }
-            }
-        } else {
-            binding.accountBtn.text =
-                String.format(getString(R.string.logout_confirm_message), UserDataRepo.username)
-            binding.accountBtn.setOnClickListener {
-                tryLogout()
-            }
-        }
+        updateAccountButton(UserDataRepo.isLoggedIn)
 
         binding.apply {
             checkUpdateBtn.setOnClickListener {
@@ -126,6 +111,11 @@ class SettingActivity : TopActivity() {
     }
 
     private fun setupObserver() {
+        // 观察登录状态变化
+        top.easelink.lcg.account.AccountManager.isLoggedIn.observe(this) { isLoggedIn ->
+            updateAccountButton(isLoggedIn)
+        }
+        
         // 使用lambda简化LiveData观察者
         mViewModel.apply {
             syncFavoriteEnable.observe(this@SettingActivity) { isEnabled ->
@@ -154,6 +144,25 @@ class SettingActivity : TopActivity() {
 
             handlePreTagInArticle.observe(this@SettingActivity) { isChecked ->
                 binding.articleHandlePreTag.isChecked = isChecked
+            }
+        }
+    }
+    
+    private fun updateAccountButton(isLoggedIn: Boolean) {
+        if (!isLoggedIn) {
+            with(binding) {
+                syncFavoritesSwitch.isEnabled = false
+                autoSignSwitch.isEnabled = false
+                accountBtn.text = getString(R.string.login_btn)
+                accountBtn.setOnClickListener {
+                    LoginHintDialog().show(supportFragmentManager, null)
+                }
+            }
+        } else {
+            binding.accountBtn.text =
+                String.format(getString(R.string.logout_confirm_message), UserDataRepo.username)
+            binding.accountBtn.setOnClickListener {
+                tryLogout()
             }
         }
     }

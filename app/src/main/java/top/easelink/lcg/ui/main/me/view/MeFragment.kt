@@ -14,6 +14,7 @@ import coil.load
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import org.greenrobot.eventbus.EventBus
+import androidx.lifecycle.lifecycleScope
 import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.framework.utils.addFragmentInActivity
@@ -28,6 +29,8 @@ import top.easelink.lcg.ui.main.history.view.HistoryArticlesFragment
 import top.easelink.lcg.ui.main.me.viewmodel.MeViewModel
 import top.easelink.lcg.ui.main.model.OpenForumEvent
 import top.easelink.lcg.ui.setting.view.SettingActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import top.easelink.lcg.utils.WebsiteConstant.MY_ARTICLES_QUERY
 import top.easelink.lcg.utils.avatar.PlaceholderDrawable
 import top.easelink.lcg.utils.avatar.getDefaultAvatar
@@ -60,7 +63,10 @@ class MeFragment : TopFragment(), ControllableFragment {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[MeViewModel::class.java]
         binding.settingBtn.setOnClickListener {
@@ -68,6 +74,7 @@ class MeFragment : TopFragment(), ControllableFragment {
         }
         updateIconButtons()
         registerObservers()
+        setupSwipeRefresh()
         if (SystemClock.elapsedRealtime() - lastFetchInfoTime > MINIMUM_REQUEST_INTERVAL) {
             lastFetchInfoTime = SystemClock.elapsedRealtime()
             viewModel.fetchUserInfoDirect()
@@ -197,6 +204,21 @@ class MeFragment : TopFragment(), ControllableFragment {
 
     private fun showChildFragment(fragment: Fragment) {
         addFragmentInFragment(childFragmentManager, fragment, R.id.child_root)
+    }
+
+    private fun setupSwipeRefresh() {
+        binding.swipeRefreshLayout.apply {
+            setColorSchemeColors(ContextCompat.getColor(context, R.color.pojie_logo))
+            setOnRefreshListener {
+                // 刷新用户信息
+                viewModel.fetchUserInfoDirect()
+                // 延迟关闭刷新动画，确保用户可以看到刷新效果
+                viewLifecycleOwner.lifecycleScope.launch {
+                    delay(1000)
+                    isRefreshing = false
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {

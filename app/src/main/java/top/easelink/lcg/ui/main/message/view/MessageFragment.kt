@@ -35,24 +35,46 @@ class MessageFragment : TopFragment(), ControllableFragment {
         super.onViewCreated(view, savedInstanceState)
         AccountManager.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
             if (isLoggedIn) {
+                // Remove LoginHintFragment if it exists
+                val loginHintFragment = childFragmentManager.findFragmentByTag(LoginHintFragment::class.java.simpleName)
+                if (loginHintFragment != null) {
+                    childFragmentManager.beginTransaction().remove(loginHintFragment).commitNow()
+                }
+                
+                // Show message tab and view pager
                 binding.messageTab.visibility = View.VISIBLE
                 binding.messageViewPager.visibility = View.VISIBLE
+                
+                // Ensure they are brought to front
+                binding.messageTab.bringToFront()
+                binding.messageViewPager.bringToFront()
 
-                binding.messageViewPager.adapter = MessageViewPagerAdapter(
-                    requireActivity(),
-                    requireContext()
-                )
+                // Set up view pager adapter if not already set
+                if (binding.messageViewPager.adapter == null) {
+                    binding.messageViewPager.adapter = MessageViewPagerAdapter(
+                        requireActivity(),
+                        requireContext()
+                    )
 
-                TabLayoutMediator(binding.messageTab, binding.messageViewPager) { tab, position ->
-                    tab.text = when(position) {
-                        0 -> getString(R.string.tab_title_notification)
-                        1 -> getString(R.string.tab_title_private_message)
-                        else -> ""
-                    }
-                }.attach()
+                    TabLayoutMediator(binding.messageTab, binding.messageViewPager) { tab, position ->
+                        tab.text = when(position) {
+                            0 -> getString(R.string.tab_title_notification)
+                            1 -> getString(R.string.tab_title_private_message)
+                            else -> ""
+                        }
+                    }.attach()
+                }
             } else {
+                // Hide message tab and view pager
                 binding.messageTab.visibility = View.GONE
                 binding.messageViewPager.visibility = View.GONE
+                
+                // Remove any existing fragment and add LoginHintFragment
+                childFragmentManager.findFragmentByTag(LoginHintFragment::class.java.simpleName)?.let {
+                    childFragmentManager.beginTransaction().remove(it).commitNow()
+                }
+                
+                // Add LoginHintFragment
                 addFragmentInFragment(
                     fragmentManager = childFragmentManager,
                     fragment = LoginHintFragment(),

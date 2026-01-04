@@ -11,6 +11,11 @@
 
     <dist:module dist:instant="true"/>
 
+    <queries>
+        <!-- 查询微信应用 -->
+        <package android:name="com.tencent.mm" />
+    </queries>
+
     <application
         android:largeHeap="true"
         android:allowBackup="false"

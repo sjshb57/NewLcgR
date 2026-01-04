@@ -126,8 +126,9 @@ class FavoriteArticlesAdapter(private var favoriteArticlesViewModel: FavoriteArt
 
     override fun onItemRemove(position: Int) {
         if (position in mArticleEntities.indices) {
-            mArticleEntities.removeAt(position)
-            notifyItemRemoved(position)
+            val articleEntity = mArticleEntities[position]
+            // 调用viewModel的removeFavorite方法，从数据库中删除
+            favoriteArticlesViewModel.removeFavorite(articleEntity)
         }
     }
 

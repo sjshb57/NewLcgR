@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.updatePadding
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import com.google.android.material.navigation.NavigationBarView
 import org.greenrobot.eventbus.EventBus
@@ -31,8 +32,10 @@ import top.easelink.lcg.config.AppConfig
 import top.easelink.lcg.databinding.ActivityMainBinding
 import top.easelink.lcg.ui.main.about.view.AboutFragment
 import top.easelink.lcg.ui.main.article.view.ArticleFragment
+import top.easelink.lcg.ui.main.articles.view.FavoriteArticlesFragment
 import top.easelink.lcg.ui.main.articles.view.ForumArticlesFragment
 import top.easelink.lcg.ui.main.discover.view.DiscoverFragment
+import top.easelink.lcg.ui.main.forumnav.view.ForumNavigationFragment
 import top.easelink.lcg.ui.main.largeimg.view.LargeImageDialog
 import top.easelink.lcg.ui.main.me.view.MeFragment
 import top.easelink.lcg.ui.main.message.view.MessageFragment
@@ -117,39 +120,50 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     private fun setupFragmentBackStackListener() {
         supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
+            val backStackCount = supportFragmentManager.backStackEntryCount
+            if (backStackCount == 0) {
                 showBottomNavigation()
-                supportFragmentManager.fragments.firstOrNull { !it.isHidden }?.let {
-                    updateUIForFragment(it)
-                } ?: run {
-                    restoreCurrentTabFragment()
+                // 直接恢复当前tab对应的Fragment，而不是依赖查找第一个可见Fragment
+                restoreCurrentTabFragment()
+            } else {
+                // Check if current top fragment is ArticleFragment or not
+                val fragments = supportFragmentManager.fragments
+                for (fragment in fragments) {
+                    if (fragment.isVisible) {
+                        if (shouldShowBottomNavigation(fragment)) {
+                            showBottomNavigation()
+                        } else {
+                            hideBottomNavigation()
+                        }
+                        break
+                    }
                 }
             }
         }
     }
 
-    private fun restoreCurrentTabFragment() {
-        val targetFragment = when (currentTabId) {
-            R.id.action_home -> supportFragmentManager.findFragmentByTag(RecommendFragment::class.java.simpleName)
-            R.id.action_message -> supportFragmentManager.findFragmentByTag(MessageFragment::class.java.simpleName)
-            R.id.action_forum_navigation -> supportFragmentManager.findFragmentByTag(DiscoverFragment::class.java.simpleName)
-            R.id.action_about_me -> supportFragmentManager.findFragmentByTag(MeFragment::class.java.simpleName)
-            else -> null
-        }
+    private fun shouldShowBottomNavigation(fragment: Fragment): Boolean {
+        return fragment is RecommendFragment
+                || fragment is MessageFragment
+                || fragment is DiscoverFragment
+                || fragment is MeFragment
+                || fragment is ForumArticlesFragment
+                || fragment is ForumNavigationFragment
+                || fragment is FavoriteArticlesFragment
+    }
 
-        targetFragment?.let {
-            supportFragmentManager.commit {
-                show(it)
-                setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-            }
-            updateUIForFragment(it)
-        } ?: run {
-            when (currentTabId) {
-                R.id.action_home -> showFragment(RecommendFragment::class.java)
-                R.id.action_message -> showFragment(MessageFragment::class.java)
-                R.id.action_forum_navigation -> showFragment(DiscoverFragment::class.java)
-                R.id.action_about_me -> showFragment(MeFragment::class.java)
-            }
+    private fun restoreCurrentTabFragment() {
+        // 确保清除所有可能的回退栈状态
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
+        
+        // 根据当前tabId重新创建并显示正确的Fragment
+        when (currentTabId) {
+            R.id.action_home -> showFragment(RecommendFragment::class.java)
+            R.id.action_message -> showFragment(MessageFragment::class.java)
+            R.id.action_forum_navigation -> showFragment(DiscoverFragment::class.java)
+            R.id.action_about_me -> showFragment(MeFragment::class.java)
         }
     }
 
@@ -222,7 +236,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 show(fragment)
             } else {
                 add(R.id.fragment_container, fragment, tag)
-                if (fragment is ForumArticlesFragment) {
+                if (fragment is ForumArticlesFragment || fragment is ForumNavigationFragment) {
                     addToBackStack(tag)
                 }
             }
@@ -248,7 +262,7 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
                 show(fragment)
             } else {
                 add(R.id.fragment_container, fragment, tag)
-                if (fragment is ForumArticlesFragment) {
+                if (fragment is ForumArticlesFragment || fragment is ForumNavigationFragment) {
                     addToBackStack(tag)
                 }
             }
@@ -270,7 +284,8 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             is DiscoverFragment,
             is MeFragment,
             is ArticleFragment,
-            is ForumArticlesFragment -> true
+            is ForumArticlesFragment,
+            is FavoriteArticlesFragment -> true
             else -> false
         }
         setStatusBarAppearance(isLightStatusBar)
@@ -279,8 +294,30 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             is RecommendFragment -> View.VISIBLE
             else -> View.GONE
         }
+        
+        // MessageFragment doesn't need auto-hide bottom navigation
+        if (fragment is MessageFragment) {
+            toggleBottomNavScrollBehavior(false)
+        } else {
+            toggleBottomNavScrollBehavior(true)
+        }
 
         syncBottomNavigation()
+    }
+
+    private fun toggleBottomNavScrollBehavior(enable: Boolean) {
+        val layoutParams = binding.bottomNavigation.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
+        if (enable) {
+            if (layoutParams?.behavior == null) {
+                layoutParams?.behavior = com.google.android.material.behavior.HideBottomViewOnScrollBehavior<View>()
+            }
+        } else {
+            if (layoutParams?.behavior != null) {
+                layoutParams?.behavior = null
+                // Ensure it is visible when behavior is removed
+                binding.bottomNavigation.translationY = 0f
+            }
+        }
     }
 
     private fun syncBottomNavigation() {
@@ -309,6 +346,13 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     fun showBottomNavigation() {
         binding.bottomNavigation.visibility = View.VISIBLE
+        val layoutParams = binding.bottomNavigation.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
+        val behavior = layoutParams?.behavior
+        if (behavior is com.google.android.material.behavior.HideBottomViewOnScrollBehavior) {
+            behavior.slideUp(binding.bottomNavigation)
+        } else {
+            binding.bottomNavigation.translationY = 0f
+        }
         ViewCompat.setOnApplyWindowInsetsListener(binding.fragmentContainer) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updatePadding(
@@ -339,12 +383,14 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     private fun showArticleFragment(fragment: Fragment) {
         supportFragmentManager.commit {
-            replace(R.id.fragment_container, fragment)
-            addToBackStack(null)
-            setReorderingAllowed(true)
-            supportFragmentManager.fragments.firstOrNull { !it.isHidden }?.let {
+            // 隐藏所有Fragment，确保只有目标Fragment可见
+            supportFragmentManager.fragments.forEach {
                 hide(it)
             }
+            add(R.id.fragment_container, fragment, fragment.javaClass.simpleName)
+            addToBackStack(null)
+            setReorderingAllowed(true)
+            setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
         }
         hideBottomNavigation()
     }
@@ -393,6 +439,11 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (binding.bottomNavigation.selectedItemId == item.itemId) {
             return false
+        }
+
+        // 清除回退栈，确保从新的tab开始
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
 
         currentTabId = item.itemId

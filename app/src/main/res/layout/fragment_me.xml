@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:id="@+id/me_fragment_container"
+    android:id="@+id/swipe_refresh_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clickable="true"
-    android:focusable="true"
     android:background="@color/white">
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:id="@+id/me_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/me_user_info_card"
@@ -230,4 +236,5 @@
         android:layout_below="@id/cardview_me_notifications"
         />
 
-</RelativeLayout>
+    </RelativeLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -25,6 +25,12 @@ class RecommendFragment : Fragment(R.layout.fragment_recommend) {
             tab.text = adapter.getTabTitle(position)
             tab.contentDescription = "Tab ${position + 1}"
         }.attach()
+
+        binding.viewPager.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                (activity as? top.easelink.lcg.ui.main.MainActivity)?.showBottomNavigation()
+            }
+        })
     }
 
     override fun onDestroyView() {

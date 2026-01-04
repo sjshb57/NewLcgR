@@ -1,48 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
+    <data>
+        <variable
+            name="viewModel"
+            type="top.easelink.lcg.ui.main.articles.viewmodel.ForumArticlesViewModel"/>
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:clipChildren="false"
-        android:focusable="true"
-        android:clickable="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/articleToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            style="@style/Toolbar"
-            app:titleTextColor="@color/black"
-            app:layout_scrollFlags="scroll|enterAlways"/>
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/forumTab"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/articleToolbar"
-            android:visibility="gone"
-            app:tabMode="scrollable"/>
-
-        <top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
-            android:id="@+id/refreshLayout"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/forumTab">
+            android:background="@color/white"
+            android:clipChildren="false"
+            android:focusable="true"
+            android:clickable="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/articleToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                style="@style/Toolbar"
+                app:titleTextColor="@color/black"
+                app:layout_scrollFlags="scroll|enterAlways"/>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/forumTab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/articleToolbar"
+                android:minHeight="@dimen/dp_40"
+                android:background="@color/white"
+                android:visibility="gone"
+                app:tabIndicatorColor="@color/colorAccent"
+                app:tabIndicatorHeight="@dimen/dp_3"
+                app:tabTextColor="@color/gray"
+                app:tabSelectedTextColor="@color/colorAccent"
+                app:tabMode="scrollable"
+                app:tabTextAppearance="@style/AppTab.TextAppearance"/>
+
+            <top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
+                android:id="@+id/refreshLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible"/>
-        </top.easelink.framework.customview.ScrollChildSwipeRefreshLayout>
-    </RelativeLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+                android:layout_below="@id/forumTab"
+                app:refreshing="@{viewModel.isLoading}">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+            </top.easelink.framework.customview.ScrollChildSwipeRefreshLayout>
+        </RelativeLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
