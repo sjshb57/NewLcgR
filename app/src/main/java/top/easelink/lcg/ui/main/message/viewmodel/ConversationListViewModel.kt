@@ -2,11 +2,10 @@ package top.easelink.lcg.ui.main.message.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
 import timber.log.Timber
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.network.JsoupClient
 import top.easelink.lcg.ui.main.model.Conversation
 import top.easelink.lcg.utils.WebsiteConstant
@@ -20,13 +19,13 @@ class ConversationListViewModel : ViewModel() {
 
     fun fetchConversations() {
         isLoading.value = true
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch {
             try {
                 parseConversations(JsoupClient.sendGetRequestWithQuery(WebsiteConstant.PRIVATE_MESSAGE_QUERY))
             } catch (e: Exception) {
                 Timber.e(e)
             }
-            isLoading.postValue(false)
+            isLoading.value = false
         }
     }
 
@@ -39,7 +38,7 @@ class ConversationListViewModel : ViewModel() {
                 val lastMessage = it.selectFirst("dd.ptm")?.let { ddPtmElement ->
                     ddPtmElement.textNodes().let { node ->
                         if (node.size > 5) {
-                            node[4].text()?.replaceFirst(" ", "").orEmpty()
+                            node[4].text().replaceFirst(" ", "")
                         } else {
                             ""
                         }
@@ -57,9 +56,7 @@ class ConversationListViewModel : ViewModel() {
                     replyUrl = replyUrl
                 )
             }
-            conversations.postValue(conversationList)
+            conversations.value = conversationList
         }
-
     }
-
 }

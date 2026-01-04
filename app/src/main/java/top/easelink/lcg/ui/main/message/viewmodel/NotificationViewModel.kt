@@ -2,11 +2,10 @@ package top.easelink.lcg.ui.main.message.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
 import timber.log.Timber
-import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.network.JsoupClient
 import top.easelink.lcg.ui.main.model.BaseNotification
 import top.easelink.lcg.ui.main.model.NotificationModel
@@ -24,11 +23,12 @@ class NotificationViewModel : ViewModel() {
             callback.invoke(false)
             return
         }
-        GlobalScope.launch(IOPool) {
+        viewModelScope.launch {
             try {
                 JsoupClient.sendGetRequestWithQuery(nextPageUrl).let {
                     val model = parseResponse(it)
-                    notifications.postValue(model)
+                    notifications.value = model
+                    callback.invoke(true)
                 }
             } catch (e: Exception) {
                 Timber.e(e)
@@ -38,19 +38,20 @@ class NotificationViewModel : ViewModel() {
     }
 
     fun fetchNotifications() {
-        GlobalScope.launch(IOPool) {
-            isLoading.postValue(true)
+        viewModelScope.launch {
+            isLoading.value = true
             try {
                 JsoupClient.sendGetRequestWithQuery(NOTIFICATION_HOME_QUERY).let {
-                    notifications.postValue(parseResponse(it))
+                    notifications.value = parseResponse(it)
                 }
             } catch (e: Exception) {
                 Timber.e(e)
             }
-            isLoading.postValue(false)
+            isLoading.value = false
         }
     }
 
+    @Suppress("unused")
     private fun parseSystemResponse(doc: Document): List<SystemNotification> {
         doc.apply {
             val dateTimeList = select("span.xg1").map {
@@ -96,7 +97,7 @@ class NotificationViewModel : ViewModel() {
                 null
             }
         }
-        nextPageUrl = doc.select("a.nxt")?.attr("href").orEmpty()
+        nextPageUrl = doc.select("a.nxt").attr("href")
         return NotificationModel(notifications, nextPageUrl)
     }
 }
