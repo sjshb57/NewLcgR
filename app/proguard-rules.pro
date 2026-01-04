@@ -129,3 +129,5 @@
 -keep public class top.easelink.framework.R$*{
     public static final int *;
 }
+-dontwarn com.google.re2j.Matcher
+-dontwarn com.google.re2j.Pattern
