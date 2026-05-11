@@ -12,7 +12,6 @@ android {
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,6 +36,12 @@ android {
         buildConfig = true
         dataBinding = true
         viewBinding = true
+    }
+    lint {
+        targetSdk = 36
+    }
+    testOptions {
+        targetSdk = 36
     }
 }
 

@@ -8,7 +8,7 @@ plugins {
 }
 
 val versionMajor = 2
-val versionMinor = 1
+val versionMinor = 3
 val versionPatch = 0
 
 android {
@@ -29,7 +29,7 @@ android {
         ndk {
             abiFilters.addAll(listOf("arm64-v8a"))
         }
-        resConfigs("zh-rCN","zh-rTW")
+        resourceConfigurations += setOf("zh-rCN", "zh-rTW")
     }
 
     signingConfigs {
@@ -46,8 +46,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-        //    isShrinkResources = true
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
