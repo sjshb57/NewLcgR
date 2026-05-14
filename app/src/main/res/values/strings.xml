@@ -10,6 +10,8 @@
     <string name="baidu_net_disk_not_support">暂不支持百度网盘唤起</string>
     <string name="login_or_register">登录或注册</string>
     <string name="login_hint_message">登陆开启更多功能</string>
+    <string name="session_expired_tips">登录已失效，请重新登录</string>
+    <string name="auto_sign_in_login_required">自动签到失败：登录已失效，请重新登录</string>
     <string name="history_articles_empty_tips">看过的文章才有记录哦</string>
 
     <!--  History  -->

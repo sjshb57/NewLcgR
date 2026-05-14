@@ -1,13 +1,8 @@
 package top.easelink.lcg.network
 
-import okhttp3.Request
-import okhttp3.OkHttpClient
-import com.franmontiel.persistentcookiejar.PersistentCookieJar
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import com.franmontiel.persistentcookiejar.ClearableCookieJar
 import okhttp3.Cache
-
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -18,26 +13,26 @@ import java.util.concurrent.TimeUnit
 
 object OkApiClient : ApiRequest {
 
-    private const val followRedirectsEnable = true
+    private const val FOLLOW_REDIRECTS = true
 
-    private const val TIME_OUT = 5L
-    private var mClient: OkHttpClient
+    // 旧实现是 5s 全超时，国内访问 52pojie 经常 >5s -> 大量假性 SocketTimeoutException。
+    // 调整到经验值：连接 10s，读写 15s，整体调用 30s。
+    private const val CONNECT_TIMEOUT = 10L
+    private const val READ_WRITE_TIMEOUT = 15L
+    private const val CALL_TIMEOUT = 30L
 
-    init {
+    private val mClient: OkHttpClient by lazy {
         val cacheDirectory = File(LCGApp.context.cacheDir, "okhttp_cache")
-        val cookieJar: ClearableCookieJar =
-            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(LCGApp.context))
-        mClient = OkHttpClient
-            .Builder()
-            .callTimeout(TIME_OUT, TimeUnit.SECONDS)
-            .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-            .readTimeout(TIME_OUT, TimeUnit.SECONDS)
-            .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+        OkHttpClient.Builder()
+            .callTimeout(CALL_TIMEOUT, TimeUnit.SECONDS)
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(READ_WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(READ_WRITE_TIMEOUT, TimeUnit.SECONDS)
             .addInterceptor(CacheControlInterceptor)
-            .cookieJar(cookieJar)
-            .followRedirects(followRedirects = followRedirectsEnable)
+            .cookieJar(LCGCookieJar.jar)
+            .followRedirects(FOLLOW_REDIRECTS)
             .retryOnConnectionFailure(true)
-            .cache(cache = Cache(cacheDirectory, 10 * 1024 * 1024))
+            .cache(Cache(cacheDirectory, 10 * 1024 * 1024))
             .build()
     }
 
@@ -53,7 +48,6 @@ object OkApiClient : ApiRequest {
             302 -> throw RequestTooOftenException()
             else -> null
         }
-
     }
 
     override fun sendPostRequestWithUrl(
