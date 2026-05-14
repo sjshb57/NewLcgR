@@ -312,6 +312,19 @@ class WebViewActivity : AppCompatActivity() {
         private var mCustomViewCallback: CustomViewCallback? = null
         private var mCustomView: View? = null
 
+        // 把 WebView 内 JS 的 console 输出接到 logcat。WAF 滑块页跑重度混淆 JS，
+        // 出错时如果不接 console，整个页面就停在"正在加载中..."而没有任何线索。
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+            Timber.tag("WebViewJS").d(
+                "[%s] %s @ %s:%d",
+                consoleMessage.messageLevel(),
+                consoleMessage.message(),
+                consoleMessage.sourceId(),
+                consoleMessage.lineNumber()
+            )
+            return true
+        }
+
         override fun onShowCustomView(view: View, callback: CustomViewCallback) {
             if (mCustomView != null) {
                 callback.onCustomViewHidden()
@@ -348,16 +361,54 @@ class WebViewActivity : AppCompatActivity() {
         override fun onPageCommitVisible(view: WebView, url: String) {
             setLoading(false)
             view.settings.blockNetworkImage = false
-            // 等 WAF 验证码图片这种子资源加载后再同步 cookie：commit 瞬间 wzws_cid 可能
-            // 还没到 CookieManager（它是通过 /waf_text_captcha 图片响应的 Set-Cookie
-            // 下发的）。延迟 300ms + flush 确保 cookie 落盘后再同步进 jar。
+            // 等 WAF 验证码子资源加载后再同步 cookie：commit 瞬间 wzws_cid 可能
+            // 还没到 CookieManager（它是通过 /waf_*_captcha 响应的 Set-Cookie 下发的）。
+            // 文字版只需要等一张 ~8KB 的 JPEG，300ms 够；滑块版要等 234KB base64 AJAX，
+            // 弱网下经常超过 300ms，延长到 2000ms。shouldInterceptRequest 里另有按子资源
+            // 粒度的即时同步兜底。
+            val delay = if (url.contains("/waf_slider_verify.html")) 2000L else 300L
             view.postDelayed({
                 runCatching { android.webkit.CookieManager.getInstance().flush() }
                 LCGCookieJar.syncFromWebView(url)
-            }, 300)
+            }, delay)
             if (isOpenLoginEvent) {
                 view.loadUrl("javascript:$HOOK_NAME.processHtml(document.documentElement.outerHTML);")
             }
+        }
+
+        // 子资源粒度的 cookie 同步：/waf_*_captcha 响应会下发新的 wzws_cid，
+        // 必须在它返回后立刻 flush + sync，否则后续 OkHttp 请求带的是过期 cookie。
+        // 同时给 WAF/wzws-* 子资源打日志，方便定位"卡在正在加载中"的环节。
+        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+            val u = request.url.toString()
+            if (u.contains("/waf_") || u.contains("/wzws-")) {
+                Timber.tag("WAF").d("→ %s %s", request.method, u)
+            }
+            if (u.contains("/waf_slider_captcha") || u.contains("/waf_text_captcha")) {
+                view.post {
+                    runCatching { android.webkit.CookieManager.getInstance().flush() }
+                    LCGCookieJar.syncFromWebView(u)
+                }
+            }
+            return null
+        }
+
+        override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
+            Timber.tag("WAF").w(
+                "HTTP %d on %s (%s)",
+                errorResponse.statusCode,
+                request.url,
+                errorResponse.reasonPhrase
+            )
+        }
+
+        override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+            Timber.tag("WAF").w(
+                "err %d %s on %s",
+                error.errorCode,
+                error.description,
+                request.url
+            )
         }
 
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
@@ -396,7 +447,8 @@ class WebViewActivity : AppCompatActivity() {
         if (url == null) return false
         return url.contains("/waf_text_verify.html") ||
                 url.contains("/waf_slider_verify.html") ||
-                url.contains("/waf_text_captcha")
+                url.contains("/waf_text_captcha") ||
+                url.contains("/waf_slider_captcha")
     }
 
     companion object {
