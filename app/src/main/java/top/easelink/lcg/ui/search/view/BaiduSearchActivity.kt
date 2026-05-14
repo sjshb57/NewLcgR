@@ -2,6 +2,9 @@ package top.easelink.lcg.ui.search.view
 
 import android.os.Bundle
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +26,7 @@ import top.easelink.lcg.ui.search.viewmodel.BaiduSearchViewModel
 import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
 import top.easelink.lcg.databinding.ActivityBaiduSearchBinding
+import top.easelink.lcg.utils.setStatusBarPadding
 
 
 class BaiduSearchActivity : TopActivity() {
@@ -54,6 +58,13 @@ class BaiduSearchActivity : TopActivity() {
     }
 
     private fun setUp() {
+        // edge-to-edge：顶部信息条加状态栏 padding；RefreshLayout 底部加导航栏 padding。
+        binding.totalInfo.setStatusBarPadding()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.refreshLayout) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = bars.bottom)
+            insets
+        }
         mViewModelBaidu.mTotalResult.observe(this, Observer {
             binding.totalInfo.text = it.orEmpty()
         })

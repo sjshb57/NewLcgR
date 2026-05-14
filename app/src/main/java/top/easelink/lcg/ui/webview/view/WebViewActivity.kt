@@ -29,8 +29,10 @@ import top.easelink.framework.threadpool.IOPool
 import top.easelink.framework.threadpool.Main
 import top.easelink.lcg.R
 import top.easelink.lcg.account.AccountManager.isLoggedIn
+import top.easelink.lcg.account.UserDataRepo
 import top.easelink.lcg.account.UserDataRepo.updateUserInfo
 import top.easelink.lcg.appinit.LCGApp
+import top.easelink.lcg.network.LCGCookieJar
 import top.easelink.lcg.service.web.HookInterface
 import top.easelink.lcg.ui.main.me.source.UserInfoRepo.requestUserInfo
 import top.easelink.lcg.ui.main.MainActivity
@@ -43,7 +45,6 @@ import top.easelink.lcg.utils.WebsiteConstant.QQ_LOGIN_URL
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
 import top.easelink.lcg.utils.showMessage
-import top.easelink.lcg.utils.updateCookies
 import top.easelink.lcg.utils.setStatusBarPadding
 
 class WebViewActivity : AppCompatActivity() {
@@ -143,7 +144,11 @@ class WebViewActivity : AppCompatActivity() {
             if (html.isNullOrBlank()) return
             coroutineScope.launch(CalcPool) {
                 val doc = Jsoup.parse(html)
-                doc.selectFirst("div.avt") ?: return@launch
+                val currentUrl = withContext(Main) { mWebView.url } ?: return@launch
+                if (!isLoginSuccess(doc, currentUrl)) return@launch
+                // 把刚登录拿到的 cookie 灌入统一 jar，OkHttp/Jsoup/Coil 立刻共享同一个会话。
+                LCGCookieJar.syncFromWebView(currentUrl)
+                UserDataRepo.isLoggedIn = true
                 isLoggedIn.postValue(true)
                 doc.getElementById("messagetext")?.text()?.let {
                     showMessage(it)
@@ -158,6 +163,19 @@ class WebViewActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Discuz 论坛登录成功的标志：
+     * 1) 页面里出现用户头像 div.avt（旧逻辑唯一依据，单独使用易误判）；
+     * 2) 同时 CookieManager 至少持有一个 auth 类 cookie（Discuz 的 *_auth / *_saltkey）。
+     * 两个条件同时满足才认为登录真的成功。
+     */
+    private fun isLoginSuccess(doc: org.jsoup.nodes.Document, url: String): Boolean {
+        val hasAvatar = doc.selectFirst("div.avt") != null
+        val cookies = android.webkit.CookieManager.getInstance().getCookie(url) ?: ""
+        val hasAuthCookie = AUTH_COOKIE_REGEX.containsMatchIn(cookies)
+        return hasAvatar && hasAuthCookie
     }
 
     private fun initData() {
@@ -315,9 +333,8 @@ class WebViewActivity : AppCompatActivity() {
     private inner class InnerWebViewClient : WebViewClient() {
         override fun onPageCommitVisible(view: WebView, url: String) {
             setLoading(false)
-            CookieManager.getInstance().getCookie(url)?.let {
-                updateCookies(it, isOpenLoginEvent)
-            }
+            // 直接按 URL 的实际 host 把 cookie 同步进统一 jar，避免 WebView 与原生网络栈失去会话同步。
+            LCGCookieJar.syncFromWebView(url)
             if (isOpenLoginEvent) {
                 view.loadUrl("javascript:$HOOK_NAME.processHtml(document.documentElement.outerHTML);")
             }
@@ -349,6 +366,7 @@ class WebViewActivity : AppCompatActivity() {
 
     companion object {
         private const val HOOK_NAME = "hook"
+        private val AUTH_COOKIE_REGEX = Regex("""\b\w*_?auth=([^;]+)""")
 
         fun startWebViewWith(url: String, context: Context?) {
             Intent(context ?: LCGApp.context, WebViewActivity::class.java).apply {

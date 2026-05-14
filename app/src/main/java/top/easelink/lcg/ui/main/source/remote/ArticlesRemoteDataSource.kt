@@ -25,6 +25,7 @@ import top.easelink.lcg.ui.main.source.local.ArticlesDatabase
 import top.easelink.lcg.ui.main.source.model.*
 import top.easelink.lcg.utils.WebsiteConstant.ADD_TO_FAVORITE_QUERY
 import top.easelink.lcg.utils.WebsiteConstant.FORUM_BASE_QUERY
+import top.easelink.lcg.utils.WebsiteConstant.REMOVE_FAVORITE_QUERY
 import java.net.SocketTimeoutException
 import java.util.*
 
@@ -148,13 +149,14 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                         replyUrls[i]
                     }
                     val post = Post(
-                        author = userInfos[i][USER_NAME].toString(),
-                        avatar = userInfos[i][USER_AVATAR].toString(),
+                        // 用 orEmpty() 兜底；原实现 .toString() 在 key 缺失时会写出字面值 "null"。
+                        author = userInfos[i][USER_NAME].orEmpty(),
+                        avatar = userInfos[i][USER_AVATAR].orEmpty(),
                         date = dateTimes[i],
                         content = contents[i],
                         replyUrl = replyUrl,
                         replyAddUrl = replyAddUrl,
-                        profileUrl = userInfos[i][USER_PROFILE_URL].toString(),
+                        profileUrl = userInfos[i][USER_PROFILE_URL].orEmpty(),
                         extraInfo = userInfos[i][USER_EXTRA_INFO],
                         followInfo = userInfos[i][FOLLOW_TITLE]?.to(userInfos[i][FOLLOW_URL] ?: "")
                     )
@@ -498,6 +500,19 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
         element.select("div.tip").remove()
         // remove user level info etc
         element.select("script").remove()
+
+        // 给 Discuz 的引用块加上视觉样式。Html.fromHtml 不识别 div.quote，
+        // 不加这层包装的话引用文字会和正文混在一起。
+        for (quote in element.select("div.quote")) {
+            val inner = quote.selectFirst("blockquote")?.html().orEmpty()
+            if (inner.isNotEmpty()) {
+                quote.html(
+                    "<blockquote style=\"border-left:3px solid #ccc;" +
+                            "padding-left:8px;color:#888\">$inner</blockquote>"
+                )
+            }
+        }
+
         // convert all code
         for (e in element.getElementsByTag("pre")) {
             val s = e.html()
@@ -507,12 +522,17 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                 .replace(" ", "&nbsp;")
             e.html(s)
         }
-        // move gif from file to src
+        // move gif from file to src (Discuz 附件 / ignore_js_op 包装)
         val imgElements = element.getElementsByTag("img")
         for (i in imgElements.indices) {
             val imgElement = imgElements[i]
             val src = imgElement.attr("src")
-            if (src.contains("https://static.52pojie.cn/static/") && !src.contains("none")) {
+            // 原实现一刀切删 static.52pojie.cn/static/ 下所有图，连 image/smiley/（表情）也秒了。
+            // 这里只过滤掉论坛 UI 元素（用户等级图标、common 资源），明确放行 smiley 与其它内容图。
+            if (src.contains("static.52pojie.cn/static/image/") &&
+                !src.contains("smiley") &&
+                !src.contains("none")
+            ) {
                 imgElement.remove()
             }
             val attr = imgElement.attr("file")
@@ -534,6 +554,23 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                 )
             )
             true
+        } catch (e: Exception) {
+            Timber.e(e)
+            false
+        }
+    }
+
+    @WorkerThread
+    override fun removeFavorites(threadId: String, formHash: String): Boolean {
+        return try {
+            val doc = JsoupClient.sendGetRequestWithQuery(
+                String.format(REMOVE_FAVORITE_QUERY, threadId, formHash)
+            )
+            // Discuz 删除成功通常返回带 "成功" / "删除" 字样的 messagetext，
+            // 失败会返回 alert_error；用文案兜底判断，避免把失败当成功。
+            val msg = doc.getElementById("messagetext")?.text().orEmpty()
+            val hasError = doc.select(".alert_error").isNotEmpty()
+            !hasError && (msg.isEmpty() || msg.contains("成功") || msg.contains("删除"))
         } catch (e: Exception) {
             Timber.e(e)
             false

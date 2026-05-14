@@ -130,8 +130,11 @@ class ArticleFragment : TopFragment(), ControllableFragment {
                 orientation = RecyclerView.VERTICAL
             }
             itemAnimator = DefaultItemAnimator()
-            adapter = ArticleAdapter(viewModel, this@ArticleFragment)
+            val articleAdapter = ArticleAdapter(viewModel, this@ArticleFragment)
+            adapter = articleAdapter
 
+            // posts LiveData 只在"首次加载/切换文章"时整体替换。翻页/插入回复都走对应的增量事件，
+            // 避免每次更新都重绑全列表（旧实现是 clearItems()+addItems() → 所有 setHtml 重跑、图片重下）。
             viewModel.posts.observe(viewLifecycleOwner) { posts ->
                 if (posts.isNotEmpty() && posts[0].replyUrl != null) {
                     binding.comment.visibility = View.VISIBLE
@@ -141,10 +144,19 @@ class ArticleFragment : TopFragment(), ControllableFragment {
                 } else {
                     binding.comment.visibility = View.GONE
                 }
-                (adapter as? ArticleAdapter)?.apply {
-                    clearItems()
-                    addItems(posts)
-                }
+                articleAdapter.setItems(posts)
+            }
+
+            viewModel.newPostsAppended.observe(viewLifecycleOwner) { newPosts ->
+                articleAdapter.appendItems(newPosts)
+            }
+
+            viewModel.postInsertedAt.observe(viewLifecycleOwner) { (position, post) ->
+                articleAdapter.insertItem(position, post)
+            }
+
+            viewModel.hasMorePages.observe(viewLifecycleOwner) { hasMore ->
+                articleAdapter.setHasMore(hasMore)
             }
         }
     }

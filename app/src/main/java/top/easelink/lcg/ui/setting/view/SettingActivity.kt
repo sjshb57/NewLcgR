@@ -6,6 +6,9 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.CompoundButton
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import top.easelink.framework.topbase.TopActivity
 import top.easelink.lcg.R
@@ -15,6 +18,7 @@ import top.easelink.lcg.databinding.ActivitySettingsBinding
 import top.easelink.lcg.ui.main.login.view.LoginHintDialog
 import top.easelink.lcg.ui.main.logout.view.LogoutHintDialog
 import top.easelink.lcg.ui.setting.viewmodel.SettingViewModel
+import top.easelink.lcg.utils.setStatusBarPadding
 import top.easelink.lcg.utils.showMessage
 
 class SettingActivity : TopActivity() {
@@ -50,6 +54,14 @@ class SettingActivity : TopActivity() {
     }
 
     private fun setupToolBar() {
+        // targetSdk 36 强制 edge-to-edge：toolbar 顶部加状态栏 padding，
+        // 根 ScrollView 底部加导航栏 padding，否则会被系统栏遮挡。
+        binding.toolbar.setStatusBarPadding()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = bars.bottom)
+            insets
+        }
         setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

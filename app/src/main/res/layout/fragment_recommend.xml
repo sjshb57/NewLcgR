@@ -23,10 +23,13 @@
         app:tabMode="fixed"
         app:tabTextAppearance="@style/AppTab.TextAppearance"
         />
+    <!-- ViewPager2 不支持 wrap_content（高度会塌成 0 或闪烁）；
+         给 0dp + layout_weight=1 让它占满 TabLayout 之外的全部高度。 -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:focusableInTouchMode="true"
         android:focusable="true"/>
 </LinearLayout>

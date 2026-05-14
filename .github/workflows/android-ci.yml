@@ -1,0 +1,83 @@
+name: Android CI
+
+on:
+  push:
+    branches: [claude/review-project-AT38c]
+  workflow_dispatch:
+
+# 同一个 PR 上的连续 push 只跑最新的，节省 Actions 分钟数
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Lint (debug)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # 关键 build/lint/test 一并跑。Release build 需要 keystore，CI 不跑。
+      # SHIPLY_APP_ID / SHIPLY_APP_KEY 是 runtime 配置，构建时只是字符串塞进 BuildConfig，
+      # 缺失也能编过，会得到 "null" 字符串 —— 测试环境可接受。
+      - name: Assemble debug
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Lint debug
+        run: ./gradlew lintDebug --stacktrace
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Upload debug APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: |
+            app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results-debug.xml
+            framework/build/reports/lint-results-debug.html
+            framework/build/reports/lint-results-debug.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload unit test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: |
+            app/build/reports/tests/
+            framework/build/reports/tests/
+          if-no-files-found: ignore
+          retention-days: 14

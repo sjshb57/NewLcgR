@@ -436,6 +436,12 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             .show(supportFragmentManager, HalfScreenWebViewFragment::class.java.simpleName)
     }
 
+    @Suppress("unused", "UNUSED_PARAMETER")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onSessionExpired(event: SessionExpiredEvent) {
+        showMessage(R.string.session_expired_tips)
+    }
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (binding.bottomNavigation.selectedItemId == item.itemId) {
             return false
