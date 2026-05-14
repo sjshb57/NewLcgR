@@ -3,12 +3,16 @@ package top.easelink.lcg.ui.profile.view
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.WindowManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import top.easelink.framework.topbase.TopActivity
 import top.easelink.framework.topbase.TopFragment
 import top.easelink.framework.utils.addFragmentInActivity
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.ActivityProfileBinding
 import top.easelink.lcg.ui.profile.viewmodel.ProfileViewModel
+import top.easelink.lcg.utils.setStatusBarPadding
 
 const val KEY_PROFILE_URL = "profile_url"
 
@@ -40,6 +44,13 @@ class ProfileActivity : TopActivity() {
     }
 
     private fun setupToolBar() {
+        // targetSdk 36 edge-to-edge：toolbar 顶部、Fragment 容器底部分别加 inset padding。
+        binding.toolbar.setStatusBarPadding()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.profileRoot) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = bars.bottom)
+            insets
+        }
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)

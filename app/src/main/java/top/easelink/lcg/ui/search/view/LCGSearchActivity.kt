@@ -8,6 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -24,6 +27,7 @@ import top.easelink.lcg.ui.search.viewmodel.LCGSearchResultAdapter
 import top.easelink.lcg.ui.search.viewmodel.LCGSearchViewModel
 import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
+import top.easelink.lcg.utils.setStatusBarPadding
 import top.easelink.lcg.utils.showMessage
 
 class LCGSearchActivity : TopActivity() {
@@ -85,6 +89,13 @@ class LCGSearchActivity : TopActivity() {
     }
 
     private fun setUp() {
+        // edge-to-edge insets：toolbar 顶部加状态栏 padding；RecyclerView 底部加导航栏 padding。
+        binding.toolbar.setStatusBarPadding()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.recyclerView) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = bars.bottom)
+            insets
+        }
         setupRecyclerView()
         setupObserver()
     }
