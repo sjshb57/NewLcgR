@@ -12,7 +12,6 @@ import top.easelink.framework.utils.addFragmentInActivity
 import top.easelink.lcg.R
 import top.easelink.lcg.databinding.ActivityProfileBinding
 import top.easelink.lcg.ui.profile.viewmodel.ProfileViewModel
-import top.easelink.lcg.utils.ThemeHelper
 import top.easelink.lcg.utils.setStatusBarPadding
 
 const val KEY_PROFILE_URL = "profile_url"
@@ -23,7 +22,6 @@ class ProfileActivity : TopActivity() {
     private lateinit var binding: ActivityProfileBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
         binding = ActivityProfileBinding.inflate(layoutInflater)

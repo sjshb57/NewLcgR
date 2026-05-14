@@ -18,7 +18,6 @@ import top.easelink.lcg.databinding.ActivitySettingsBinding
 import top.easelink.lcg.ui.main.login.view.LoginHintDialog
 import top.easelink.lcg.ui.main.logout.view.LogoutHintDialog
 import top.easelink.lcg.ui.setting.viewmodel.SettingViewModel
-import top.easelink.lcg.utils.ThemeHelper
 import top.easelink.lcg.utils.setStatusBarPadding
 import top.easelink.lcg.utils.showMessage
 
@@ -28,7 +27,6 @@ class SettingActivity : TopActivity() {
     private lateinit var binding: ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -121,14 +119,6 @@ class SettingActivity : TopActivity() {
             showRecommendFlag.setOnCheckedChangeListener { _, isChecked ->
                 AppConfig.articleShowRecommendFlag = isChecked
             }
-
-            materialDesign3Switch.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked == AppConfig.materialDesign3Enabled) return@setOnCheckedChangeListener
-                mViewModel.setMaterialDesign3(isChecked)
-                // 立即 recreate 当前页让用户看到效果；其他已存在的 Activity 会在它们下一次
-                // onCreate 时自动通过 ThemeHelper 应用新主题。
-                recreate()
-            }
         }
     }
 
@@ -166,10 +156,6 @@ class SettingActivity : TopActivity() {
 
             handlePreTagInArticle.observe(this@SettingActivity) { isChecked ->
                 binding.articleHandlePreTag.isChecked = isChecked
-            }
-
-            useMaterialDesign3.observe(this@SettingActivity) { isChecked ->
-                binding.materialDesign3Switch.isChecked = isChecked
             }
         }
     }

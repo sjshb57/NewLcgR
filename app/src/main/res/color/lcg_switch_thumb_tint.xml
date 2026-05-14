@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SwitchMaterial 拇指（圆形）的着色：
+  - checked: pojie_logo 红
+  - 默认（unchecked）: 白色（还原 MD2 风格）
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="@color/pojie_logo" />
+    <item android:color="@color/white" />
+</selector>

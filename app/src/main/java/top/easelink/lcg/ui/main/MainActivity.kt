@@ -44,7 +44,6 @@ import top.easelink.lcg.ui.main.model.*
 import top.easelink.lcg.ui.setting.view.SettingActivity
 import top.easelink.lcg.ui.webview.view.HalfScreenWebViewFragment
 import top.easelink.lcg.ui.webview.view.WebViewActivity
-import top.easelink.lcg.utils.ThemeHelper
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.showMessage
 
@@ -56,7 +55,6 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     private val fragmentTags = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)

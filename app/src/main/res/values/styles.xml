@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- 启动页保留原 launch_bg；其它仍继承 AppTheme（已迁移到 Material3） -->
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowIsTranslucent">false</item>
@@ -23,26 +24,41 @@
         <item name="android:taskToBackExitAnimation">@null</item>
     </style>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryDark">@color/white</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <!--
+    主题已整体迁移到 Material Design 3：parent 改为 Theme.Material3.Light.NoActionBar。
+    色板以 52pojie logo 红为 colorPrimary 突出品牌；surface 仍是白底保持论坛页面通透。
+    其它 Widget.* / TextAppearance.* 大多保留 MaterialComponents parent —— Material 库
+    同时支持 MD2/MD3，旧 parent 在 MD3 主题下仍能正常渲染，逐个改造收益小、风险大。
+    -->
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+        <!-- 色板 -->
+        <item name="colorPrimary">@color/pojie_logo</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">#FFE4E6</item>
+        <item name="colorOnPrimaryContainer">@color/pojie_logo</item>
+
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/white</item>
+
         <item name="colorSurface">@color/white</item>
-        <item name="colorOnPrimary">@color/black</item>
         <item name="colorOnSurface">@color/black</item>
+        <item name="colorSurfaceVariant">@color/slight_light_gray</item>
+        <item name="colorOnSurfaceVariant">@color/dark_gray</item>
+        <item name="android:colorBackground">@color/slight_light_light_gray</item>
+
         <item name="android:textColorPrimary">@color/black_effective</item>
         <item name="android:textColorSecondary">@color/black_effective</item>
         <item name="android:textColor">@color/black_effective</item>
 
+        <!-- 窗口 / 系统栏 -->
         <item name="android:windowBackground">@color/white</item>
         <item name="android:windowContentOverlay">@null</item>
-
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
 
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLightStatusBar">true</item>
@@ -51,15 +67,20 @@
         <item name="android:textSize">@dimen/sp_16</item>
         <item name="android:typeface">sans</item>
 
+        <!-- 兼容性细节（AppCompat 范畴，MD3 主题下仍生效） -->
         <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_black_24px</item>
         <item name="actionOverflowButtonStyle">@style/LCGOverflowButtonStyle</item>
         <item name="searchViewStyle">@style/LCGSearchView</item>
 
         <item name="toolbarStyle">@style/AppToolbarStyle</item>
+
+        <!-- SwitchMaterial 全局样式覆盖：还原 MD2 风格 white off-state -->
+        <item name="switchStyle">@style/Widget.LCG.Switch</item>
     </style>
 
-    <style name="AppToolbarStyle" parent="Widget.MaterialComponents.Toolbar.Primary">
+    <!-- Toolbar：Material3 的 Toolbar 默认无 elevation，更扁平 -->
+    <style name="AppToolbarStyle" parent="Widget.Material3.Toolbar">
         <item name="android:background">@color/white</item>
         <item name="titleTextColor">@color/black</item>
         <item name="subtitleTextColor">@color/black</item>
@@ -73,7 +94,8 @@
         <item name="android:tint">@color/black</item>
     </style>
 
-    <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar">
+    <!-- 显式 Toolbar style（被多个 layout 直接引用）也走 Material3 -->
+    <style name="Toolbar" parent="Widget.Material3.Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
         <item name="android:background">@color/white</item>
@@ -89,7 +111,7 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="AppTheme.Dialog.FullScreen.BottomInOut" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme.Dialog.FullScreen.BottomInOut" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowBackground">@color/white</item>
         <item name="android:windowAnimationStyle">@style/BottomInOutAnim</item>
         <item name="android:backgroundDimEnabled">true</item>
@@ -207,7 +229,7 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="AppTheme.Dialog.FullScreen" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme.Dialog.FullScreen" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>
@@ -218,7 +240,7 @@
         <item name="android:windowTitleStyle">@null</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
     </style>
 
     <style name="BottomInOutAnim" parent="android:Animation">
@@ -233,9 +255,9 @@
 
     <!--
     列表项卡片统一样式：圆角 + 水平外边距 + 适度阴影。
-    收藏 / 阅读记录 / 列表项共用此 style，保持视觉一致。
+    用 Widget.Material3.CardView.Elevated 让卡片在 MD3 主题下也保持柔和阴影感。
     -->
-    <style name="Widget.LCG.ItemCard" parent="Widget.MaterialComponents.CardView">
+    <style name="Widget.LCG.ItemCard" parent="Widget.Material3.CardView.Elevated">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">@dimen/dp_12</item>
@@ -251,35 +273,13 @@
     </style>
 
     <!--
-    Material 3 主题（实验性，由 AppConfig.materialDesign3Enabled 开关控制）。
-    parent 用 Theme.Material3.Light.NoActionBar，色板以 52pojie logo 红为 primary，
-    让品牌色更突出。深色模式 / 完整组件 override 留待后续打磨。
+    SwitchMaterial 自定义样式：还原 MD2 时代的"白色 off-state"。
+    Theme.Material3 默认会把 off-state 渲染成 surfaceContainerHighest（偏深的灰），
+    用户反馈不喜欢；这里通过 ColorStateList 把 off-state 强行设回白色 + 浅灰轨道。
     -->
-    <style name="Theme.LCG.Material3" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/pojie_logo</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">#FFE4E6</item>
-        <item name="colorOnPrimaryContainer">@color/pojie_logo</item>
-
-        <item name="colorSecondary">@color/colorAccent</item>
-        <item name="colorOnSecondary">@color/white</item>
-
-        <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/black</item>
-        <item name="colorSurfaceVariant">@color/slight_light_gray</item>
-        <item name="colorOnSurfaceVariant">@color/dark_gray</item>
-        <!-- colorBackground 是系统属性，要带 android: 前缀；不带前缀会 AAPT2 报错 -->
-        <item name="android:colorBackground">@color/slight_light_light_gray</item>
-
-        <item name="android:windowBackground">@color/white</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:textAllCaps">false</item>
-
-        <!-- 用户已熟悉的细节沿用 MD2 主题保持一致体验 -->
-        <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
-        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_black_24px</item>
+    <style name="Widget.LCG.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+        <item name="thumbTint">@color/lcg_switch_thumb_tint</item>
+        <item name="trackTint">@color/lcg_switch_track_tint</item>
     </style>
 
 </resources>

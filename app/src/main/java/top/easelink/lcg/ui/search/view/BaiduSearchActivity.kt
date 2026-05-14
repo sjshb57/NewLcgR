@@ -26,7 +26,6 @@ import top.easelink.lcg.ui.search.viewmodel.BaiduSearchViewModel
 import top.easelink.lcg.ui.webview.view.WebViewActivity
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
 import top.easelink.lcg.databinding.ActivityBaiduSearchBinding
-import top.easelink.lcg.utils.ThemeHelper
 import top.easelink.lcg.utils.setStatusBarPadding
 
 
@@ -43,7 +42,6 @@ class BaiduSearchActivity : TopActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityBaiduSearchBinding.inflate(layoutInflater)
         setContentView(binding.root)

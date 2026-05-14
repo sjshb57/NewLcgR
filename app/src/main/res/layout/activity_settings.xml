@@ -132,24 +132,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_4"
             android:background="@color/transparent"
-            android:text="@string/appearance_setting"
-            android:textSize="@dimen/sp_10"
-            android:textColor="@color/gray" />
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:padding="@dimen/dp_12"
-            android:elevation="@dimen/dp_2"
-            android:background="@color/white"
-            android:id="@+id/material_design_3_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/enable_material_design_3" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_marginTop="@dimen/dp_8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp_4"
-            android:background="@color/transparent"
             android:text="@string/app_setting"
             android:textSize="@dimen/sp_10"
             android:textColor="@color/gray" />
