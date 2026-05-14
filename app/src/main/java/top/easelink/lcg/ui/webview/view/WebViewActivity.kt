@@ -167,15 +167,19 @@ class WebViewActivity : AppCompatActivity() {
 
     /**
      * Discuz 论坛登录成功的标志：
-     * 1) 页面里出现用户头像 div.avt（旧逻辑唯一依据，单独使用易误判）；
-     * 2) 同时 CookieManager 至少持有一个 auth 类 cookie（Discuz 的 *_auth / *_saltkey）。
-     * 两个条件同时满足才认为登录真的成功。
+     * 1) 页面里出现用户头像 div.avt（Discuz 通用，已登录用户右上角必定渲染）；
+     * 2) 页面 NOT 含 #messagelogin / "您需要先登录" 这类失效标志。
+     *
+     * 旧实现还要求 cookie 含 *_auth，但 52pojie 实际命名是 *_st_p（uid|ts|md5 格式），
+     * 没有 *_auth cookie。强制要求 *_auth 会让 isLoginSuccess 永远 false，登录成功后
+     * UI 不会标记成已登录 —— 这是另一处隐藏 bug。这里改成只看 HTML 信号。
      */
     private fun isLoginSuccess(doc: org.jsoup.nodes.Document, url: String): Boolean {
         val hasAvatar = doc.selectFirst("div.avt") != null
-        val cookies = android.webkit.CookieManager.getInstance().getCookie(url) ?: ""
-        val hasAuthCookie = AUTH_COOKIE_REGEX.containsMatchIn(cookies)
-        return hasAvatar && hasAuthCookie
+        val isLoginRequiredPage = doc.getElementById("messagelogin") != null ||
+                doc.getElementById("messagetext")?.text()
+                    ?.contains("您需要先登录才能继续") == true
+        return hasAvatar && !isLoginRequiredPage
     }
 
     private fun initData() {
@@ -366,7 +370,6 @@ class WebViewActivity : AppCompatActivity() {
 
     companion object {
         private const val HOOK_NAME = "hook"
-        private val AUTH_COOKIE_REGEX = Regex("""\b\w*_?auth=([^;]+)""")
 
         fun startWebViewWith(url: String, context: Context?) {
             Intent(context ?: LCGApp.context, WebViewActivity::class.java).apply {

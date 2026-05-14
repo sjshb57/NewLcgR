@@ -151,34 +151,47 @@ object JsoupClient : ApiRequest {
     }
 
     /**
-     * 探测响应里是否携带 Discuz 的登录页特征。
+     * 探测响应里是否携带 Discuz 的"会话失效"特征。
      * 命中且本地仍持有"已登录"状态 -> 视为会话失效，清账号并通知 UI。
      *
-     * 为何不再"unstable"：原实现注释掉的 checkLoginState 用字符串匹配 userName，
-     * 容易随论坛文案变动而误判；这里改用更稳定的"登录表单存在 + 没有 formhash 指向的私有页"组合。
+     * 检测策略基于实地抓取 52pojie 真实响应（已登录帖子页 vs 未登录访问签到页）：
+     *
+     * 强信号 #1：<div id="messagelogin"> 元素存在
+     *   这个元素只在 Discuz 的"需要登录才能继续此操作"提示页里出现，正常浏览页绝不会有。
+     *   是最干净的判定依据。
+     *
+     * 强信号 #2：<div id="messagetext"> 文本含 "您需要先登录才能继续"
+     *   Discuz 标准未登录提示文案，已在 52pojie 实际响应里验证过。
+     *
+     * 命中任一即清登录态。曾用过的"form[name=login] 存在"信号被舍弃 ——
+     * 论坛侧边栏经常自带快速登录框，已登录用户也可能看到，会误报。
+     *
+     * 触发时打 Timber.w 记录上下文，方便用户在 logcat 里排查"莫名掉登录"。
      */
     private fun checkLoginState(doc: Document) {
         if (!UserDataRepo.isLoggedIn) return
-        val hasLoginForm = doc.selectFirst("form[name=login], div#loginform, table#loginform") != null
-        val hasFormHash = doc.selectFirst("input[name=formhash]") != null
-        val messageText = doc.getElementById("messagetext")?.text().orEmpty()
-        val mentionsLogin = messageText.contains("您还未登录") ||
-                messageText.contains("请先登录") ||
-                messageText.contains("还没有登录")
 
-        // 看到"健康"页面（有 formhash、没登录表单、没 messagetext 错误）→ 会话有效，重置 one-shot。
-        if (hasFormHash && !hasLoginForm && messageText.isEmpty()) {
+        val hasMessageLogin = doc.getElementById("messagelogin") != null
+        val messageText = doc.getElementById("messagetext")?.text().orEmpty()
+        val explicitExpired = messageText.contains(SESSION_EXPIRED_MARKER)
+
+        if (!hasMessageLogin && !explicitExpired) {
+            // 与会话无关 / 健康响应 → 重置 one-shot，下次再失效仍能弹一次。
             sessionExpiredFiredOnce.compareAndSet(true, false)
             return
         }
 
-        // 命中登录页结构 或 Discuz 提示框文案 → 视为失效。
-        if ((hasLoginForm && !hasFormHash) || mentionsLogin) {
-            if (sessionExpiredFiredOnce.compareAndSet(false, true)) {
-                Timber.w("session expired detected, clearing user data")
-                UserDataRepo.clearAll()
-                EventBus.getDefault().post(SessionExpiredEvent())
-            }
+        Timber.w(
+            "session expired detected: hasMessageLogin=%s explicitExpired=%s messageText='%s'",
+            hasMessageLogin,
+            explicitExpired,
+            messageText.take(120)
+        )
+        if (sessionExpiredFiredOnce.compareAndSet(false, true)) {
+            UserDataRepo.clearAll()
+            EventBus.getDefault().post(SessionExpiredEvent())
         }
     }
+
+    private const val SESSION_EXPIRED_MARKER = "您需要先登录才能继续"
 }
