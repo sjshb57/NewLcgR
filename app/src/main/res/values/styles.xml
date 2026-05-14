@@ -268,8 +268,8 @@
         <item name="colorOnSurface">@color/black</item>
         <item name="colorSurfaceVariant">@color/slight_light_gray</item>
         <item name="colorOnSurfaceVariant">@color/dark_gray</item>
-        <item name="colorBackground">@color/slight_light_light_gray</item>
-        <item name="colorOnBackground">@color/black</item>
+        <!-- colorBackground 是系统属性，要带 android: 前缀；不带前缀会 AAPT2 报错 -->
+        <item name="android:colorBackground">@color/slight_light_light_gray</item>
 
         <item name="android:windowBackground">@color/white</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

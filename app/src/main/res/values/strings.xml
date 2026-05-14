@@ -81,7 +81,6 @@
     <string name="app_setting">应用</string>
     <string name="appearance_setting">外观</string>
     <string name="enable_material_design_3">使用 Material Design 3 风格</string>
-    <string name="material_design_3_summary">实验性，开启后界面会切换到 MD3 风格</string>
     <string name="check_app_update">检查最新版本</string>
     <string name="app_is_latest">已经是最新版本了</string>
     <string name="check_app_update_error">检查版本失败</string>
