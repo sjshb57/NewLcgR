@@ -62,9 +62,6 @@ class WebViewActivity : AppCompatActivity() {
     })
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 强制 WebView Activity 走 light theme：webview 内的网页内容总是亮色，
-        // 如果外层框架跟着 app 走深色，会出现"深色框 + 白色页"剧烈视觉切换。
-        delegate.localNightMode = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
         super.onCreate(savedInstanceState)
         initData()
         initContentView()
@@ -299,12 +296,6 @@ class WebViewActivity : AppCompatActivity() {
             setSupportZoom(false)
             cacheMode = WebSettings.LOAD_DEFAULT
             blockNetworkImage = true
-            // 关键：默认 WebView UA 末尾带 " wv" 标记，52pojie 的 WAF 据此把请求识别成
-            // 可疑流量并重定向到 waf_slider_verify.html 滑块验证页（用户表现：无限闪烁
-            // 进不去登录页）。换成标准 Android Chrome UA 绕过 WAF。
-            userAgentString =
-                "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36"
         }
     }
 
