@@ -68,7 +68,6 @@ class HalfScreenWebViewFragment : TopDialog() {
             builtInZoomControls = true
             displayZoomControls = false
             blockNetworkImage = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
             defaultTextEncodingName = "UTF-8"
             cacheMode = WebSettings.LOAD_NO_CACHE

@@ -34,11 +34,6 @@ class LCGApp : Application() {
         initCoil()
         AppGuardStarter.init(this)
         ShiplyInitialization.init(this@LCGApp)
-        // 注意：此处原本会调用 LCGCookieJar.syncToWebView()，把 jar 里的 cookie 推回
-        // WebView 的 CookieManager。但这会导致一个隐藏 bug：如果 jar 里残留上一次失败
-        // 登录留下的过期/无效 cookie，启动时被推进 WebView 后，下次访问 52pojie 时
-        // WebView 带着无效 cookie 请求，触发 WAF 拒绝访问 waf_text_verify.html。
-        // WebView 的 CookieManager 自身已会跨 app 重启持久化，不需要从 jar 回推。
         trySignIn()
         CacheCleanerTask.clearCachesIfNeeded()
     }

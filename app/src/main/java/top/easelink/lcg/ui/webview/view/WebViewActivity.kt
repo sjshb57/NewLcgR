@@ -284,7 +284,7 @@ class WebViewActivity : AppCompatActivity() {
             builtInZoomControls = true
             displayZoomControls = false
             blockNetworkImage = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
             defaultTextEncodingName = "UTF-8"
             cacheMode = WebSettings.LOAD_NO_CACHE
@@ -296,7 +296,7 @@ class WebViewActivity : AppCompatActivity() {
         mWebView.settings.apply {
             javaScriptEnabled = mForceEnableJs
             domStorageEnabled = true
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             useWideViewPort = true
             loadWithOverviewMode = true
             defaultTextEncodingName = "UTF-8"
