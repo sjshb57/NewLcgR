@@ -41,13 +41,18 @@ fun getScreenHeightDp(context: Context): Int {
 }
 
 /**
- * Get the device's real User-Agent
+ * 取系统 WebView 的默认 UA。
  *
+ * 注意：WebSettings.getDefaultUserAgent 返回的 UA 末尾带 " wv)" 标记
+ * （Android WebView 标识符），有些 WAF 会用这个标识做"可疑流量"评分。
+ * 出于防御性目的，对 Jsoup/OkHttp 这种纯后台请求去掉 wv 标记，让请求
+ * 看起来像普通 Chrome on Android。WebView 自己用的 UA 不动（webview
+ * 本来就是 webview，伪装也没意义）。
  */
 fun getDeviceUserAgent(context: Context): String {
-    // 显示UA信息
-    // showMessage(WebSettings.getDefaultUserAgent(context))
     return WebSettings.getDefaultUserAgent(context)
+        .replace("; wv) ", ") ")
+        .replace(" wv) ", ") ")
 }
 
 fun getScreenWidth(context: Context): Int = context.resources.displayMetrics.widthPixels

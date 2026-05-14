@@ -93,12 +93,20 @@ object LCGCookieJar {
     }
 
     private fun buildCookie(httpUrl: HttpUrl, name: String, value: String): Cookie? = runCatching {
+        // 短期会话类 cookie 必须用短 TTL，否则下次冷启动会把已过期的旧值推回 WebView，
+        // 服务端看到过期会话直接拒绝（典型表现：waf_text_verify.html 无法访问）。
+        // wzws_cid 是知道创宇 WAF 的挑战 cookie（Max-Age=1800s），PHPSESSID 同理。
+        val ttl = if (name.startsWith("wzws_") || name == "PHPSESSID") {
+            SHORT_SESSION_TTL_MS
+        } else {
+            DEFAULT_COOKIE_TTL_MS
+        }
         Cookie.Builder()
             .name(name)
             .value(value)
             .domain(httpUrl.host)
             .path("/")
-            .expiresAt(System.currentTimeMillis() + DEFAULT_COOKIE_TTL_MS)
+            .expiresAt(System.currentTimeMillis() + ttl)
             .build()
     }.onFailure { Timber.w(it, "build cookie failed: %s=%s", name, value) }.getOrNull()
 
@@ -127,4 +135,5 @@ object LCGCookieJar {
     }
 
     private const val DEFAULT_COOKIE_TTL_MS = 30L * 24 * 60 * 60 * 1000
+    private const val SHORT_SESSION_TTL_MS = 30L * 60 * 1000  // 30 分钟，对齐 WAF challenge 默认 Max-Age
 }

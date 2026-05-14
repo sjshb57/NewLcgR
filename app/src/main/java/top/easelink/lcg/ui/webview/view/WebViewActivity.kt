@@ -119,6 +119,14 @@ class WebViewActivity : AppCompatActivity() {
             openInSystemBrowser(url)
         }
 
+        // CookieManager 默认接受 first-party cookie，但 third-party 默认是 false。
+        // QQ 登录会跨域跳转到 connect.qq.com，需要 third-party cookie 才能完成；
+        // WAF cookie wzws_cid 是 first-party HttpOnly，依赖 acceptCookie=true。
+        android.webkit.CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setAcceptThirdPartyCookies(mWebView, true)
+        }
+
         isOpenLoginEvent = intent.getBooleanExtra(OPEN_LOGIN_PAGE, false)
         mForceEnableJs = intent.getBooleanExtra(FORCE_ENABLE_JS_KEY, false)
 
@@ -339,35 +347,56 @@ class WebViewActivity : AppCompatActivity() {
     private inner class InnerWebViewClient : WebViewClient() {
         override fun onPageCommitVisible(view: WebView, url: String) {
             setLoading(false)
-            // 直接按 URL 的实际 host 把 cookie 同步进统一 jar，避免 WebView 与原生网络栈失去会话同步。
-            LCGCookieJar.syncFromWebView(url)
+            view.settings.blockNetworkImage = false
+            // 等 WAF 验证码图片这种子资源加载后再同步 cookie：commit 瞬间 wzws_cid 可能
+            // 还没到 CookieManager（它是通过 /waf_text_captcha 图片响应的 Set-Cookie
+            // 下发的）。延迟 300ms + flush 确保 cookie 落盘后再同步进 jar。
+            view.postDelayed({
+                runCatching { android.webkit.CookieManager.getInstance().flush() }
+                LCGCookieJar.syncFromWebView(url)
+            }, 300)
             if (isOpenLoginEvent) {
                 view.loadUrl("javascript:$HOOK_NAME.processHtml(document.documentElement.outerHTML);")
             }
-            view.settings.blockNetworkImage = false
         }
 
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            view.settings.blockNetworkImage = true
-            setLoading(true)
+            // 关键修复：WAF 验证页 (/waf_text_verify.html / /waf_slider_verify.html) 必须
+            // 立刻加载图片——验证码图 (/waf_text_captcha) 的响应头才是下发 wzws_cid
+            // cookie 的地方。普通页面才屏蔽图片以加快首屏。
+            val isWaf = isWafChallengeUrl(url)
+            view.settings.blockNetworkImage = !isWaf
+            // 验证页要让用户看到，不能用 Lottie 占位盖住
+            setLoading(!isWaf)
         }
 
         override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
-            // 考虑显示警告对话框后再决定是否继续
-            handler.cancel() // 改为 cancel() 提高安全性
+            // 安全策略：任何 SSL 错误一律 cancel，不提供"继续"绕过 UI（MITM 风险）。
+            handler.cancel()
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             request.url.toString().let { url ->
                 when {
-                    url.startsWith("wtloginmqq://ptlogin/qlogin") -> runCatching {
-                        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                    url.startsWith("wtloginmqq://ptlogin/qlogin") -> {
+                        runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+                        return true
                     }
-                    url.startsWith("bdnetdisk") -> showMessage(R.string.baidu_net_disk_not_support)
+                    url.startsWith("bdnetdisk") -> {
+                        showMessage(R.string.baidu_net_disk_not_support)
+                        return true
+                    }
                 }
             }
             return false
         }
+    }
+
+    private fun isWafChallengeUrl(url: String?): Boolean {
+        if (url == null) return false
+        return url.contains("/waf_text_verify.html") ||
+                url.contains("/waf_slider_verify.html") ||
+                url.contains("/waf_text_captcha")
     }
 
     companion object {
