@@ -46,13 +46,16 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /**
-     * 持久化暗夜模式偏好并立刻通过 AppCompatDelegate 应用（系统会自动 recreate 所有 Activity）。
+     * 持久化暗夜模式偏好并立刻通过 AppCompatDelegate 应用。
+     * Activity recreate 由 SettingActivity 的 onItemSelected 显式调用兜底。
      * mode 与 AppConfig.NIGHT_MODE_* 常量对齐。
      */
     fun setNightMode(mode: Int) {
         if (mode == AppConfig.nightMode) return
+        val delegateMode = toDelegateMode(mode)
+        timber.log.Timber.i("setNightMode: appMode=%d → delegateMode=%d", mode, delegateMode)
         AppConfig.nightMode = mode
-        AppCompatDelegate.setDefaultNightMode(toDelegateMode(mode))
+        AppCompatDelegate.setDefaultNightMode(delegateMode)
     }
 
     companion object {
