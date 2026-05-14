@@ -2,11 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <dimen name="design_bottom_navigation_height" tools:override="true">@dimen/dp_50</dimen>
 
-    <!--
-    语义化 spacing / text scale —— 新写的 layout 应使用以下 token，
-    旧 layout 中残留的 @dimen/dp_N 是历史包袱，触碰到时逐步迁移过来。
-    spacing 基线 4/8/16/24，对齐 Material 8-grid。
-    -->
     <dimen name="space_xxs">2dp</dimen>
     <dimen name="space_xs">4dp</dimen>
     <dimen name="space_sm">8dp</dimen>
@@ -24,10 +19,6 @@
     <!-- 触摸目标最小值（Material 无障碍规范），FAB / IconButton 等触达控件用 -->
     <dimen name="touch_target_min">48dp</dimen>
 
-    <!--
-    历史 dp_N 字典（保留供旧 layout 引用，逐步迁移至 space_* / text_* 后清理）。
-    已删：0 引用的小数项 dp_*_5 系列、dp_*_25，以及无人引用的 dp_301~dp_340。
-    -->
     <dimen name="dp_m_60">-60dp</dimen>
     <dimen name="dp_m_30">-30dp</dimen>
     <dimen name="dp_m_20">-20dp</dimen>
@@ -307,7 +298,6 @@
     <dimen name="dp_290">290dp</dimen>
     <dimen name="dp_300">300dp</dimen>
 
-    <!-- font size，逐步迁移至上方 text_* token -->
     <dimen name="sp_6">6sp</dimen>
     <dimen name="sp_8">8sp</dimen>
     <dimen name="sp_10">10sp</dimen>
