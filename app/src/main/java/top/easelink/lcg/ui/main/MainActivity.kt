@@ -5,7 +5,6 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
@@ -84,15 +83,15 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
             binding.statusBarBackground.apply {
                 layoutParams.height = systemBars.top
-                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.white))
+                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.lcg_surface))
             }
 
             binding.toolbar.updatePadding(top = 0)
             binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
 
-            (binding.bottomNavigation.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-                bottomMargin = systemBars.bottom
-            }
+            // BottomNav 不再用 bottomMargin 把自己"抬"到系统导航栏之上，而是用 paddingBottom
+            // 让背景延伸到屏幕底部、内容区上推。视觉上更贴底，更符合 edge-to-edge 设计。
+            binding.bottomNavigation.updatePadding(bottom = systemBars.bottom)
 
             insets
         }
@@ -363,12 +362,14 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     }
 
     private fun setStatusBarAppearance(isLight: Boolean) {
+        // isLight 指"页面背景偏亮，状态栏图标应该用深色"。day mode 通常是 true，
+        // night mode 系统会强制翻转，所以这里直接读 lcg_surface 资源即可，
+        // 资源系统会按 night-qualifier 自动选对应版本。
         WindowCompat.getInsetsController(window, window.decorView).apply {
             isAppearanceLightStatusBars = isLight
         }
         binding.statusBarBackground.setBackgroundColor(
-            if (isLight) ContextCompat.getColor(this, R.color.white)
-            else ContextCompat.getColor(this, R.color.black)
+            ContextCompat.getColor(this, R.color.lcg_surface)
         )
     }
 

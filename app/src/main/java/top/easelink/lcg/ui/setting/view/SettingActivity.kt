@@ -119,6 +119,14 @@ class SettingActivity : TopActivity() {
             showRecommendFlag.setOnCheckedChangeListener { _, isChecked ->
                 AppConfig.articleShowRecommendFlag = isChecked
             }
+
+            nightModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    mViewModel.setNightMode(position)
+                }
+            }
         }
     }
 
@@ -156,6 +164,10 @@ class SettingActivity : TopActivity() {
 
             handlePreTagInArticle.observe(this@SettingActivity) { isChecked ->
                 binding.articleHandlePreTag.isChecked = isChecked
+            }
+
+            nightModeSelected.observe(this@SettingActivity) { position ->
+                binding.nightModeSpinner.setSelection(position, false)
             }
         }
     }

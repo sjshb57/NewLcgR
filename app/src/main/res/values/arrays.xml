@@ -5,4 +5,11 @@
         <item>百度站内</item>
     </string-array>
 
+    <!-- 顺序必须与 AppConfig.NIGHT_MODE_* 常量对齐：0 / 1 / 2 -->
+    <string-array name="night_mode_array">
+        <item>跟随系统</item>
+        <item>强制亮色</item>
+        <item>强制深色</item>
+    </string-array>
+
 </resources>

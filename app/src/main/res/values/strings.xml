@@ -79,6 +79,8 @@
     <string name="sync_favorites">同步收藏文章到网站</string>
     <string name="sync_favorites_instruction">（默认仅收藏到本地）</string>
     <string name="app_setting">应用</string>
+    <string name="appearance_setting">外观</string>
+    <string name="night_mode_setting">深色模式</string>
     <string name="check_app_update">检查最新版本</string>
     <string name="app_is_latest">已经是最新版本了</string>
     <string name="check_app_update_error">检查版本失败</string>

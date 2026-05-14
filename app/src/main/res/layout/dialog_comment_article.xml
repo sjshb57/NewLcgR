@@ -29,7 +29,7 @@
                 app:layout_constraintHorizontal_bias="0" />
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/reply_content_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/comment_title"

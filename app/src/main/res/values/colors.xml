@@ -41,4 +41,21 @@
     <color name="statusBarColorWhite">#FFFFFF</color>
     <color name="statusBarColorDefault">@color/colorPrimary</color>
     <color name="light_grey_background">#ECECEC</color>
+
+    <!--
+    LCG 命名空间的 day/night-aware 色板：layout 和 styles 用这些而不是直接
+    @color/white / @color/black，以便在 values-night/ 自动切换深色版本。
+    -->
+    <color name="lcg_surface">#FFFFFF</color>            <!-- 卡片 / Toolbar 背景 -->
+    <color name="lcg_on_surface">#2A2A2A</color>          <!-- 主要文字 -->
+    <color name="lcg_surface_variant">#ECECEC</color>     <!-- 次级表面、分隔线感 -->
+    <color name="lcg_on_surface_variant">#696969</color>  <!-- 次级文字 -->
+    <color name="lcg_background">#F7F6F6</color>          <!-- 页面背景（卡片浮起感） -->
+
+    <color name="lcg_primary_container">#E6E6E6</color>
+    <color name="lcg_on_primary_container">#2A2A2A</color>
+    <color name="lcg_secondary_container">#FFE4E6</color>
+
+    <!-- Switch ON 时轨道颜色：半透明红，避免大面积红刺眼 -->
+    <color name="lcg_switch_track_on">#80E01720</color>
 </resources>

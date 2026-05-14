@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  深色模式色板覆盖（仅覆盖 LCG 命名空间下的 surface/text 系列；
+  原版 @color/white / @color/black 仍保持字面值，layout 里残留的硬编码白底/黑字
+  会逐步替换为 @color/lcg_surface 等 day/night-aware 资源）。
+-->
+<resources>
+    <color name="lcg_surface">#1E1E1E</color>
+    <color name="lcg_on_surface">#ECECEC</color>
+    <color name="lcg_surface_variant">#2A2A2A</color>
+    <color name="lcg_on_surface_variant">#B0B0B0</color>
+    <color name="lcg_background">#121212</color>
+
+    <color name="lcg_primary_container">#3A3A3A</color>
+    <color name="lcg_on_primary_container">#ECECEC</color>
+    <color name="lcg_secondary_container">#4A1418</color>
+
+    <!-- 半透明红轨道在深色下也能保持视觉一致 -->
+    <color name="lcg_switch_track_on">#80E01720</color>
+</resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 启动页保留原 launch_bg；其它仍继承 AppTheme（已迁移到 Material3） -->
+    <!-- 启动页保留原 launch_bg；正式主题切换由 SplashActivity.setTheme 完成 -->
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowIsTranslucent">false</item>
@@ -13,45 +13,44 @@
         <item name="android:activityOpenEnterAnimation">@null</item>
         <item name="android:activityOpenExitAnimation">@null</item>
         <item name="android:activityCloseEnterAnimation">@null</item>
-        <item name="android:activityCloseExitAnimation">@null</item>
         <item name="android:taskOpenEnterAnimation">@null</item>
-        <item name="android:taskOpenExitAnimation">@null</item>
         <item name="android:taskCloseEnterAnimation">@null</item>
-        <item name="android:taskCloseExitAnimation">@null</item>
         <item name="android:taskToFrontEnterAnimation">@null</item>
-        <item name="android:taskToFrontExitAnimation">@null</item>
         <item name="android:taskToBackEnterAnimation">@null</item>
-        <item name="android:taskToBackExitAnimation">@null</item>
     </style>
 
     <!--
-    主题已整体迁移到 Material Design 3：parent 改为 Theme.Material3.Light.NoActionBar。
-    色板以 52pojie logo 红为 colorPrimary 突出品牌；surface 仍是白底保持论坛页面通透。
-    其它 Widget.* / TextAppearance.* 大多保留 MaterialComponents parent —— Material 库
-    同时支持 MD2/MD3，旧 parent 在 MD3 主题下仍能正常渲染，逐个改造收益小、风险大。
+    主应用主题，纯 Material 3（DayNight 自动跟随系统切换深色，由
+    AppCompatDelegate.setDefaultNightMode 在 Settings 里覆盖）。
+
+    色板调整：保留原版"中性主调 + 红色点缀"的视觉气质：
+    - colorPrimary 用 colorPrimary 资源 (#2a2a2a 深灰)，避免主色铺满成红色
+    - colorSecondary 才是 52pojie 红，用于 FAB / 开关 ON / 高亮等点缀
+    其它 MD3 必要色板（surface / surfaceVariant / background）配套定义。
     -->
-    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- 色板 -->
-        <item name="colorPrimary">@color/pojie_logo</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">#FFE4E6</item>
-        <item name="colorOnPrimaryContainer">@color/pojie_logo</item>
+        <item name="colorPrimaryContainer">@color/lcg_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/lcg_on_primary_container</item>
 
-        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorSecondary">@color/pojie_logo</item>
         <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/lcg_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/pojie_logo</item>
 
-        <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/black</item>
-        <item name="colorSurfaceVariant">@color/slight_light_gray</item>
-        <item name="colorOnSurfaceVariant">@color/dark_gray</item>
-        <item name="android:colorBackground">@color/slight_light_light_gray</item>
+        <item name="colorSurface">@color/lcg_surface</item>
+        <item name="colorOnSurface">@color/lcg_on_surface</item>
+        <item name="colorSurfaceVariant">@color/lcg_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/lcg_on_surface_variant</item>
+        <item name="android:colorBackground">@color/lcg_background</item>
 
-        <item name="android:textColorPrimary">@color/black_effective</item>
-        <item name="android:textColorSecondary">@color/black_effective</item>
-        <item name="android:textColor">@color/black_effective</item>
+        <item name="android:textColorPrimary">@color/lcg_on_surface</item>
+        <item name="android:textColorSecondary">@color/lcg_on_surface_variant</item>
 
         <!-- 窗口 / 系统栏 -->
-        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowBackground">@color/lcg_surface</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowDisablePreview">true</item>
@@ -67,7 +66,7 @@
         <item name="android:textSize">@dimen/sp_16</item>
         <item name="android:typeface">sans</item>
 
-        <!-- 兼容性细节（AppCompat 范畴，MD3 主题下仍生效） -->
+        <!-- 兼容 AppCompat 范畴属性，MD3 主题下仍生效 -->
         <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_black_24px</item>
         <item name="actionOverflowButtonStyle">@style/LCGOverflowButtonStyle</item>
@@ -75,44 +74,47 @@
 
         <item name="toolbarStyle">@style/AppToolbarStyle</item>
 
-        <!-- SwitchMaterial 全局样式覆盖：还原 MD2 风格 white off-state -->
+        <!-- 开关：MD3 默认 off-state 偏黑，强制还原 MD2 "白色 off / 红色 on" 风格 -->
         <item name="switchStyle">@style/Widget.LCG.Switch</item>
+        <item name="materialSwitchStyle">@style/Widget.LCG.MaterialSwitch</item>
+
+        <!-- 底部导航：禁用 MD3 默认的红色"药丸"激活背景指示器 -->
+        <item name="bottomNavigationStyle">@style/Widget.LCG.BottomNavigationView</item>
     </style>
 
-    <!-- Toolbar：Material3 的 Toolbar 默认无 elevation，更扁平 -->
+    <!-- Toolbar -->
     <style name="AppToolbarStyle" parent="Widget.Material3.Toolbar">
-        <item name="android:background">@color/white</item>
-        <item name="titleTextColor">@color/black</item>
-        <item name="subtitleTextColor">@color/black</item>
-        <item name="navigationIconTint">@color/black</item>
-        <item name="actionMenuTextColor">@color/black</item>
+        <item name="android:background">@color/lcg_surface</item>
+        <item name="titleTextColor">@color/lcg_on_surface</item>
+        <item name="subtitleTextColor">@color/lcg_on_surface_variant</item>
+        <item name="navigationIconTint">@color/lcg_on_surface</item>
+        <item name="actionMenuTextColor">@color/lcg_on_surface</item>
         <item name="actionOverflowButtonStyle">@style/LCGOverflowButtonStyle.Black</item>
         <item name="elevation">0dp</item>
     </style>
 
     <style name="LCGOverflowButtonStyle.Black" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:tint">@color/black</item>
+        <item name="android:tint">@color/lcg_on_surface</item>
     </style>
 
-    <!-- 显式 Toolbar style（被多个 layout 直接引用）也走 Material3 -->
     <style name="Toolbar" parent="Widget.Material3.Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
-        <item name="android:background">@color/white</item>
-        <item name="colorControlNormal">@color/black</item>
+        <item name="android:background">@color/lcg_surface</item>
+        <item name="colorControlNormal">@color/lcg_on_surface</item>
         <item name="android:fitsSystemWindows">false</item>
-        <item name="titleTextColor">@color/black</item>
+        <item name="titleTextColor">@color/lcg_on_surface</item>
     </style>
 
-    <style name="Toolbar.TitleText" parent="TextAppearance.MaterialComponents.Subtitle1">
-        <item name="android:textColor">@color/black</item>
+    <style name="Toolbar.TitleText" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/lcg_on_surface</item>
         <item name="android:textSize">16sp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="AppTheme.Dialog.FullScreen.BottomInOut" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:windowBackground">@color/white</item>
+    <style name="AppTheme.Dialog.FullScreen.BottomInOut" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/lcg_surface</item>
         <item name="android:windowAnimationStyle">@style/BottomInOutAnim</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowIsFloating">true</item>
@@ -122,18 +124,18 @@
     </style>
 
     <style name="LCGOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:tint">@color/black</item>
+        <item name="android:tint">@color/lcg_on_surface</item>
     </style>
 
     <style name="MaterialDrawer.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">false</item>
-        <item name="color">@color/black</item>
+        <item name="color">@color/lcg_on_surface</item>
     </style>
 
     <style name="LCGSearchView" parent="Widget.AppCompat.SearchView">
         <item name="defaultQueryHint">@string/input_key_word</item>
-        <item name="queryBackground">@color/white</item>
-        <item name="submitBackground">@color/white</item>
+        <item name="queryBackground">@color/lcg_surface</item>
+        <item name="submitBackground">@color/lcg_surface</item>
     </style>
 
     <style name="TextStyle">
@@ -141,41 +143,41 @@
         <item name="android:layout_marginBottom">@dimen/dp_2</item>
         <item name="android:layout_marginLeft">@dimen/dp_2</item>
         <item name="android:layout_marginRight">@dimen/dp_2</item>
-        <item name="android:textColor">@color/black_effective</item>
+        <item name="android:textColor">@color/lcg_on_surface</item>
     </style>
 
-    <style name="TextStyle.Title" parent="TextAppearance.MaterialComponents.Subtitle1">
-        <item name="android:textColor">@color/black</item>
+    <style name="TextStyle.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/lcg_on_surface</item>
     </style>
 
-    <style name="TextStyle.Title.Sub" parent="TextAppearance.MaterialComponents.Subtitle2">
+    <style name="TextStyle.Title.Sub" parent="TextAppearance.Material3.TitleSmall">
         <item name="android:textSize">@dimen/sp_12</item>
-        <item name="android:textColor">@color/semi_gray</item>
+        <item name="android:textColor">@color/lcg_on_surface_variant</item>
     </style>
 
-    <style name="TextStyle.Heading" parent="TextAppearance.MaterialComponents.Headline6">
+    <style name="TextStyle.Heading" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:textSize">@dimen/sp_16</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/lcg_on_surface</item>
     </style>
 
-    <style name="TextStyle.SearchResult.Abstract" parent="TextAppearance.MaterialComponents.Subtitle1">
+    <style name="TextStyle.SearchResult.Abstract" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:textSize">@dimen/sp_12</item>
-        <item name="android:textColor">@color/semi_gray</item>
+        <item name="android:textColor">@color/lcg_on_surface_variant</item>
     </style>
 
-    <style name="TextStyle.SearchResult.Title" parent="TextAppearance.MaterialComponents.Subtitle1">
+    <style name="TextStyle.SearchResult.Title" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textSize">@dimen/sp_14</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/lcg_on_surface</item>
     </style>
 
-    <style name="CollapsingToolbar.TitleText" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
-        <item name="android:textColor">@color/black</item>
+    <style name="CollapsingToolbar.TitleText" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">@color/lcg_on_surface</item>
         <item name="android:textSize">@dimen/sp_16</item>
     </style>
 
     <style name="Button" parent="Widget.AppCompat.Button">
-        <item name="android:textColor">@color/black_effective</item>
+        <item name="android:textColor">@color/lcg_on_surface</item>
         <item name="android:layout_height">@dimen/dp_48</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:paddingLeft">@dimen/dp_8</item>
@@ -200,36 +202,56 @@
         <item name="android:background">@color/transparent</item>
     </style>
 
-    <style name="AppTab" parent="Widget.Design.TabLayout">
-        <item name="android:theme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+    <style name="AppTab" parent="Widget.Material3.TabLayout">
         <item name="android:minHeight">?attr/actionBarSize</item>
         <item name="tabTextAppearance">@style/AppTab.TextAppearance</item>
         <item name="tabIndicatorHeight">@dimen/dp_2</item>
-        <item name="tabSelectedTextColor">@color/black</item>
-        <item name="tabTextColor">@color/gray</item>
+        <item name="tabSelectedTextColor">@color/lcg_on_surface</item>
+        <item name="tabTextColor">@color/lcg_on_surface_variant</item>
     </style>
 
-    <style name="AppTab.TextAppearance" parent="TextAppearance.Design.Tab">
+    <style name="AppTab.TextAppearance" parent="TextAppearance.Material3.LabelLarge">
         <item name="textAllCaps">false</item>
         <item name="android:textSize">@dimen/sp_14</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="ReplyEditText" parent="Theme.AppCompat.Light">
-        <item name="colorControlNormal">@color/colorPrimary</item>
+    <style name="ReplyEditText" parent="Theme.Material3.DayNight">
+        <item name="colorControlNormal">@color/lcg_on_surface_variant</item>
         <item name="colorControlActivated">@color/pojie_logo</item>
     </style>
 
-    <style name="BottomNavigationView" parent="@style/AppTab.TextAppearance">
-        <item name="android:textSize">9sp</item>
+    <!--
+    BottomNavigationView 自定义样式（应用到所有 MD3 BottomNav 实例）：
+    1) 关闭"激活背景指示器"（MD3 默认会在选中 icon 后画一个红色药丸背景）
+    2) Active/Inactive 文字样式相同（11sp），避免点击后字号"长大"的视觉动效
+    3) 颜色用 ColorStateList，选中红、未选灰，对齐 bottom_nav_state.xml
+    -->
+    <style name="Widget.LCG.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">@style/Widget.LCG.BottomNavigationView.ActiveIndicator</item>
+        <item name="itemTextAppearanceActive">@style/Widget.LCG.BottomNavigationView.Label</item>
+        <item name="itemTextAppearanceInactive">@style/Widget.LCG.BottomNavigationView.Label</item>
+        <item name="itemTextColor">@color/bottom_nav_state</item>
+        <item name="itemIconTint">@color/bottom_nav_state</item>
+        <item name="itemRippleColor">@color/translucent_gray</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="elevation">0dp</item>
     </style>
 
-    <style name="BottomNavigationView.Active" parent="@style/AppTab.TextAppearance">
-        <item name="android:textSize">12sp</item>
+    <!-- 0 尺寸 = 隐藏激活指示器 -->
+    <style name="Widget.LCG.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:width">0dp</item>
+        <item name="android:height">0dp</item>
+        <item name="android:color">@android:color/transparent</item>
     </style>
 
-    <style name="AppTheme.Dialog.FullScreen" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Widget.LCG.BottomNavigationView.Label" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppTheme.Dialog.FullScreen" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>
@@ -253,10 +275,7 @@
         <item name="android:windowExitAnimation">@anim/fade_out</item>
     </style>
 
-    <!--
-    列表项卡片统一样式：圆角 + 水平外边距 + 适度阴影。
-    用 Widget.Material3.CardView.Elevated 让卡片在 MD3 主题下也保持柔和阴影感。
-    -->
+    <!-- 列表项卡片统一样式 -->
     <style name="Widget.LCG.ItemCard" parent="Widget.Material3.CardView.Elevated">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -269,17 +288,22 @@
         <item name="android:foreground">?attr/selectableItemBackground</item>
         <item name="cardCornerRadius">@dimen/dp_10</item>
         <item name="cardElevation">@dimen/dp_1</item>
-        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardBackgroundColor">@color/lcg_surface</item>
     </style>
 
     <!--
-    SwitchMaterial 自定义样式：还原 MD2 时代的"白色 off-state"。
-    Theme.Material3 默认会把 off-state 渲染成 surfaceContainerHighest（偏深的灰），
-    用户反馈不喜欢；这里通过 ColorStateList 把 off-state 强行设回白色 + 浅灰轨道。
+    旧 SwitchMaterial 的全局样式（兼容遗留 layout）。
+    新 MD3 MaterialSwitch widget 用 Widget.LCG.MaterialSwitch 应用同款配色。
     -->
-    <style name="Widget.LCG.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+    <style name="Widget.LCG.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
         <item name="thumbTint">@color/lcg_switch_thumb_tint</item>
         <item name="trackTint">@color/lcg_switch_track_tint</item>
+    </style>
+
+    <style name="Widget.LCG.MaterialSwitch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="thumbTint">@color/lcg_switch_thumb_tint</item>
+        <item name="trackTint">@color/lcg_switch_track_tint</item>
+        <item name="trackDecorationTint">@color/lcg_switch_track_tint</item>
     </style>
 
 </resources>
