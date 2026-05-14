@@ -168,7 +168,7 @@ class SettingActivity : TopActivity() {
                 binding.articleHandlePreTag.isChecked = isChecked
             }
 
-            materialDesign3Enabled.observe(this@SettingActivity) { isChecked ->
+            useMaterialDesign3.observe(this@SettingActivity) { isChecked ->
                 binding.materialDesign3Switch.isChecked = isChecked
             }
         }
