@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 名字保留以避免破坏现有引用，实际颜色走 day/night-aware lcg_surface -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <corners android:radius="@dimen/dp_4" />
-    <solid android:color="@color/lcg_surface"/>
+    <corners android:radius="@dimen/dp_4"/>
+    <solid android:color="?attr/colorSurface"/>
 </shape>

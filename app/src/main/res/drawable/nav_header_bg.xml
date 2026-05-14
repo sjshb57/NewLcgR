@@ -3,9 +3,9 @@
     <item android:bottom="28dp">
         <shape android:shape="rectangle">
             <gradient
-                    android:angle="270"
-                    android:endColor="@color/white"
-                    android:startColor="@color/blue_grey_light" />
+                android:angle="270"
+                android:endColor="@color/lcg_surface"
+                android:startColor="@color/blue_grey_light"/>
         </shape>
     </item>
 </layer-list>
