@@ -10,7 +10,7 @@
     android:focusable="true"
     android:clickable="true"
     android:gravity="top"
-    android:background="@color/white">
+    android:background="@color/lcg_surface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/me_user_info_card"
@@ -39,7 +39,7 @@
             android:id="@+id/me_user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/black_effective"
+            android:textColor="@color/lcg_on_surface"
             android:textSize="@dimen/sp_16"
             android:ellipsize="end"
             android:maxEms="10"

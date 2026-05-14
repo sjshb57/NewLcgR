@@ -72,7 +72,7 @@
         android:layout_marginStart="@dimen/dp_20"
         android:layout_marginEnd="@dimen/dp_20"
         android:background="@drawable/rectangle_bg"
-        android:backgroundTint="@color/slight_light_gray"
+        android:backgroundTint="@color/lcg_background"
         app:layout_constraintTop_toBottomOf="@id/content_text_view"
         />
 

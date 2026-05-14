@@ -6,7 +6,7 @@
     android:id="@+id/reply_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:background="@color/lcg_surface"
     android:orientation="vertical"
     app:cardCornerRadius="@dimen/dp_2">
 

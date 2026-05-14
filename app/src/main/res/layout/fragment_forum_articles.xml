@@ -16,7 +16,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
+            android:background="@color/lcg_surface"
             android:clipChildren="false"
             android:focusable="true"
             android:clickable="true"
@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 style="@style/Toolbar"
-                app:titleTextColor="@color/black"
+                app:titleTextColor="@color/lcg_on_surface"
                 app:layout_scrollFlags="scroll|enterAlways"/>
 
             <com.google.android.material.tabs.TabLayout
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/articleToolbar"
                 android:minHeight="@dimen/dp_40"
-                android:background="@color/white"
+                android:background="@color/lcg_surface"
                 android:visibility="gone"
                 app:tabIndicatorColor="@color/colorAccent"
                 app:tabIndicatorHeight="@dimen/dp_3"

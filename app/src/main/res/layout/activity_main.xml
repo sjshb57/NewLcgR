@@ -38,10 +38,10 @@
                     android:layout_height="?attr/actionBarSize"
                     android:elevation="@dimen/dp_4"
                     app:layout_scrollFlags="scroll|enterAlways"
-                    app:subtitleTextColor="@color/black"
+                    app:subtitleTextColor="@color/lcg_on_surface"
                     app:title="@string/app_name"
                     app:titleTextAppearance="@style/Toolbar.TitleText"
-                    app:titleTextColor="@color/black"/>
+                    app:titleTextColor="@color/lcg_on_surface"/>
             </com.google.android.material.appbar.AppBarLayout>
 
             <FrameLayout
@@ -53,10 +53,10 @@
         </LinearLayout>
 
         <!--
-        BottomNavigationView 样式（背景、字体大小、激活指示器等）由 styles.xml 里
-        Widget.LCG.BottomNavigationView 集中控制。这里只声明实例化 + menu 绑定。
-        clipToPadding=false 配合 MainActivity 内的 paddingBottom inset，让 nav 贴底
-        延伸到系统导航栏下方，避免显得"飘起来"。
+        BottomNav 样式（背景、字体大小、激活指示器等）由 styles.xml 里
+        Widget.LCG.BottomNavigationView 集中控制。MainActivity 给 bottomMargin
+        =systemBars.bottom 让 nav 贴在系统导航栏之上；窗口 windowBackground 是
+        lcg_surface，导航栏区域透出同样色，视觉上无缝衔接。
         -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
@@ -64,7 +64,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="@color/lcg_surface"
-            android:clipToPadding="false"
             app:itemIconSize="@dimen/dp_20"
             app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
             app:menu="@menu/nav_bottom"/>

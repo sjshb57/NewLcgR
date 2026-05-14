@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:contentPadding="@dimen/dp_6"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/lcg_surface"
         app:cardCornerRadius="@dimen/dp_4"
         app:cardUseCompatPadding="true">
 
@@ -58,7 +58,7 @@
                 android:background="@drawable/button_bg"
                 android:text="@string/reply_post_btn_cancel"
                 android:backgroundTint="@color/semi_gray"
-                android:textColor="@color/black"
+                android:textColor="@color/lcg_on_surface"
                 android:textSize="@dimen/sp_12"
                 android:layout_marginEnd="@dimen/dp_22"
                 android:padding="@dimen/dp_4"
@@ -77,7 +77,7 @@
                 android:background="@drawable/button_bg"
                 android:text="@string/reply_post_btn_confirm"
                 android:backgroundTint="@color/pojie_logo"
-                android:textColor="@color/black"
+                android:textColor="@color/lcg_on_surface"
                 android:textSize="@dimen/sp_12"
                 android:padding="@dimen/dp_4"
                 android:minHeight="@dimen/dp_0"

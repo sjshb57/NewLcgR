@@ -11,7 +11,7 @@
     android:layout_marginBottom="@dimen/dp_6"
     android:clickable="true"
     android:focusable="true"
-    android:background="@color/white"
+    android:background="@color/lcg_surface"
     android:foreground="?attr/selectableItemBackgroundBorderless"
     android:longClickable="true"
     android:orientation="vertical"
@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         android:paddingBottom="@dimen/dp_10">
         <TextView
             android:id="@+id/title_text_view"

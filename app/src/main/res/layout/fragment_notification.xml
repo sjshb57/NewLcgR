@@ -9,7 +9,7 @@
     android:focusable="true"
     android:clickable="true"
     android:gravity="center"
-    android:background="@color/white">
+    android:background="@color/lcg_surface">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/notification_swipe_refresh"

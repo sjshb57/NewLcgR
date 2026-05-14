@@ -70,9 +70,12 @@ object AppConfig {
         get() = get(CONFIG_SYNC_FAVORITES, true)
         set(value) = put(CONFIG_SYNC_FAVORITES, value)
 
-    /** 用户选的暗夜模式（0 跟随系统 / 1 亮 / 2 暗）。 */
+    /**
+     * 用户选的暗夜模式。默认 NIGHT_MODE_LIGHT —— 新装用户保持白色页面，
+     * 不跟随系统强制变暗，等用户在 Settings 主动选择才生效。
+     */
     var nightMode: Int
-        get() = get(CONFIG_NIGHT_MODE, NIGHT_MODE_FOLLOW_SYSTEM)
+        get() = get(CONFIG_NIGHT_MODE, NIGHT_MODE_LIGHT)
         set(value) = put(CONFIG_NIGHT_MODE, value)
 
 

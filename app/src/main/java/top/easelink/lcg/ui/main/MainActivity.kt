@@ -89,9 +89,15 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
             binding.toolbar.updatePadding(top = 0)
             binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
 
-            // BottomNav 不再用 bottomMargin 把自己"抬"到系统导航栏之上，而是用 paddingBottom
-            // 让背景延伸到屏幕底部、内容区上推。视觉上更贴底，更符合 edge-to-edge 设计。
-            binding.bottomNavigation.updatePadding(bottom = systemBars.bottom)
+            // BottomNav 用 bottomMargin 抬到系统栏之上，配合 navigationBarColor=lcg_surface
+            // 让系统导航区域和 nav 颜色一致，视觉上"贴底"。padding 方式会让图标位置上移，
+            // 改回 margin 让图标保持垂直居中。
+            (binding.bottomNavigation.layoutParams as? android.view.ViewGroup.MarginLayoutParams)?.apply {
+                if (bottomMargin != systemBars.bottom) {
+                    bottomMargin = systemBars.bottom
+                    binding.bottomNavigation.requestLayout()
+                }
+            }
 
             insets
         }
