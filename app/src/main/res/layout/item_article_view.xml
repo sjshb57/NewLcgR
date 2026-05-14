@@ -5,26 +5,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout"
-    style="@style/Widget.LCG.ItemCard">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/dp_2"
+    android:layout_marginBottom="@dimen/dp_6"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@color/white"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
+    android:longClickable="true"
+    android:orientation="vertical"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="@dimen/dp_3">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/article_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/dp_12"
-        android:paddingBottom="@dimen/dp_12">
-
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:paddingBottom="@dimen/dp_10">
         <TextView
             android:id="@+id/title_text_view"
             style="@style/TextStyle.Heading"
             android:textStyle="bold"
-            android:layout_width="0dp"
+            android:layout_width="@dimen/dp_0"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_14"
+            android:layout_marginTop="@dimen/dp_10"
             android:layout_marginEnd="@dimen/dp_14"
             android:maxLines="2"
-            android:textSize="@dimen/sp_16"
-            android:lineSpacingExtra="@dimen/dp_2"
+            android:textSize="@dimen/sp_14"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -35,7 +46,8 @@
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_8"
+            android:layout_marginStart="@dimen/dp_8"
+            android:layout_marginTop="@dimen/dp_5"
             app:layout_constraintTop_toBottomOf="@id/title_text_view"
             app:layout_constraintStart_toStartOf="@id/title_text_view"
             tools:text="10 / 200"/>
@@ -48,17 +60,16 @@
             android:ellipsize="middle"
             android:maxWidth="@dimen/dp_200"
             android:singleLine="true"
-            android:layout_marginStart="@dimen/dp_8"
-            app:layout_constraintTop_toTopOf="@id/reply_and_view"
-            app:layout_constraintBottom_toBottomOf="@id/reply_and_view"
-            app:layout_constraintStart_toEndOf="@id/reply_and_view"
+            android:layout_marginTop="@dimen/dp_4"
+            app:layout_constraintTop_toBottomOf="@id/reply_and_view"
+            app:layout_constraintStart_toStartOf="@id/title_text_view"
             tools:text="『原创发布区』"/>
-
+        
         <top.easelink.framework.customview.ELStampView
             android:id="@+id/stamp"
             android:layout_width="@dimen/dp_30"
             android:layout_height="@dimen/dp_30"
-            android:layout_marginEnd="@dimen/dp_8"
+            android:layout_marginEnd="@dimen/dp_4"
             android:layout_marginTop="@dimen/dp_4"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
@@ -73,11 +84,8 @@
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:layout_marginStart="@dimen/dp_8"
+            android:layout_marginBottom="@dimen/dp_10"
             app:layout_constraintTop_toTopOf="@id/reply_and_view"
-            app:layout_constraintBottom_toBottomOf="@id/reply_and_view"
             app:layout_constraintEnd_toEndOf="@id/title_text_view"
             tools:text="Author"/>
 
@@ -86,9 +94,8 @@
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_4"
-            app:layout_constraintTop_toBottomOf="@id/author_text_view"
-            app:layout_constraintEnd_toEndOf="@id/title_text_view"
+            app:layout_constraintTop_toTopOf="@id/origin"
+            app:layout_constraintEnd_toEndOf="@id/author_text_view"
             tools:text="2019-07-04"/>
 
         <ImageView
