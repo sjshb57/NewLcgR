@@ -11,14 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.RoundedCornersTransformation
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import timber.log.Timber
 import top.easelink.framework.base.BaseViewHolder
@@ -60,9 +55,15 @@ class ArticleAdapter(
 
     private val mPostList: MutableList<Post> = ArrayList()
 
+    /**
+     * 还有下一页就显示 LoadMore item。
+     * 原实现按 `size > 10` 硬阈值判断 → 短回复贴永远没"加载更多"，长贴第二页拉不到。
+     */
+    private var hasMoreItem: Boolean = false
+
     override fun getItemCount() = when {
         mPostList.isEmpty() -> 1 // show empty view
-        mPostList.size > 10 -> mPostList.size + 1 // for post more than 10 add a load more item
+        hasMoreItem -> mPostList.size + 1
         else -> mPostList.size
     }
 
@@ -102,13 +103,45 @@ class ArticleAdapter(
         }
     }
 
-    fun addItems(postList: List<Post>) {
+    /** 整列表替换。仅用于"首次加载 / 切换文章"。 */
+    @SuppressLint("NotifyDataSetChanged")
+    fun setItems(postList: List<Post>) {
+        mPostList.clear()
         mPostList.addAll(postList)
         notifyDataSetChanged()
     }
 
+    /** 翻页 append：按区间通知，保持滚动位置 + 不重绑已显示项。 */
+    fun appendItems(newPosts: List<Post>) {
+        if (newPosts.isEmpty()) return
+        val start = mPostList.size
+        mPostList.addAll(newPosts)
+        notifyItemRangeInserted(start, newPosts.size)
+    }
+
+    /** 单条插入（回复成功后插到指定行）。 */
+    fun insertItem(position: Int, post: Post) {
+        val safePos = position.coerceIn(0, mPostList.size)
+        mPostList.add(safePos, post)
+        notifyItemInserted(safePos)
+    }
+
+    /** 设置/更新 LoadMore item 的显示状态。 */
+    fun setHasMore(hasMore: Boolean) {
+        if (hasMoreItem == hasMore) return
+        val wasShowing = hasMoreItem
+        hasMoreItem = hasMore
+        // 用 mPostList.size 作为 LoadMore 的位置 —— 即末尾的下一个 item。
+        when {
+            hasMore && !wasShowing && mPostList.isNotEmpty() -> notifyItemInserted(mPostList.size)
+            !hasMore && wasShowing && mPostList.isNotEmpty() -> notifyItemRemoved(mPostList.size)
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     fun clearItems() {
         mPostList.clear()
+        hasMoreItem = false
         notifyDataSetChanged()
     }
 
@@ -252,7 +285,9 @@ class ArticleAdapter(
             post?.let { p ->
                 with(binding) {
                     try {
-                        if (p.author == username) {
+                        // 只有真的登录、且作者名与当前用户匹配才高亮。
+                        // 原实现忘了 isLoggedIn 兜底，未登录时 username=""，会把所有 author="" 的匿名回复全染色。
+                        if (isLoggedIn && username.isNotEmpty() && p.author == username) {
                             replyCard.strokeColor = ContextCompat.getColor(root.context, R.color.orange)
                             replyCard.strokeWidth = dp2px(root.context, 1f).toInt()
                         } else {
@@ -396,32 +431,16 @@ class ArticleAdapter(
     inner class LoadMoreViewHolder internal constructor(private val binding: ItemLoadMoreViewBinding) :
         BaseViewHolder(binding.root) {
 
-        private var fetchJob: Job? = null
-
         override fun onBind(position: Int) {
-            fetchJob?.cancel()
-            fetchJob = mFragment.lifecycleScope.launch {
-                val result = withContext(Dispatchers.IO) {
-                    var fetchResult = false
-                    mListener.fetchArticlePost(ArticleAdapterListener.FETCH_POST_MORE) { res ->
-                        fetchResult = res
-                    }
-                    fetchResult
-                }
-                binding.root.visibility = if (result) View.GONE else View.VISIBLE
-            }
-        }
-
-        fun onRecycled() {
-            fetchJob?.cancel()
+            // 这里只触发拉取；显示/隐藏由 Adapter.setHasMore 根据 ViewModel.hasMorePages 控制，
+            // 不再依赖回调里的 fetchResult（异步未返回前永远是 false，会让 LoadMore 永远 VISIBLE）。
+            binding.root.visibility = View.VISIBLE
+            mListener.fetchArticlePost(ArticleAdapterListener.FETCH_POST_MORE, null)
         }
     }
 
     override fun onViewRecycled(holder: BaseViewHolder) {
         super.onViewRecycled(holder)
-        if (holder is LoadMoreViewHolder) {
-            holder.onRecycled()
-        }
     }
 
     companion object {
