@@ -62,6 +62,9 @@ class WebViewActivity : AppCompatActivity() {
     })
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 强制 WebView Activity 走 light theme：webview 内的网页内容总是亮色，
+        // 如果外层框架跟着 app 走深色，会出现"深色框 + 白色页"剧烈视觉切换。
+        delegate.localNightMode = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
         super.onCreate(savedInstanceState)
         initData()
         initContentView()
@@ -141,11 +144,16 @@ class WebViewActivity : AppCompatActivity() {
     inner class WebViewHook : HookInterface {
         @JavascriptInterface
         override fun processHtml(html: String?) {
-            if (html.isNullOrBlank()) return
+            if (html.isNullOrBlank()) {
+                Timber.d("processHtml: html is null/blank, skip")
+                return
+            }
             coroutineScope.launch(CalcPool) {
                 val doc = Jsoup.parse(html)
                 val currentUrl = withContext(Main) { mWebView.url } ?: return@launch
-                if (!isLoginSuccess(doc, currentUrl)) return@launch
+                val success = isLoginSuccess(doc, currentUrl)
+                Timber.d("processHtml: url=%s isLoginSuccess=%s", currentUrl, success)
+                if (!success) return@launch
                 // 把刚登录拿到的 cookie 灌入统一 jar，OkHttp/Jsoup/Coil 立刻共享同一个会话。
                 LCGCookieJar.syncFromWebView(currentUrl)
                 UserDataRepo.isLoggedIn = true
@@ -166,20 +174,17 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     /**
-     * Discuz 论坛登录成功的标志：
-     * 1) 页面里出现用户头像 div.avt（Discuz 通用，已登录用户右上角必定渲染）；
-     * 2) 页面 NOT 含 #messagelogin / "您需要先登录" 这类失效标志。
+     * Discuz 论坛登录成功的标志：页面里出现用户头像 div.avt。
      *
-     * 旧实现还要求 cookie 含 *_auth，但 52pojie 实际命名是 *_st_p（uid|ts|md5 格式），
-     * 没有 *_auth cookie。强制要求 *_auth 会让 isLoginSuccess 永远 false，登录成功后
-     * UI 不会标记成已登录 —— 这是另一处隐藏 bug。这里改成只看 HTML 信号。
+     * 之前曾尝试加更严格的"不含 #messagelogin / 不含'您需要先登录'文案"双重校验，
+     * 但 52pojie 登录后的首页可能在其它模板片段（侧边栏快速登录、未读弹窗、片段
+     * 引用等）里包含同名元素，导致 isLoginSuccess 永远 false → 用户登录后死循环
+     * 在 WebView 里。回归原作者只看 div.avt 的简单规则。
      */
     private fun isLoginSuccess(doc: org.jsoup.nodes.Document, url: String): Boolean {
         val hasAvatar = doc.selectFirst("div.avt") != null
-        val isLoginRequiredPage = doc.getElementById("messagelogin") != null ||
-                doc.getElementById("messagetext")?.text()
-                    ?.contains("您需要先登录才能继续") == true
-        return hasAvatar && !isLoginRequiredPage
+        Timber.d("isLoginSuccess: url=%s hasAvatar=%s", url, hasAvatar)
+        return hasAvatar
     }
 
     private fun initData() {
