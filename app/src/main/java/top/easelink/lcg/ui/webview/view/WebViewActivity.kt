@@ -299,6 +299,12 @@ class WebViewActivity : AppCompatActivity() {
             setSupportZoom(false)
             cacheMode = WebSettings.LOAD_DEFAULT
             blockNetworkImage = true
+            // 关键：默认 WebView UA 末尾带 " wv" 标记，52pojie 的 WAF 据此把请求识别成
+            // 可疑流量并重定向到 waf_slider_verify.html 滑块验证页（用户表现：无限闪烁
+            // 进不去登录页）。换成标准 Android Chrome UA 绕过 WAF。
+            userAgentString =
+                "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 " +
+                "(KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36"
         }
     }
 
