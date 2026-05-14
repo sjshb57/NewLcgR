@@ -14,7 +14,8 @@
             android:id="@+id/toolbar"
             style="@style/Toolbar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_40"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
             app:titleTextColor="@color/black"
             app:title="@string/setting_title"
             app:titleTextAppearance="@style/Toolbar.TitleText"/>

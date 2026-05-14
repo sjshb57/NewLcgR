@@ -19,19 +19,29 @@
         app:elevation="0dp"
         android:outlineProvider="none"
         app:liftOnScroll="false">
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/article_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@color/white"
-        android:elevation="0dp"
-        app:elevation="0dp"
-        android:outlineProvider="none"
-        app:titleTextColor="@color/black"
-        tools:title="Article title"
-        app:titleTextAppearance="@style/Toolbar.TitleText" />
-</com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/article_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:background="@color/white"
+            android:elevation="0dp"
+            app:elevation="0dp"
+            android:outlineProvider="none"
+            app:titleTextColor="@color/black"
+            tools:title="Article title"
+            app:titleTextAppearance="@style/Toolbar.TitleText" />
+
+        <!--
+        toolbar 与状态栏均为白底，edge-to-edge 下二者视觉粘连。
+        加一条 1dp 极淡分隔线让顶部有微弱视觉收束。
+        -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:background="@color/light_grey_background" />
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/post_recycler_view"
