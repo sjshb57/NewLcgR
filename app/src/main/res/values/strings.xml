@@ -16,6 +16,7 @@
 
     <!--  History  -->
     <string name="btn_clear_histories">全部删除</string>
+    <string name="remove_history_item">删除此记录</string>
 
     <!--  Error messages  -->
     <string name="io_error_mark_invalid">页面解析失败，请使用网页打开</string>

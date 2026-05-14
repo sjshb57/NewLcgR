@@ -99,17 +99,20 @@ class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         fun bind(item: HistoryModel) {
             with(binding) {
                 titleTextView.text = item.title
-                titleTextView.setOnClickListener {
+                authorTextView.text = item.author
+                dateTextView.text = formatRelativeTime(item.timeStamp)
+
+                // 整张卡片可点击进入文章；长按预览。
+                layout.setOnClickListener {
                     EventBus.getDefault().post(OpenArticleEvent(item.url))
                 }
-                titleTextView.setOnLongClickListener {
+                layout.setOnLongClickListener {
                     showMessage("长按预览文章")
                     mFragmentManager?.get()?.let { fm ->
                         PostPreviewDialog.newInstance(item.url).show(fm, PostPreviewDialog.TAG)
                     }
                     true
                 }
-                authorTextView.text = item.author
                 removeButton.setOnClickListener {
                     ioScope.launch {
                         ArticlesDatabase.getInstance().articlesDao().deleteHistory(item.url)
@@ -119,6 +122,22 @@ class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         }
 
         override fun onBind(position: Int) {}
+
+        private fun formatRelativeTime(timestamp: Long): String {
+            if (timestamp <= 0L) return ""
+            val diff = System.currentTimeMillis() - timestamp
+            val minutes = diff / 1000 / 60
+            return when {
+                minutes < 1L -> "刚刚"
+                minutes < 60L -> "${minutes} 分钟前"
+                minutes < 24 * 60L -> "${minutes / 60} 小时前"
+                minutes < 30 * 24 * 60L -> "${minutes / 60 / 24} 天前"
+                else -> {
+                    val fmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                    fmt.format(java.util.Date(timestamp))
+                }
+            }
+        }
     }
 
     inner class EmptyViewHolder(
