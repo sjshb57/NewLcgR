@@ -15,6 +15,7 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
     val openArticleInWebView = MutableLiveData<Boolean>()
     val handlePreTagInArticle = MutableLiveData<Boolean>()
     val showRecommendFlag = MutableLiveData<Boolean>()
+    val materialDesign3Enabled = MutableLiveData<Boolean>()
 
     fun init() {
         with(AppConfig) {
@@ -25,6 +26,7 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
             openArticleInWebView.value = articleShowInWebView
             showRecommendFlag.value = articleShowRecommendFlag
             handlePreTagInArticle.value = articleHandlePreTag
+            materialDesign3Enabled.value = AppConfig.materialDesign3Enabled
         }
     }
 
@@ -40,5 +42,10 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
 
     fun setSyncFavorite(enable: Boolean) {
         AppConfig.syncFavorites = enable
+    }
+
+    /** 仅持久化偏好；Activity 重建由 SettingActivity 控制时机。 */
+    fun setMaterialDesign3(enable: Boolean) {
+        AppConfig.materialDesign3Enabled = enable
     }
 }

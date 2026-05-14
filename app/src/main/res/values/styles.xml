@@ -233,7 +233,7 @@
 
     <!--
     列表项卡片统一样式：圆角 + 水平外边距 + 适度阴影。
-    收藏 / 文章列表 / 收藏推荐等列表项共用此 style，保持视觉一致。
+    收藏 / 阅读记录 / 列表项共用此 style，保持视觉一致。
     -->
     <style name="Widget.LCG.ItemCard" parent="Widget.MaterialComponents.CardView">
         <item name="android:layout_width">match_parent</item>
@@ -248,6 +248,38 @@
         <item name="cardCornerRadius">@dimen/dp_10</item>
         <item name="cardElevation">@dimen/dp_1</item>
         <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <!--
+    Material 3 主题（实验性，由 AppConfig.materialDesign3Enabled 开关控制）。
+    parent 用 Theme.Material3.Light.NoActionBar，色板以 52pojie logo 红为 primary，
+    让品牌色更突出。深色模式 / 完整组件 override 留待后续打磨。
+    -->
+    <style name="Theme.LCG.Material3" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/pojie_logo</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">#FFE4E6</item>
+        <item name="colorOnPrimaryContainer">@color/pojie_logo</item>
+
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorSurfaceVariant">@color/slight_light_gray</item>
+        <item name="colorOnSurfaceVariant">@color/dark_gray</item>
+        <item name="colorBackground">@color/slight_light_light_gray</item>
+        <item name="colorOnBackground">@color/black</item>
+
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:textAllCaps">false</item>
+
+        <!-- 用户已熟悉的细节沿用 MD2 主题保持一致体验 -->
+        <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_black_24px</item>
     </style>
 
 </resources>

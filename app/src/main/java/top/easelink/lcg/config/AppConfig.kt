@@ -20,6 +20,7 @@ object AppConfig {
     private const val CONFIG_DEFAULT_SEARCH_ENGINE = "default_search_engine"
     private const val CONFIG_AUTO_SIGN_IN = "auto_sign_in"
     private const val CONFIG_SYNC_FAVORITES = "sync_favorites"
+    private const val CONFIG_MATERIAL_DESIGN_3 = "material_design_3_enabled"
 
 
     private const val CONFIG_SEARCH_ENGINE_BAIDU = 1
@@ -63,6 +64,14 @@ object AppConfig {
     var syncFavorites: Boolean
         get() = get(CONFIG_SYNC_FAVORITES, true)
         set(value) = put(CONFIG_SYNC_FAVORITES, value)
+
+    /**
+     * 是否使用 Material Design 3 主题。默认 false，保留 MD2 体验作为过渡期默认值。
+     * 由 Settings 里的开关控制；切换时 SettingActivity 主动 recreate() 立即生效。
+     */
+    var materialDesign3Enabled: Boolean
+        get() = get(CONFIG_MATERIAL_DESIGN_3, false)
+        set(value) = put(CONFIG_MATERIAL_DESIGN_3, value)
 
 
     private fun getConfigSp(): SharedPreferences {

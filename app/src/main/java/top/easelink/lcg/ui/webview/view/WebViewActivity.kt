@@ -43,6 +43,7 @@ import top.easelink.lcg.utils.WebsiteConstant.EXTRA_TABLE_HTML
 import top.easelink.lcg.utils.WebsiteConstant.LOGIN_QUERY
 import top.easelink.lcg.utils.WebsiteConstant.QQ_LOGIN_URL
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
+import top.easelink.lcg.utils.ThemeHelper
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
 import top.easelink.lcg.utils.showMessage
 import top.easelink.lcg.utils.setStatusBarPadding
@@ -62,6 +63,7 @@ class WebViewActivity : AppCompatActivity() {
     })
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         initData()
         initContentView()

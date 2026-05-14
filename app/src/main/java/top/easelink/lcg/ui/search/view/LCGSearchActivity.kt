@@ -26,6 +26,7 @@ import top.easelink.lcg.ui.search.model.OpenSearchResultEvent
 import top.easelink.lcg.ui.search.viewmodel.LCGSearchResultAdapter
 import top.easelink.lcg.ui.search.viewmodel.LCGSearchViewModel
 import top.easelink.lcg.ui.webview.view.WebViewActivity
+import top.easelink.lcg.utils.ThemeHelper
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.setStatusBarPadding
 import top.easelink.lcg.utils.showMessage
@@ -48,6 +49,7 @@ class LCGSearchActivity : TopActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivitySearchLcgBinding.inflate(layoutInflater)
         setContentView(binding.root)
