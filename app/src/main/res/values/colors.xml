@@ -46,7 +46,7 @@
     <color name="lcg_on_surface">#2A2A2A</color>
     <color name="lcg_surface_variant">#ECECEC</color>
     <color name="lcg_on_surface_variant">#696969</color>
-    <color name="lcg_background">#F7F6F6</color>
+    <color name="lcg_background">#FAFAFA</color>
 
     <color name="lcg_primary_container">#E6E6E6</color>
     <color name="lcg_on_primary_container">#2A2A2A</color>
