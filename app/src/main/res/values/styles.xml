@@ -75,9 +75,12 @@
 
         <item name="toolbarStyle">@style/AppToolbarStyle</item>
 
-        <item name="switchStyle">@style/Widget.LCG.Switch</item>
-        <item name="materialSwitchStyle">@style/Widget.LCG.MaterialSwitch</item>
-
+        <!--
+        Switch:不再覆盖 thumb/track tint,让 Material3 MaterialSwitch 用默认 token
+        (track-on=colorPrimary,thumb-on=colorOnPrimary)。这样开关颜色跟随主色，
+        而不是先前硬编码的 pojie 红——用户反馈"红弹丸跟原版感觉不一致"。
+        bottomNavigationStyle 仍走自定义,因为要去掉 MD3 默认的 active indicator 椭圆。
+        -->
         <item name="bottomNavigationStyle">@style/Widget.LCG.BottomNavigationView</item>
     </style>
 
