@@ -23,12 +23,6 @@
     <color name="lcg_outline">#948F88</color>
     <color name="lcg_outline_variant">#4A4642</color>
 
-    <color name="lcg_surface_container_lowest">#161616</color>
-    <color name="lcg_surface_container_low">#1E1E1E</color>
-    <color name="lcg_surface_container">#232323</color>
-    <color name="lcg_surface_container_high">#2D2D2D</color>
-    <color name="lcg_surface_container_highest">#383838</color>
-
     <color name="light_grey_background">#2A2A2A</color>
 
     <color name="lcg_switch_track_on">#80E01720</color>

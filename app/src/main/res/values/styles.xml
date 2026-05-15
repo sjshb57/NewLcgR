@@ -49,13 +49,6 @@
         <item name="colorOutline">@color/lcg_outline</item>
         <item name="colorOutlineVariant">@color/lcg_outline_variant</item>
 
-        <item name="colorSurfaceContainerLowest">@color/lcg_surface_container_lowest</item>
-        <item name="colorSurfaceContainerLow">@color/lcg_surface_container_low</item>
-        <item name="colorSurfaceContainer">@color/lcg_surface_container</item>
-        <item name="colorSurfaceContainerHigh">@color/lcg_surface_container_high</item>
-        <item name="colorSurfaceContainerHighest">@color/lcg_surface_container_highest</item>
-        <item name="colorSurfaceTint">@color/lcg_surface_tint</item>
-
         <item name="android:textColorPrimary">@color/lcg_on_surface</item>
         <item name="android:textColorSecondary">@color/lcg_on_surface_variant</item>
 

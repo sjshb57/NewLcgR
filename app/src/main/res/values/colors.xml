@@ -65,13 +65,5 @@
     <color name="lcg_outline">#7B7670</color>
     <color name="lcg_outline_variant">#CCC7C0</color>
 
-    <color name="lcg_surface_container_lowest">#FFFFFF</color>
-    <color name="lcg_surface_container_low">#FAF8F6</color>
-    <color name="lcg_surface_container">#F4F2F0</color>
-    <color name="lcg_surface_container_high">#EEEDEA</color>
-    <color name="lcg_surface_container_highest">#E9E7E4</color>
-
-    <color name="lcg_surface_tint">@color/colorPrimary</color>
-
     <color name="lcg_switch_track_on">#80E01720</color>
 </resources>
