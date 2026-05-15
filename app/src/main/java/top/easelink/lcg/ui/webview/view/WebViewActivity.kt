@@ -135,6 +135,7 @@ class WebViewActivity : AppCompatActivity() {
             !mUrl.isNullOrEmpty() -> {
                 updateWebViewSettingsRemote()
                 if (isOpenLoginEvent) {
+                    clearStaleWafCookies(mUrl!!)
                     mWebView.removeJavascriptInterface(HOOK_NAME)
                     mWebView.addJavascriptInterface(WebViewHook(), HOOK_NAME)
                 }
@@ -145,6 +146,36 @@ class WebViewActivity : AppCompatActivity() {
                 mWebView.loadDataWithBaseURL("", mHtml!!, "text/html", "UTF-8", "")
             }
         }
+    }
+
+    /**
+     * 登录页打开前,清理上次失败留下的 WAF 挑战 cookie (wzws_*) 和会话 cookie (PHPSESSID)。
+     *
+     * 现场症状:用户重启 App 多次后,WebView CookieManager 里残留一个失效的 wzws_cid;
+     * 服务端看到它就 302 把请求跳回原 URL,原 URL 又因 cookie 已失效 302 回
+     * /waf_text_verify.html → 形成 ERR_TOO_MANY_REDIRECTS 死循环。普通浏览器没有
+     * 这个问题是因为它压根没存这个失效 cookie。
+     *
+     * 清掉之后 WAF 会重新下发全新挑战 cookie,正常进入文字/滑块验证页。
+     * 普通登录 cookie (auth_*、uid、saltkey 等) 不动,避免影响"曾经登录过但 token
+     * 失效"的恢复路径。
+     */
+    private fun clearStaleWafCookies(url: String) {
+        val cm = android.webkit.CookieManager.getInstance()
+        val current = cm.getCookie(url) ?: return
+        val expired = "Expires=Thu, 01-Jan-1970 00:00:00 GMT"
+        val targets = current.split(";").mapNotNull { entry ->
+            val name = entry.trim().substringBefore('=').trim()
+            name.takeIf { it.startsWith("wzws") || it == "PHPSESSID" }
+        }
+        if (targets.isEmpty()) return
+        targets.forEach { name ->
+            // 不知道服务端写的是哪个 domain，两套都打一遍兜底。
+            cm.setCookie(url, "$name=; Path=/; $expired")
+            cm.setCookie(url, "$name=; Path=/; Domain=.52pojie.cn; $expired")
+        }
+        cm.flush()
+        Timber.tag("WAF").d("cleared stale WAF cookies before login: %s", targets)
     }
 
     inner class WebViewHook : HookInterface {
