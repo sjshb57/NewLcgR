@@ -127,7 +127,7 @@ object JsoupClient : ApiRequest {
             .header("Upgrade-Insecure-Requests", "1")
             .header("Sec-Fetch-Dest", "document")
             .header("Sec-Fetch-Mode", "navigate")
-            .header("Sec-Fetch-Site", "same-origin")
+            .header("Sec-Fetch-Site", "none")
             .header("Sec-Fetch-User", "?1")
             .header("sec-ch-ua-mobile", "?1")
             .header("sec-ch-ua-platform", "Android")
