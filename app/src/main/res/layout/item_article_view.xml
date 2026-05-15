@@ -16,7 +16,7 @@
     android:longClickable="true"
     android:orientation="vertical"
     app:cardCornerRadius="0dp"
-    app:cardElevation="@dimen/dp_3">
+    app:cardElevation="@dimen/dp_1">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/article_container"

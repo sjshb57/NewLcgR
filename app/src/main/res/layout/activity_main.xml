@@ -31,12 +31,17 @@
                 android:background="@android:color/transparent"
                 app:elevation="0dp">
 
+                <!--
+                elevation 走 0dp:MD3 elevated surface 会按 elevation 叠 colorPrimary
+                tonal overlay,4dp 配 colorSurface=white 看起来就成了灰色 toolbar,
+                跟原版"纯白 toolbar"对不上。AppBarLayout 自身 elevation=0,这里也清零。
+                -->
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/toolbar"
                     style="@style/Toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:elevation="@dimen/dp_4"
+                    android:elevation="0dp"
                     app:layout_scrollFlags="scroll|enterAlways"
                     app:subtitleTextColor="@color/lcg_on_surface"
                     app:title="@string/app_name"
