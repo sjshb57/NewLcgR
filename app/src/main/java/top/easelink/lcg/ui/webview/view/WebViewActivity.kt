@@ -44,6 +44,7 @@ import top.easelink.lcg.utils.WebsiteConstant.LOGIN_QUERY
 import top.easelink.lcg.utils.WebsiteConstant.QQ_LOGIN_URL
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
+import top.easelink.lcg.utils.getDeviceUserAgent
 import top.easelink.lcg.utils.showMessage
 import top.easelink.lcg.utils.setStatusBarPadding
 
@@ -304,6 +305,10 @@ class WebViewActivity : AppCompatActivity() {
             setSupportZoom(false)
             cacheMode = WebSettings.LOAD_DEFAULT
             blockNetworkImage = true
+            // 关键:strip 掉 WebView UA 里的 " wv) " 标记,跟 Jsoup/OkHttp 对齐。
+            // 知道创宇盾的环境检测 JS 读 navigator.userAgent,看到 wv 就判可疑流量,
+            // 把请求卡在"浏览器环境检查中"页自我刷新循环里(进而升级到滑块也卡死)。
+            userAgentString = getDeviceUserAgent(LCGApp.context)
         }
     }
 
