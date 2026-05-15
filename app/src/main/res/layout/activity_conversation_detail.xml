@@ -10,10 +10,10 @@
             style="@style/Toolbar"
             android:layout_width="match_parent"
             android:elevation="@dimen/dp_4"
-            app:subtitleTextColor="@color/white"
+            app:subtitleTextColor="@color/lcg_on_surface"
             app:title="@string/app_name"
             app:titleTextAppearance="@style/Toolbar.TitleText"
-            app:titleTextColor="@color/white"
+            app:titleTextColor="@color/lcg_on_surface"
             app:layout_scrollFlags="scroll|enterAlways"
             app:layout_constraintTop_toTopOf="parent"
             />
@@ -23,7 +23,7 @@
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@color/white" >
+            android:background="@color/lcg_surface" >
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"

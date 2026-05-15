@@ -15,15 +15,9 @@ import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import androidx.core.content.edit
 
 /**
- * 单例的 cookie 容器，作为整个 App 唯一的 cookie 真源（single source of truth）。
- *
- * 原项目里有四套互不同步的 cookie 实现（OkApiClient 用 PersistentCookieJar；JsoupClient/
- * Coil/ReplyPost 用一份扁平 key=value 的 SharedPreferences；WebView 用系统 CookieManager），
- * 导致登录态在不同模块之间不一致，README 里"偶尔需要重新登录"的根因之一。
- *
- * 这里把所有写入收口到 PersistentCookieJar，并提供与 WebView 的双向桥接：
- * - WebView 登录后，调用 syncFromWebView 把系统 cookie 同步到 jar；
- * - 应用启动时调用 syncToWebView 把 jar 的 cookie 推回 WebView，避免再次打开登录页时"看着已登出"。
+ * 单例 cookie 真源。OkHttp / Jsoup / Coil 全部走这一份 jar。
+ * WebView 侧由系统 CookieManager 持久化，通过 syncFromWebView 单向同步进 jar；
+ * 反向回推 WebView 不做，否则启动时容易把已失效会话灌进 WebView 触发 WAF 拒访问。
  */
 object LCGCookieJar {
 
@@ -72,19 +66,6 @@ object LCGCookieJar {
         if (list.isNotEmpty()) jar.saveFromResponse(httpUrl, list)
     }
 
-    /**
-     * 反方向：把 jar 中所有 cookie 推回 WebView 的 CookieManager。
-     * 用于 App 启动时确保 WebView 不会"忘记"登录态。
-     */
-    fun syncToWebView() {
-        val httpUrl = SERVER_BASE_URL.toHttpUrlOrNull() ?: return
-        val cm = CookieManager.getInstance()
-        jar.loadForRequest(httpUrl).forEach { c ->
-            cm.setCookie(SERVER_BASE_URL, "${c.name}=${c.value}; path=${c.path}; domain=${c.domain}")
-        }
-        cm.flush()
-    }
-
     /** 登出时调用：清空 jar 与 WebView CookieManager。 */
     fun clearAll() {
         jar.clear()
@@ -93,12 +74,20 @@ object LCGCookieJar {
     }
 
     private fun buildCookie(httpUrl: HttpUrl, name: String, value: String): Cookie? = runCatching {
+        // 短期会话类 cookie 必须用短 TTL，否则下次冷启动会把已过期的旧值推回 WebView，
+        // 服务端看到过期会话直接拒绝（典型表现：waf_text_verify.html 无法访问）。
+        // wzws_cid 是知道创宇 WAF 的挑战 cookie（Max-Age=1800s），PHPSESSID 同理。
+        val ttl = if (name.startsWith("wzws_") || name == "PHPSESSID") {
+            SHORT_SESSION_TTL_MS
+        } else {
+            DEFAULT_COOKIE_TTL_MS
+        }
         Cookie.Builder()
             .name(name)
             .value(value)
             .domain(httpUrl.host)
             .path("/")
-            .expiresAt(System.currentTimeMillis() + DEFAULT_COOKIE_TTL_MS)
+            .expiresAt(System.currentTimeMillis() + ttl)
             .build()
     }.onFailure { Timber.w(it, "build cookie failed: %s=%s", name, value) }.getOrNull()
 
@@ -127,4 +116,5 @@ object LCGCookieJar {
     }
 
     private const val DEFAULT_COOKIE_TTL_MS = 30L * 24 * 60 * 60 * 1000
+    private const val SHORT_SESSION_TTL_MS = 30L * 60 * 1000  // 30 分钟，对齐 WAF challenge 默认 Max-Age
 }

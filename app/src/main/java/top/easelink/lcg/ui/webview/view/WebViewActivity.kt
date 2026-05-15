@@ -44,6 +44,7 @@ import top.easelink.lcg.utils.WebsiteConstant.LOGIN_QUERY
 import top.easelink.lcg.utils.WebsiteConstant.QQ_LOGIN_URL
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
+import top.easelink.lcg.utils.getDeviceUserAgent
 import top.easelink.lcg.utils.showMessage
 import top.easelink.lcg.utils.setStatusBarPadding
 
@@ -119,6 +120,14 @@ class WebViewActivity : AppCompatActivity() {
             openInSystemBrowser(url)
         }
 
+        // CookieManager 默认接受 first-party cookie，但 third-party 默认是 false。
+        // QQ 登录会跨域跳转到 connect.qq.com，需要 third-party cookie 才能完成；
+        // WAF cookie wzws_cid 是 first-party HttpOnly，依赖 acceptCookie=true。
+        android.webkit.CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setAcceptThirdPartyCookies(mWebView, true)
+        }
+
         isOpenLoginEvent = intent.getBooleanExtra(OPEN_LOGIN_PAGE, false)
         mForceEnableJs = intent.getBooleanExtra(FORCE_ENABLE_JS_KEY, false)
 
@@ -126,6 +135,7 @@ class WebViewActivity : AppCompatActivity() {
             !mUrl.isNullOrEmpty() -> {
                 updateWebViewSettingsRemote()
                 if (isOpenLoginEvent) {
+                    clearStaleWafCookies(mUrl!!)
                     mWebView.removeJavascriptInterface(HOOK_NAME)
                     mWebView.addJavascriptInterface(WebViewHook(), HOOK_NAME)
                 }
@@ -138,14 +148,49 @@ class WebViewActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 登录页打开前,清理上次失败留下的 WAF 挑战 cookie (wzws_*) 和会话 cookie (PHPSESSID)。
+     *
+     * 现场症状:用户重启 App 多次后,WebView CookieManager 里残留一个失效的 wzws_cid;
+     * 服务端看到它就 302 把请求跳回原 URL,原 URL 又因 cookie 已失效 302 回
+     * /waf_text_verify.html → 形成 ERR_TOO_MANY_REDIRECTS 死循环。普通浏览器没有
+     * 这个问题是因为它压根没存这个失效 cookie。
+     *
+     * 清掉之后 WAF 会重新下发全新挑战 cookie,正常进入文字/滑块验证页。
+     * 普通登录 cookie (auth_*、uid、saltkey 等) 不动,避免影响"曾经登录过但 token
+     * 失效"的恢复路径。
+     */
+    private fun clearStaleWafCookies(url: String) {
+        val cm = android.webkit.CookieManager.getInstance()
+        val current = cm.getCookie(url) ?: return
+        val expired = "Expires=Thu, 01-Jan-1970 00:00:00 GMT"
+        val targets = current.split(";").mapNotNull { entry ->
+            val name = entry.trim().substringBefore('=').trim()
+            name.takeIf { it.startsWith("wzws") || it == "PHPSESSID" }
+        }
+        if (targets.isEmpty()) return
+        targets.forEach { name ->
+            // 不知道服务端写的是哪个 domain，两套都打一遍兜底。
+            cm.setCookie(url, "$name=; Path=/; $expired")
+            cm.setCookie(url, "$name=; Path=/; Domain=.52pojie.cn; $expired")
+        }
+        cm.flush()
+        Timber.tag("WAF").d("cleared stale WAF cookies before login: %s", targets)
+    }
+
     inner class WebViewHook : HookInterface {
         @JavascriptInterface
         override fun processHtml(html: String?) {
-            if (html.isNullOrBlank()) return
+            if (html.isNullOrBlank()) {
+                Timber.d("processHtml: html is null/blank, skip")
+                return
+            }
             coroutineScope.launch(CalcPool) {
                 val doc = Jsoup.parse(html)
                 val currentUrl = withContext(Main) { mWebView.url } ?: return@launch
-                if (!isLoginSuccess(doc, currentUrl)) return@launch
+                val success = isLoginSuccess(doc, currentUrl)
+                Timber.d("processHtml: url=%s isLoginSuccess=%s", currentUrl, success)
+                if (!success) return@launch
                 // 把刚登录拿到的 cookie 灌入统一 jar，OkHttp/Jsoup/Coil 立刻共享同一个会话。
                 LCGCookieJar.syncFromWebView(currentUrl)
                 UserDataRepo.isLoggedIn = true
@@ -166,20 +211,17 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     /**
-     * Discuz 论坛登录成功的标志：
-     * 1) 页面里出现用户头像 div.avt（Discuz 通用，已登录用户右上角必定渲染）；
-     * 2) 页面 NOT 含 #messagelogin / "您需要先登录" 这类失效标志。
+     * Discuz 论坛登录成功的标志：页面里出现用户头像 div.avt。
      *
-     * 旧实现还要求 cookie 含 *_auth，但 52pojie 实际命名是 *_st_p（uid|ts|md5 格式），
-     * 没有 *_auth cookie。强制要求 *_auth 会让 isLoginSuccess 永远 false，登录成功后
-     * UI 不会标记成已登录 —— 这是另一处隐藏 bug。这里改成只看 HTML 信号。
+     * 之前曾尝试加更严格的"不含 #messagelogin / 不含'您需要先登录'文案"双重校验，
+     * 但 52pojie 登录后的首页可能在其它模板片段（侧边栏快速登录、未读弹窗、片段
+     * 引用等）里包含同名元素，导致 isLoginSuccess 永远 false → 用户登录后死循环
+     * 在 WebView 里。回归原作者只看 div.avt 的简单规则。
      */
     private fun isLoginSuccess(doc: org.jsoup.nodes.Document, url: String): Boolean {
         val hasAvatar = doc.selectFirst("div.avt") != null
-        val isLoginRequiredPage = doc.getElementById("messagelogin") != null ||
-                doc.getElementById("messagetext")?.text()
-                    ?.contains("您需要先登录才能继续") == true
-        return hasAvatar && !isLoginRequiredPage
+        Timber.d("isLoginSuccess: url=%s hasAvatar=%s", url, hasAvatar)
+        return hasAvatar
     }
 
     private fun initData() {
@@ -274,7 +316,7 @@ class WebViewActivity : AppCompatActivity() {
             builtInZoomControls = true
             displayZoomControls = false
             blockNetworkImage = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
             defaultTextEncodingName = "UTF-8"
             cacheMode = WebSettings.LOAD_NO_CACHE
@@ -286,7 +328,7 @@ class WebViewActivity : AppCompatActivity() {
         mWebView.settings.apply {
             javaScriptEnabled = mForceEnableJs
             domStorageEnabled = true
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             useWideViewPort = true
             loadWithOverviewMode = true
             defaultTextEncodingName = "UTF-8"
@@ -294,6 +336,10 @@ class WebViewActivity : AppCompatActivity() {
             setSupportZoom(false)
             cacheMode = WebSettings.LOAD_DEFAULT
             blockNetworkImage = true
+            // 关键:strip 掉 WebView UA 里的 " wv) " 标记,跟 Jsoup/OkHttp 对齐。
+            // 知道创宇盾的环境检测 JS 读 navigator.userAgent,看到 wv 就判可疑流量,
+            // 把请求卡在"浏览器环境检查中"页自我刷新循环里(进而升级到滑块也卡死)。
+            userAgentString = getDeviceUserAgent(LCGApp.context)
         }
     }
 
@@ -301,6 +347,19 @@ class WebViewActivity : AppCompatActivity() {
     private inner class InnerChromeClient : WebChromeClient() {
         private var mCustomViewCallback: CustomViewCallback? = null
         private var mCustomView: View? = null
+
+        // 把 WebView 内 JS 的 console 输出接到 logcat。WAF 滑块页跑重度混淆 JS，
+        // 出错时如果不接 console，整个页面就停在"正在加载中..."而没有任何线索。
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+            Timber.tag("WebViewJS").d(
+                "[%s] %s @ %s:%d",
+                consoleMessage.messageLevel(),
+                consoleMessage.message(),
+                consoleMessage.sourceId(),
+                consoleMessage.lineNumber()
+            )
+            return true
+        }
 
         override fun onShowCustomView(view: View, callback: CustomViewCallback) {
             if (mCustomView != null) {
@@ -337,35 +396,95 @@ class WebViewActivity : AppCompatActivity() {
     private inner class InnerWebViewClient : WebViewClient() {
         override fun onPageCommitVisible(view: WebView, url: String) {
             setLoading(false)
-            // 直接按 URL 的实际 host 把 cookie 同步进统一 jar，避免 WebView 与原生网络栈失去会话同步。
-            LCGCookieJar.syncFromWebView(url)
+            view.settings.blockNetworkImage = false
+            // 等 WAF 验证码子资源加载后再同步 cookie：commit 瞬间 wzws_cid 可能
+            // 还没到 CookieManager（它是通过 /waf_*_captcha 响应的 Set-Cookie 下发的）。
+            // 文字版只需要等一张 ~8KB 的 JPEG，300ms 够；滑块版要等 234KB base64 AJAX，
+            // 弱网下经常超过 300ms，延长到 2000ms。shouldInterceptRequest 里另有按子资源
+            // 粒度的即时同步兜底。
+            val delay = if (url.contains("/waf_slider_verify.html")) 2000L else 300L
+            view.postDelayed({
+                runCatching { android.webkit.CookieManager.getInstance().flush() }
+                LCGCookieJar.syncFromWebView(url)
+            }, delay)
             if (isOpenLoginEvent) {
                 view.loadUrl("javascript:$HOOK_NAME.processHtml(document.documentElement.outerHTML);")
             }
-            view.settings.blockNetworkImage = false
+        }
+
+        // 子资源粒度的 cookie 同步：/waf_*_captcha 响应会下发新的 wzws_cid，
+        // 必须在它返回后立刻 flush + sync，否则后续 OkHttp 请求带的是过期 cookie。
+        // 同时给 WAF/wzws-* 子资源打日志，方便定位"卡在正在加载中"的环节。
+        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+            val u = request.url.toString()
+            if (u.contains("/waf_") || u.contains("/wzws-")) {
+                Timber.tag("WAF").d("→ %s %s", request.method, u)
+            }
+            if (u.contains("/waf_slider_captcha") || u.contains("/waf_text_captcha")) {
+                view.post {
+                    runCatching { android.webkit.CookieManager.getInstance().flush() }
+                    LCGCookieJar.syncFromWebView(u)
+                }
+            }
+            return null
+        }
+
+        override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
+            Timber.tag("WAF").w(
+                "HTTP %d on %s (%s)",
+                errorResponse.statusCode,
+                request.url,
+                errorResponse.reasonPhrase
+            )
+        }
+
+        override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+            Timber.tag("WAF").w(
+                "err %d %s on %s",
+                error.errorCode,
+                error.description,
+                request.url
+            )
         }
 
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            view.settings.blockNetworkImage = true
-            setLoading(true)
+            // 关键修复：WAF 验证页 (/waf_text_verify.html / /waf_slider_verify.html) 必须
+            // 立刻加载图片——验证码图 (/waf_text_captcha) 的响应头才是下发 wzws_cid
+            // cookie 的地方。普通页面才屏蔽图片以加快首屏。
+            val isWaf = isWafChallengeUrl(url)
+            view.settings.blockNetworkImage = !isWaf
+            // 验证页要让用户看到，不能用 Lottie 占位盖住
+            setLoading(!isWaf)
         }
 
         override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
-            // 考虑显示警告对话框后再决定是否继续
-            handler.cancel() // 改为 cancel() 提高安全性
+            // 安全策略：任何 SSL 错误一律 cancel，不提供"继续"绕过 UI（MITM 风险）。
+            handler.cancel()
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             request.url.toString().let { url ->
                 when {
-                    url.startsWith("wtloginmqq://ptlogin/qlogin") -> runCatching {
-                        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                    url.startsWith("wtloginmqq://ptlogin/qlogin") -> {
+                        runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+                        return true
                     }
-                    url.startsWith("bdnetdisk") -> showMessage(R.string.baidu_net_disk_not_support)
+                    url.startsWith("bdnetdisk") -> {
+                        showMessage(R.string.baidu_net_disk_not_support)
+                        return true
+                    }
                 }
             }
             return false
         }
+    }
+
+    private fun isWafChallengeUrl(url: String?): Boolean {
+        if (url == null) return false
+        return url.contains("/waf_text_verify.html") ||
+                url.contains("/waf_slider_verify.html") ||
+                url.contains("/waf_text_captcha") ||
+                url.contains("/waf_slider_captcha")
     }
 
     companion object {

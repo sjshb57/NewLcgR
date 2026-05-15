@@ -18,7 +18,7 @@
         android:id="@+id/instruction_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/slight_light_light_gray"
+        app:cardBackgroundColor="@color/lcg_background"
         app:cardCornerRadius="@dimen/dp_8"
         app:cardElevation="@dimen/dp_4" >
         <top.easelink.framework.customview.htmltextview.HtmlTextView

@@ -16,18 +16,6 @@ fun getCookies(): Map<String, String> = LCGCookieJar.cookiesForUrl(SERVER_BASE_U
 /** 取一个具体 URL 应该携带的 cookie（用于跨域请求，如附件域名）。 */
 fun getCookiesFor(url: String): Map<String, String> = LCGCookieJar.cookiesForUrl(url)
 
-/** WebView 拿到的 "k1=v1; k2=v2" 字符串入库。commit 参数保留以兼容旧调用点。 */
-@Suppress("UNUSED_PARAMETER")
-fun updateCookies(cookieUrl: String, commit: Boolean) {
-    val cookies = cookieUrl.split(";")
-        .mapNotNull { entry ->
-            val pair = entry.trim().split("=", limit = 2)
-            if (pair.size == 2 && pair[0].isNotBlank()) pair[0] to pair[1] else null
-        }
-        .toMap()
-    LCGCookieJar.saveCookiesFromJsoup(SERVER_BASE_URL, cookies)
-}
-
 /** Jsoup 响应回写 cookie。 */
 fun updateCookies(cookies: Map<String, String>) {
     LCGCookieJar.saveCookiesFromJsoup(SERVER_BASE_URL, cookies)

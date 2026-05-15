@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/lcg_surface">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/follow_tab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="@dimen/dp_40"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         app:tabIndicatorColor="@color/colorAccent"
         app:tabIndicatorHeight="@dimen/dp_3"
         app:tabTextColor="@color/gray"

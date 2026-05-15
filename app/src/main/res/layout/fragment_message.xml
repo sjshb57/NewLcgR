@@ -8,14 +8,14 @@
     android:orientation="vertical"
     android:focusable="true"
     android:clickable="true"
-    android:background="@color/white">
+    android:background="@color/lcg_surface">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/message_tab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="@dimen/dp_40"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         app:tabIndicatorColor="@color/colorAccent"
         app:tabIndicatorHeight="@dimen/dp_3"
         app:tabTextColor="@color/gray"

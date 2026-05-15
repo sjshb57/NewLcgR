@@ -63,6 +63,10 @@ object UserDataRepo {
     }
 
     fun clearAll() {
+        // 关键诊断点：用户反馈"莫名掉登录"时，可在 logcat 里搜
+        // "UserDataRepo.clearAll" 看到调用栈，定位是谁触发的（JsoupClient
+        // 的会话失效检测 / MeViewModel 的 default 返回 / SettingActivity 手动登出）。
+        timber.log.Timber.w(Throwable("clearAll callsite"), "UserDataRepo.clearAll() triggered")
         clearCookies()
         SharedPreferencesHelper.getUserSp().edit { clear() }
         isLoggedIn = false

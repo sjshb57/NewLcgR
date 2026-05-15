@@ -6,7 +6,7 @@
     android:id="@+id/clRootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/lcg_surface"
     android:fitsSystemWindows="false"
     android:clipToPadding="false">
 
@@ -14,7 +14,7 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         android:elevation="0dp"
         app:elevation="0dp"
         android:outlineProvider="none"
@@ -25,11 +25,11 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:minHeight="?attr/actionBarSize"
-            android:background="@color/white"
+            android:background="@color/lcg_surface"
             android:elevation="0dp"
             app:elevation="0dp"
             android:outlineProvider="none"
-            app:titleTextColor="@color/black"
+            app:titleTextColor="@color/lcg_on_surface"
             tools:title="Article title"
             app:titleTextAppearance="@style/Toolbar.TitleText" />
 
@@ -47,7 +47,7 @@
         android:id="@+id/post_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
@@ -55,7 +55,7 @@
         android:id="@+id/block_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
@@ -113,7 +113,7 @@
         android:layout_marginBottom="@dimen/dp_60"
         android:layout_marginEnd="@dimen/dp_20"
         android:background="@drawable/bg_oval"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/lcg_surface"
         android:clickable="true"
         android:contentDescription="@null"
         android:elevation="@dimen/dp_4"

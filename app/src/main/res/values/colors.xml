@@ -41,4 +41,29 @@
     <color name="statusBarColorWhite">#FFFFFF</color>
     <color name="statusBarColorDefault">@color/colorPrimary</color>
     <color name="light_grey_background">#ECECEC</color>
+
+    <color name="lcg_surface">#FFFFFF</color>
+    <color name="lcg_on_surface">#2A2A2A</color>
+    <color name="lcg_surface_variant">#ECECEC</color>
+    <color name="lcg_on_surface_variant">#696969</color>
+    <color name="lcg_background">#FAFAFA</color>
+
+    <color name="lcg_primary_container">#E6E6E6</color>
+    <color name="lcg_on_primary_container">#2A2A2A</color>
+    <color name="lcg_secondary_container">#FFE4E6</color>
+
+    <color name="lcg_tertiary">#6E5B40</color>
+    <color name="lcg_on_tertiary">#FFFFFF</color>
+    <color name="lcg_tertiary_container">#F8DEBE</color>
+    <color name="lcg_on_tertiary_container">#261904</color>
+
+    <color name="lcg_error">#BA1A1A</color>
+    <color name="lcg_on_error">#FFFFFF</color>
+    <color name="lcg_error_container">#FFDAD6</color>
+    <color name="lcg_on_error_container">#410002</color>
+
+    <color name="lcg_outline">#7B7670</color>
+    <color name="lcg_outline_variant">#CCC7C0</color>
+
+    <color name="lcg_switch_track_on">#80E01720</color>
 </resources>

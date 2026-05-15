@@ -119,6 +119,19 @@ class SettingActivity : TopActivity() {
             showRecommendFlag.setOnCheckedChangeListener { _, isChecked ->
                 AppConfig.articleShowRecommendFlag = isChecked
             }
+
+            nightModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val before = AppConfig.nightMode
+                    if (before == position) return
+                    mViewModel.setNightMode(position)
+                    // AppCompatDelegate.setDefaultNightMode 在某些设备/AGP 版本下不一定能
+                    // 强制 recreate 当前 Activity，显式 recreate 兜底，确保切换立即生效。
+                    recreate()
+                }
+            }
         }
     }
 
@@ -156,6 +169,10 @@ class SettingActivity : TopActivity() {
 
             handlePreTagInArticle.observe(this@SettingActivity) { isChecked ->
                 binding.articleHandlePreTag.isChecked = isChecked
+            }
+
+            nightModeSelected.observe(this@SettingActivity) { position ->
+                binding.nightModeSpinner.setSelection(position, false)
             }
         }
     }

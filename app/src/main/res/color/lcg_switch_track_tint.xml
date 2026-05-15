@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Switch 轨道着色：
+  - checked: 半透明 pojie 红（与白色 thumb 搭配，整体红色但不刺眼）
+  - 默认（unchecked）: 浅灰，对齐 MD2 原版"灰色 off-state"
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="@color/lcg_switch_track_on" />
+    <item android:color="@color/light_gray" />
+</selector>

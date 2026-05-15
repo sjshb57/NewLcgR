@@ -9,7 +9,7 @@
     android:focusable="true"
     android:clickable="true"
     android:gravity="center"
-    android:background="@color/white" >
+    android:background="@color/lcg_surface" >
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/follow_list"
         android:layout_width="match_parent"

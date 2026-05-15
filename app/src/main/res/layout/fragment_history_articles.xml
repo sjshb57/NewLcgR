@@ -12,7 +12,7 @@
     android:id="@+id/clRootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/slight_light_gray">
+    android:background="@color/lcg_background">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -22,7 +22,7 @@
         android:minHeight="?attr/actionBarSize"
         app:title="@string/ic_history"
         app:titleTextAppearance="@style/Toolbar.TitleText"
-        app:titleTextColor="@color/black"
+        app:titleTextColor="@color/lcg_on_surface"
         app:menu="@menu/history_articles"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,7 +35,7 @@
         android:paddingTop="@dimen/dp_4"
         android:paddingBottom="@dimen/dp_8"
         android:clipToPadding="false"
-        android:background="@color/slight_light_gray"
+        android:background="@color/lcg_background"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:visibility="visible" />

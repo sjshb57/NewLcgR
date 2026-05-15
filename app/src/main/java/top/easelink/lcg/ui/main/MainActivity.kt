@@ -5,7 +5,6 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
@@ -84,14 +83,20 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
             binding.statusBarBackground.apply {
                 layoutParams.height = systemBars.top
-                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.white))
+                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.lcg_surface))
             }
 
             binding.toolbar.updatePadding(top = 0)
             binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
 
-            (binding.bottomNavigation.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-                bottomMargin = systemBars.bottom
+            // BottomNav 用 bottomMargin 抬到系统栏之上，配合 navigationBarColor=lcg_surface
+            // 让系统导航区域和 nav 颜色一致，视觉上"贴底"。padding 方式会让图标位置上移，
+            // 改回 margin 让图标保持垂直居中。
+            (binding.bottomNavigation.layoutParams as? android.view.ViewGroup.MarginLayoutParams)?.apply {
+                if (bottomMargin != systemBars.bottom) {
+                    bottomMargin = systemBars.bottom
+                    binding.bottomNavigation.requestLayout()
+                }
             }
 
             insets
@@ -363,12 +368,14 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     }
 
     private fun setStatusBarAppearance(isLight: Boolean) {
+        // isLight 指"页面背景偏亮，状态栏图标应该用深色"。day mode 通常是 true，
+        // night mode 系统会强制翻转，所以这里直接读 lcg_surface 资源即可，
+        // 资源系统会按 night-qualifier 自动选对应版本。
         WindowCompat.getInsetsController(window, window.decorView).apply {
             isAppearanceLightStatusBars = isLight
         }
         binding.statusBarBackground.setBackgroundColor(
-            if (isLight) ContextCompat.getColor(this, R.color.white)
-            else ContextCompat.getColor(this, R.color.black)
+            ContextCompat.getColor(this, R.color.lcg_surface)
         )
     }
 

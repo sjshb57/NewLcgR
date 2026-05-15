@@ -118,7 +118,7 @@ object JsoupClient : ApiRequest {
             .ignoreHttpErrors(true)
             .cookies(getCookiesFor(url))
             .userAgent(USER_AGENT)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-")
+            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
             .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
             .header("Accept-Encoding", "gzip, deflate, br, zstd")
             .header("Cache-Control", "max-age=0")

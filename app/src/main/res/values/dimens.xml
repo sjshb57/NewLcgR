@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <dimen name="design_bottom_navigation_height" tools:override="true">@dimen/dp_50</dimen>
-    <!-- dp and sp values, must be defind in this file! -->
-    <!-- view size,you can add if there is no one -->
+
+    <dimen name="space_xxs">2dp</dimen>
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_sm">8dp</dimen>
+    <dimen name="space_md">16dp</dimen>
+    <dimen name="space_lg">24dp</dimen>
+    <dimen name="space_xl">32dp</dimen>
+    <dimen name="space_xxl">48dp</dimen>
+
+    <dimen name="text_xs">12sp</dimen>
+    <dimen name="text_sm">14sp</dimen>
+    <dimen name="text_md">16sp</dimen>
+    <dimen name="text_lg">18sp</dimen>
+    <dimen name="text_xl">22sp</dimen>
+
+    <!-- 触摸目标最小值（Material 无障碍规范），FAB / IconButton 等触达控件用 -->
+    <dimen name="touch_target_min">48dp</dimen>
+
     <dimen name="dp_m_60">-60dp</dimen>
     <dimen name="dp_m_30">-30dp</dimen>
     <dimen name="dp_m_20">-20dp</dimen>
@@ -16,17 +32,12 @@
     <dimen name="dp_0_1">0.1dp</dimen>
     <dimen name="dp_0_5">0.5dp</dimen>
     <dimen name="dp_1">1dp</dimen>
-    <dimen name="dp_1_5">1.5dp</dimen>
     <dimen name="dp_2">2dp</dimen>
-    <dimen name="dp_2_5">2.5dp</dimen>
     <dimen name="dp_3">3dp</dimen>
-    <dimen name="dp_3_5">3.5dp</dimen>
     <dimen name="dp_4">4dp</dimen>
-    <dimen name="dp_4_5">4.5dp</dimen>
     <dimen name="dp_5">5dp</dimen>
     <dimen name="dp_6">6dp</dimen>
     <dimen name="dp_7">7dp</dimen>
-    <dimen name="dp_7_5">7.5dp</dimen>
     <dimen name="dp_8">8dp</dimen>
     <dimen name="dp_9">9dp</dimen>
     <dimen name="dp_10">10dp</dimen>
@@ -124,7 +135,6 @@
     <dimen name="dp_102">102dp</dimen>
     <dimen name="dp_103">103dp</dimen>
     <dimen name="dp_104">104dp</dimen>
-    <dimen name="dp_104_5">104.5dp</dimen>
     <dimen name="dp_105">105dp</dimen>
     <dimen name="dp_106">106dp</dimen>
     <dimen name="dp_107">107dp</dimen>
@@ -155,7 +165,6 @@
     <dimen name="dp_132">132dp</dimen>
     <dimen name="dp_133">133dp</dimen>
     <dimen name="dp_134">134dp</dimen>
-    <dimen name="dp_134_5">134.5dp</dimen>
     <dimen name="dp_135">135dp</dimen>
     <dimen name="dp_136">136dp</dimen>
     <dimen name="dp_137">137dp</dimen>
@@ -213,7 +222,6 @@
     <dimen name="dp_189">189dp</dimen>
     <dimen name="dp_190">190dp</dimen>
     <dimen name="dp_191">191dp</dimen>
-    <dimen name="dp_191_25">191.25dp</dimen>
     <dimen name="dp_192">192dp</dimen>
     <dimen name="dp_193">193dp</dimen>
     <dimen name="dp_194">194dp</dimen>
@@ -289,13 +297,7 @@
     <dimen name="dp_280">280dp</dimen>
     <dimen name="dp_290">290dp</dimen>
     <dimen name="dp_300">300dp</dimen>
-    <dimen name="dp_301">301dp</dimen>
-    <dimen name="dp_310">310dp</dimen>
-    <dimen name="dp_320">320dp</dimen>
-    <dimen name="dp_330">330dp</dimen>
-    <dimen name="dp_340">340dp</dimen>
 
-    <!-- font size,you can add if there is no one -->
     <dimen name="sp_6">6sp</dimen>
     <dimen name="sp_8">8sp</dimen>
     <dimen name="sp_10">10sp</dimen>

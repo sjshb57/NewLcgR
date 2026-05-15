@@ -1,6 +1,7 @@
 package top.easelink.lcg.ui.setting.viewmodel
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.work.WorkManager
@@ -15,6 +16,7 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
     val openArticleInWebView = MutableLiveData<Boolean>()
     val handlePreTagInArticle = MutableLiveData<Boolean>()
     val showRecommendFlag = MutableLiveData<Boolean>()
+    val nightModeSelected = MutableLiveData<Int>()
 
     fun init() {
         with(AppConfig) {
@@ -25,6 +27,7 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
             openArticleInWebView.value = articleShowInWebView
             showRecommendFlag.value = articleShowRecommendFlag
             handlePreTagInArticle.value = articleHandlePreTag
+            nightModeSelected.value = nightMode
         }
     }
 
@@ -40,5 +43,26 @@ class SettingViewModel(application: Application) : AndroidViewModel(application)
 
     fun setSyncFavorite(enable: Boolean) {
         AppConfig.syncFavorites = enable
+    }
+
+    /**
+     * 持久化暗夜模式偏好并立刻通过 AppCompatDelegate 应用。
+     * Activity recreate 由 SettingActivity 的 onItemSelected 显式调用兜底。
+     * mode 与 AppConfig.NIGHT_MODE_* 常量对齐。
+     */
+    fun setNightMode(mode: Int) {
+        if (mode == AppConfig.nightMode) return
+        val delegateMode = toDelegateMode(mode)
+        timber.log.Timber.i("setNightMode: appMode=%d → delegateMode=%d", mode, delegateMode)
+        AppConfig.nightMode = mode
+        AppCompatDelegate.setDefaultNightMode(delegateMode)
+    }
+
+    companion object {
+        fun toDelegateMode(mode: Int): Int = when (mode) {
+            AppConfig.NIGHT_MODE_LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+            AppConfig.NIGHT_MODE_DARK -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
     }
 }

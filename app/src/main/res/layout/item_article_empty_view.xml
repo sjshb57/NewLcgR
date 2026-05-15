@@ -9,7 +9,7 @@
     </data>
 
     <LinearLayout
-            android:background="@color/white"
+            android:background="@color/lcg_surface"
             android:id="@+id/linearLayoutView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

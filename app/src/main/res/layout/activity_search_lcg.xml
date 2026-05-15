@@ -22,10 +22,10 @@
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
             style="@style/Toolbar"
-            app:subtitleTextColor="@color/white"
+            app:subtitleTextColor="@color/lcg_on_surface"
             app:title="@string/app_name"
             app:titleTextAppearance="@style/Toolbar.TitleText"
-            app:titleTextColor="@color/white"
+            app:titleTextColor="@color/lcg_on_surface"
             app:layout_scrollFlags="scroll|enterAlways"/>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -46,7 +46,7 @@
         app:lottie_rawRes="@raw/search_file"
         app:lottie_loop="true"
         app:lottie_autoPlay="true"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         tools:visibility="visible"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
