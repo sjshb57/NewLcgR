@@ -1,7 +1,6 @@
 package top.easelink.lcg.ui.search.viewmodel
 
-import android.text.Html
-import android.util.Log
+import androidx.core.text.HtmlCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -81,16 +80,14 @@ class LCGSearchResultAdapter(
 
     private inner class SearchResultViewHolder(private val binding: ItemLcgSearchResultViewBinding) : BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {
-            val searchResult = mSearchResults[position].also {
-                Log.d("Leon406",it.toString())
-            }
+            val searchResult = mSearchResults[position]
             binding.apply {
-                titleTv.text = Html.fromHtml(searchResult.title)
+                titleTv.text = HtmlCompat.fromHtml(searchResult.title, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 authorTv.text = searchResult.author
                 replyAndViewTv.text = searchResult.replyView
                 dateTv.text = searchResult.date
                 forumTv.text = searchResult.forum
-                contentTv.text = Html.fromHtml(searchResult.content)
+                contentTv.text = HtmlCompat.fromHtml(searchResult.content, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 root.setOnClickListener {
                     EventBus.getDefault().post(OpenSearchResultEvent(searchResult.fullUrl))
                 }

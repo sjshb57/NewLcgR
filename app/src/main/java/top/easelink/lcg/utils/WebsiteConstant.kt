@@ -36,6 +36,8 @@ object WebsiteConstant {
     const val GET_FAVORITE_QUERY = "home.php?mod=space&do=favorite&view=me"
     const val ADD_TO_FAVORITE_QUERY =
         "home.php?mod=spacecp&ac=favorite&type=thread&id=%s&formhash=%s&infloat=yes&handlekey=k_favorite&inajax=1&ajaxtarget=fwin_content_k_favorite"
+    const val REMOVE_FAVORITE_QUERY =
+        "home.php?mod=spacecp&ac=favorite&op=delete&type=thread&id=%s&formhash=%s&deletesubmit=true&inajax=1"
 
     const val CHECK_RULE_URL =
         SERVER_BASE_URL + "forum.php?mod=ajax&action=checkpostrule&inajax=yes&ac=reply&infloat=yes&handlekey=reply"

@@ -34,7 +34,7 @@ object BaiduSearchService {
         try {
             val doc = JsoupClient.sendGetRequestWithUrl(requestUrl)
             val list: List<BaiduSearchResult> = doc.select("div.result")
-                ?.map {
+                .map {
                     try {
                         val title = extractFrom(it, "h3.c-title", "a")
                         val url = extractAttrFrom(it, "href", "h3.c-title", "a")
@@ -55,11 +55,11 @@ object BaiduSearchService {
             }
             return BaiduSearchResults(list).also {
                 try {
-                    it.nextPageUrl = doc?.selectFirst("a.pager-next-foot")
+                    it.nextPageUrl = doc.selectFirst("a.pager-next-foot")
                         ?.attr("href")
                     it.totalResult = doc
-                        ?.getElementsByClass("support-text-top")
-                        ?.first()
+                        .getElementsByClass("support-text-top")
+                        .first()
                         ?.text()
                 } catch (e: Exception) { // mute
                     it.nextPageUrl = null

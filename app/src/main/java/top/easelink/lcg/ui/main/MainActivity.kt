@@ -5,8 +5,9 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.behavior.HideViewOnScrollBehavior
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -84,14 +85,20 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
             binding.statusBarBackground.apply {
                 layoutParams.height = systemBars.top
-                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.white))
+                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.lcg_surface))
             }
 
             binding.toolbar.updatePadding(top = 0)
             binding.fragmentContainer.updatePadding(bottom = systemBars.bottom)
 
-            (binding.bottomNavigation.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-                bottomMargin = systemBars.bottom
+            // BottomNav 用 bottomMargin 抬到系统栏之上，配合 navigationBarColor=lcg_surface
+            // 让系统导航区域和 nav 颜色一致，视觉上"贴底"。padding 方式会让图标位置上移，
+            // 改回 margin 让图标保持垂直居中。
+            (binding.bottomNavigation.layoutParams as? android.view.ViewGroup.MarginLayoutParams)?.apply {
+                if (bottomMargin != systemBars.bottom) {
+                    bottomMargin = systemBars.bottom
+                    binding.bottomNavigation.requestLayout()
+                }
             }
 
             insets
@@ -306,14 +313,14 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     }
 
     private fun toggleBottomNavScrollBehavior(enable: Boolean) {
-        val layoutParams = binding.bottomNavigation.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
+        val layoutParams = binding.bottomNavigation.layoutParams as? CoordinatorLayout.LayoutParams
         if (enable) {
-            if (layoutParams?.behavior == null) {
-                layoutParams?.behavior = com.google.android.material.behavior.HideBottomViewOnScrollBehavior<View>()
+            if (layoutParams != null && layoutParams.behavior == null) {
+                layoutParams.behavior = HideViewOnScrollBehavior<View>(HideViewOnScrollBehavior.EDGE_BOTTOM)
             }
         } else {
-            if (layoutParams?.behavior != null) {
-                layoutParams?.behavior = null
+            if (layoutParams != null && layoutParams.behavior != null) {
+                layoutParams.behavior = null
                 // Ensure it is visible when behavior is removed
                 binding.bottomNavigation.translationY = 0f
             }
@@ -346,10 +353,11 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
 
     fun showBottomNavigation() {
         binding.bottomNavigation.visibility = View.VISIBLE
-        val layoutParams = binding.bottomNavigation.layoutParams as? androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams
+        val layoutParams = binding.bottomNavigation.layoutParams as? CoordinatorLayout.LayoutParams
         val behavior = layoutParams?.behavior
-        if (behavior is com.google.android.material.behavior.HideBottomViewOnScrollBehavior) {
-            behavior.slideUp(binding.bottomNavigation)
+        if (behavior is HideViewOnScrollBehavior<*>) {
+            @Suppress("UNCHECKED_CAST")
+            (behavior as HideViewOnScrollBehavior<View>).slideIn(binding.bottomNavigation)
         } else {
             binding.bottomNavigation.translationY = 0f
         }
@@ -363,12 +371,14 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     }
 
     private fun setStatusBarAppearance(isLight: Boolean) {
+        // isLight 指"页面背景偏亮，状态栏图标应该用深色"。day mode 通常是 true，
+        // night mode 系统会强制翻转，所以这里直接读 lcg_surface 资源即可，
+        // 资源系统会按 night-qualifier 自动选对应版本。
         WindowCompat.getInsetsController(window, window.decorView).apply {
             isAppearanceLightStatusBars = isLight
         }
         binding.statusBarBackground.setBackgroundColor(
-            if (isLight) ContextCompat.getColor(this, R.color.white)
-            else ContextCompat.getColor(this, R.color.black)
+            ContextCompat.getColor(this, R.color.lcg_surface)
         )
     }
 
@@ -434,6 +444,12 @@ class MainActivity : TopActivity(), NavigationBarView.OnItemSelectedListener {
     fun onOpenHalfScreenWebViewEvent(event: OpenHalfWebViewFragmentEvent) {
         HalfScreenWebViewFragment.newInstance(event.html)
             .show(supportFragmentManager, HalfScreenWebViewFragment::class.java.simpleName)
+    }
+
+    @Suppress("unused", "UNUSED_PARAMETER")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onSessionExpired(event: SessionExpiredEvent) {
+        showMessage(R.string.session_expired_tips)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

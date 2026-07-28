@@ -2,7 +2,7 @@ package top.easelink.lcg.ui.profile.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class PopUpProfileInfo(

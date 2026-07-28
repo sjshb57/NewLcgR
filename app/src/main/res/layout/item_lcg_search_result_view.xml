@@ -10,7 +10,7 @@
     android:padding="@dimen/dp_4"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:background="@color/lcg_surface"
     android:orientation="vertical"
     android:clickable="true"
     app:cardElevation="@dimen/dp_2"

@@ -52,7 +52,7 @@ class ReplyPostDialog : DialogFragment() {
             lastClickTime = System.currentTimeMillis()
             arguments?.getString(REPLY_POST_URL)?.let { url ->
                 replyPostViewModel.sendReply(url, binding.replyContent.text.toString()) {
-                    view?.postDelayed({ dismiss() }, 1000L)
+                    view.postDelayed({ dismiss() }, 1000L)
                 }
             }
         }

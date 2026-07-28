@@ -12,10 +12,10 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         style="@style/Toolbar"
-        app:subtitleTextColor="@color/black"
+        app:subtitleTextColor="@color/lcg_on_surface"
         app:title="@string/app_name"
         app:titleTextAppearance="@style/Toolbar.TitleText"
-        app:titleTextColor="@color/black" />
+        app:titleTextColor="@color/lcg_on_surface" />
 
     <FrameLayout
         android:id="@+id/container"

@@ -2,6 +2,7 @@ package top.easelink.lcg.config
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
 import top.easelink.lcg.account.UserDataRepo
 import top.easelink.lcg.appinit.LCGApp
 
@@ -20,6 +21,12 @@ object AppConfig {
     private const val CONFIG_DEFAULT_SEARCH_ENGINE = "default_search_engine"
     private const val CONFIG_AUTO_SIGN_IN = "auto_sign_in"
     private const val CONFIG_SYNC_FAVORITES = "sync_favorites"
+    private const val CONFIG_NIGHT_MODE = "night_mode"
+
+    // 0 = 跟随系统, 1 = 强制亮, 2 = 强制暗（与 night_mode_array 的顺序对齐）
+    const val NIGHT_MODE_FOLLOW_SYSTEM = 0
+    const val NIGHT_MODE_LIGHT = 1
+    const val NIGHT_MODE_DARK = 2
 
 
     private const val CONFIG_SEARCH_ENGINE_BAIDU = 1
@@ -63,6 +70,21 @@ object AppConfig {
     var syncFavorites: Boolean
         get() = get(CONFIG_SYNC_FAVORITES, true)
         set(value) = put(CONFIG_SYNC_FAVORITES, value)
+
+    /**
+     * 用户选的暗夜模式。默认 NIGHT_MODE_LIGHT —— 新装用户保持白色页面，
+     * 不跟随系统强制变暗，等用户在 Settings 主动选择才生效。
+     */
+    var nightMode: Int
+        get() = get(CONFIG_NIGHT_MODE, NIGHT_MODE_LIGHT)
+        set(value) = put(CONFIG_NIGHT_MODE, value)
+
+    /** NIGHT_MODE_* 映射到 AppCompatDelegate 的 MODE_NIGHT_*。 */
+    fun toDelegateMode(mode: Int): Int = when (mode) {
+        NIGHT_MODE_LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+        NIGHT_MODE_DARK -> AppCompatDelegate.MODE_NIGHT_YES
+        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    }
 
 
     private fun getConfigSp(): SharedPreferences {

@@ -1,5 +1,7 @@
 package top.easelink.lcg.account
 
+import timber.log.Timber
+import top.easelink.lcg.BuildConfig
 import top.easelink.lcg.utils.SharedPreferencesHelper
 import top.easelink.lcg.utils.clearCookies
 import androidx.core.content.edit
@@ -63,6 +65,9 @@ object UserDataRepo {
     }
 
     fun clearAll() {
+        if (BuildConfig.DEBUG) {
+            Timber.w(Throwable("clearAll callsite"), "UserDataRepo.clearAll() triggered")
+        }
         clearCookies()
         SharedPreferencesHelper.getUserSp().edit { clear() }
         isLoggedIn = false

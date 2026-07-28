@@ -321,7 +321,8 @@ public class HtmlTagHandler implements Html.TagHandler {
         int len = output.length();
 
         if (preStart) {
-            String placeHolder = "LCG";
+            // 用零宽空格占位，避免空 span 不被绘制；不会污染用户复制的内容。
+            String placeHolder = "​";
             output.append(placeHolder);
             len += placeHolder.length();
         }

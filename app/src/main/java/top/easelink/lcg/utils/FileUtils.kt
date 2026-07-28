@@ -1,13 +1,13 @@
 package top.easelink.lcg.utils
 
+import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import timber.log.Timber
 import top.easelink.lcg.appinit.LCGApp
 import java.io.*
@@ -34,67 +34,62 @@ fun saveImageToGallery(bmp: Bitmap, bitName: String): String {
     }
 }
 
-fun saveBmp2Gallery(context: Context, bmp: Bitmap, picName: String) {
-    var fileName: String? = null
-    val galleryPath =
-        "${Environment.getExternalStorageDirectory()}/${Environment.DIRECTORY_DCIM}/Camera/"
-    var file: File? = null
-    var outStream: FileOutputStream? = null
-    try {
-        file = File(galleryPath, "$picName.jpg")
-        fileName = file.toString()
-        outStream = FileOutputStream(fileName)
-        bmp.compress(Bitmap.CompressFormat.JPEG, 90, outStream)
-    } catch (e: Exception) {
-        Timber.e(e)
-    } finally {
-        try {
-            outStream?.close()
-        } catch (e: IOException) {
-            Timber.e(e)
-        }
-    }
-    MediaStore.Images.Media.insertImage(context.contentResolver, bmp, fileName, null)
-    val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-    val uri: Uri = Uri.fromFile(file)
-    intent.data = uri
-    context.sendBroadcast(intent)
-    showMessage(context, "图片保存成功")
-}
-
-
+/**
+ * 把已经落盘的图片文件登记进系统相册。
+ *
+ * 旧实现用 MediaStore.Images.Media.insertImage + ACTION_MEDIA_SCANNER_SCAN_FILE 广播，
+ * 两者在 API 29 起都已废弃，且直写 /sdcard/DCIM 在分区存储下根本写不进去。
+ * 这里按版本分流：Q 及以上走 MediaStore + RELATIVE_PATH，以下走公共目录 + MediaScanner。
+ */
 fun syncSystemGallery(context: Context, path: String, fileName: String) {
-    val file = File(path)
-    if (!file.exists()) {
-        Timber.e("File not exists!")
+    val src = File(path)
+    if (!src.exists()) {
+        Timber.e("File not exists: %s", path)
         return
     }
-    try {
-        MediaStore.Images.Media.insertImage(
-            context.contentResolver,
-            file.absolutePath, fileName, null
-        )
-    } catch (e: FileNotFoundException) {
-        Timber.e(e)
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        val paths = arrayOf<String>(file.absolutePath)
-        MediaScannerConnection.scanFile(context, paths, null, null)
-    } else {
-        val intent: Intent
-        if (file.isDirectory) {
-            intent = Intent(Intent.ACTION_MEDIA_MOUNTED)
-            intent.setClassName(
-                "com.android.providers.media",
-                "com.android.providers.media.MediaScannerReceiver"
-            )
-            intent.data = Uri.fromFile(Environment.getExternalStorageDirectory())
+    runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            insertViaMediaStore(context, src, fileName)
         } else {
-            intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            intent.data = Uri.fromFile(file)
+            insertViaPublicDir(context, src, fileName)
         }
-        context.sendBroadcast(intent)
+    }.onFailure { Timber.e(it, "syncSystemGallery failed") }
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun insertViaMediaStore(context: Context, src: File, fileName: String) {
+    val values = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+        put(MediaStore.Images.Media.MIME_TYPE, guessMimeType(fileName))
+        put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/LCG")
+        put(MediaStore.Images.Media.IS_PENDING, 1)
     }
+    val resolver = context.contentResolver
+    val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        ?: throw IOException("MediaStore insert returned null")
+    resolver.openOutputStream(uri).use { out ->
+        if (out == null) throw IOException("openOutputStream returned null")
+        src.inputStream().use { it.copyTo(out) }
+    }
+    values.clear()
+    values.put(MediaStore.Images.Media.IS_PENDING, 0)
+    resolver.update(uri, values, null, null)
+}
+
+@Suppress("DEPRECATION")
+private fun insertViaPublicDir(context: Context, src: File, fileName: String) {
+    val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "LCG")
+    if (!dir.exists()) dir.mkdirs()
+    val dest = File(dir, fileName)
+    src.inputStream().use { input -> FileOutputStream(dest).use { input.copyTo(it) } }
+    MediaScannerConnection.scanFile(context, arrayOf(dest.absolutePath), null, null)
+}
+
+private fun guessMimeType(fileName: String): String = when {
+    fileName.endsWith(".png", true) -> "image/png"
+    fileName.endsWith(".webp", true) -> "image/webp"
+    fileName.endsWith(".gif", true) -> "image/gif"
+    else -> "image/jpeg"
 }
 
 

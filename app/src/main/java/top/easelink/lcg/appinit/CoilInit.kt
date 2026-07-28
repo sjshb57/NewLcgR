@@ -1,82 +1,66 @@
 package top.easelink.lcg.appinit
 
-import android.app.Application
 import coil.Coil
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import top.easelink.lcg.utils.getCookies
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
+import top.easelink.lcg.utils.getCookiesFor
+import top.easelink.lcg.utils.toHeaderString
+import java.util.concurrent.TimeUnit
 
 fun initCoil() {
     Coil.setImageLoader(LCGImageLoaderFactory)
 }
 
-object LCGImageLoaderFactory: ImageLoaderFactory {
+object LCGImageLoaderFactory : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
-
         return ImageLoader
             .Builder(LCGApp.context)
-            .okHttpClient(createUnsafeOkHttpClient())
+            .okHttpClient(buildClient())
             .build()
     }
 
-    fun createUnsafeOkHttpClient(): OkHttpClient {
-        // 创建一个不进行 SSL 校验的 TrustManager
-        val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-            override fun checkClientTrusted(chain: Array<out java.security.cert.X509Certificate>, authType: String) {}
-            override fun checkServerTrusted(chain: Array<out java.security.cert.X509Certificate>, authType: String) {}
-            override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = arrayOf()
-        })
-
-        // 创建 SSL 上下文
-        val sslContext = SSLContext.getInstance("SSL").apply {
-            init(null, trustAllCerts, java.security.SecureRandom())
-        }
-
+    private fun buildClient(): OkHttpClient {
+        // 论坛附件域 attach.52pojie.cn 需要带原站 Referer 和会话 cookie 才能访问。
         val headerInterceptor = Interceptor { chain ->
-            val originalRequest = chain.request()
-            if (originalRequest.url.host.contains("attach")) {
-                val newRequest =
-                    originalRequest.newBuilder().header("Host", "attach.52pojie.cn") // 添加自定义请求头
-                        .header("Referer", "https://www.52pojie.cn/")
-                        .header("Sec-Fetch-Site", "same-site").header("Sec-Fetch-Mode", "no-cors")
-                        .header("Sec-Fetch-Dest", "image")
-                        .header("X-Requested-With", "top.easelink.lcg")
-                        .header("Cookie", getCookies().toHeaderString())
-                        .header("Connection", "keep-alive").header(
-                            "Accept",
-                            "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
-                        ).header("Accept-Encoding", "gzip, deflate").header(
-                            "User-Agent",
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-                        ).build()
+            val original = chain.request()
+            if (original.url.host.contains("attach")) {
+                val cookieHeader = getCookiesFor(original.url.toString()).toHeaderString()
+                val newRequest = original.newBuilder()
+                    .header("Referer", "https://www.52pojie.cn/")
+                    .header("Sec-Fetch-Site", "same-site")
+                    .header("Sec-Fetch-Mode", "no-cors")
+                    .header("Sec-Fetch-Dest", "image")
+                    .header("X-Requested-With", "top.easelink.lcg")
+                    .also { if (cookieHeader.isNotEmpty()) it.header("Cookie", cookieHeader) }
+                    .header("Connection", "keep-alive")
+                    .header(
+                        "Accept",
+                        "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+                    )
+                    .header("Accept-Encoding", "gzip, deflate")
+                    // 论坛附件 CDN 历史上对移动端 UA 偶有限制，沿用旧实现的桌面 UA 作为兼容。
+                    .header(
+                        "User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    )
+                    .build()
                 chain.proceed(newRequest)
             } else {
-                chain.proceed(originalRequest)
+                chain.proceed(original)
             }
         }
 
-        // 创建 OkHttpClient
         return OkHttpClient.Builder()
             .addInterceptor(headerInterceptor)
             .followRedirects(true)
             .followSslRedirects(true)
-            .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
-            .hostnameVerifier { hostname, session -> true } // 信任所有主机
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .build()
     }
-
-    private fun Map<String, String>.toHeaderString(): String {
-        val stringBuilder = StringBuilder()
-        forEach {
-            stringBuilder.append("${it.key}=${it.value}; ")
-        }
-        return stringBuilder.toString()
-    }
-
 }

@@ -32,7 +32,7 @@
         android:textColor="@color/gray" />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rank_recycler_view"
-        android:background="@color/slight_light_gray"
+        android:background="@color/lcg_background"
         android:layout_below="@id/rank_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

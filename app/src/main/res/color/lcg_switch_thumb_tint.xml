@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Switch 拇指着色：
+  - on / off 都用白色（经典 Material 风格，避免红色块在 thumb 上显得突兀）
+  - disabled 状态用更深的白让 disabled 视觉降级
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="#DDDDDD" />
+    <item android:color="@android:color/white" />
+</selector>

@@ -13,11 +13,13 @@ import android.view.WindowInsets
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import coil.transform.RoundedCornersTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import top.easelink.framework.utils.dpToPx
 import top.easelink.lcg.R
@@ -69,9 +71,18 @@ class PopUpProfileDialog : DialogFragment() {
         val popUpInfo = arguments?.getParcelableCompat<PopUpProfileInfo>(POPUP_INFO) ?: return
 
         binding.apply {
-            extraInfoGrid.adapter = UserInfoGridViewAdapter(view.context, R.layout.item_profile_user_info).also {
-                popUpInfo.extraUserInfo?.let { info ->
-                    it.addAll(parseExtraUserInfoProfilePage(info))
+            val gridAdapter = UserInfoGridViewAdapter(view.context, R.layout.item_profile_user_info)
+            extraInfoGrid.adapter = gridAdapter
+            // parseExtraUserInfoProfilePage 标了 @WorkerThread：Jsoup 解析不能跑在 UI 线程
+            popUpInfo.extraUserInfo?.let { info ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val parsed = withContext(Dispatchers.Default) {
+                        runCatching { parseExtraUserInfoProfilePage(info) }.getOrDefault(emptyList())
+                    }
+                    if (parsed.isNotEmpty()) {
+                        gridAdapter.addAll(parsed)
+                        gridAdapter.notifyDataSetChanged()
+                    }
                 }
             }
             username.text = popUpInfo.userName

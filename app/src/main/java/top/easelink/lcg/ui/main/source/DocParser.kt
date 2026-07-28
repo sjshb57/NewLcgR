@@ -54,9 +54,7 @@ fun parseUserInfo(doc: Document): UserInfo {
                     } ?: Elements()
 
                 val signInState = select("img.qq_bind")
-                    ?.firstOrNull {
-                        !(it.attr("src")?.contains("qq") ?: true)
-                    }
+                    .firstOrNull { !it.attr("src").contains("qq") }
                     ?.attr("src")
 
                 return UserInfo(

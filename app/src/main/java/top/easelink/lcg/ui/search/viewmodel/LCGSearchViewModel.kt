@@ -2,7 +2,7 @@ package top.easelink.lcg.ui.search.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.GlobalScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import top.easelink.framework.threadpool.IOPool
 import top.easelink.lcg.ui.search.model.LCGSearchResultItem
@@ -28,7 +28,7 @@ class LCGSearchViewModel : ViewModel(), LCGSearchResultAdapter.ContentFetcher {
             isLoading.value = true
         }
         mKeyWord?.let {
-            GlobalScope.launch(IOPool) {
+            viewModelScope.launch(IOPool) {
                 when (type) {
                     LCGSearchResultAdapter.ContentFetcher.Type.INIT ->
                         doSearchWith(it).let {

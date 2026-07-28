@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dp_10"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/lcg_surface"
         app:cardCornerRadius="@dimen/dp_4"
         app:cardUseCompatPadding="true">
 
@@ -36,14 +36,14 @@
                 android:layout_marginTop="@dimen/dp_10"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
+                android:background="@color/lcg_surface"
                 android:divider="@color/white"
                 android:dividerHeight="@dimen/dp_6"
                 />
 
             <ImageButton
                 android:id="@+id/exit"
-                android:background="@color/white"
+                android:background="@color/lcg_surface"
                 android:layout_marginTop="@dimen/dp_20"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

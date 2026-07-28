@@ -9,7 +9,7 @@
     android:focusable="true"
     android:clickable="true"
     android:gravity="center"
-    android:background="@color/white">
+    android:background="@color/lcg_surface">
     <com.airbnb.lottie.LottieAnimationView
         android:layout_marginTop="@dimen/dp_30"
         android:layout_gravity="center"

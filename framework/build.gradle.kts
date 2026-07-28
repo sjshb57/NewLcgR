@@ -2,13 +2,11 @@
 
 plugins {
     id("com.android.library")
-    alias(libs.plugins.parcelize)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "top.easelink.framework"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 23
@@ -16,20 +14,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    kotlin {
-        jvmToolchain(21)
     }
 
     buildFeatures {
@@ -68,7 +55,6 @@ dependencies {
     api(libs.gson)
 
     // view
-    api(libs.richtext)
     api(libs.multitype)
     api(libs.shimmerlayout)
     api(libs.lottie)

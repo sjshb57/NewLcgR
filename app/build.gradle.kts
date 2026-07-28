@@ -2,7 +2,6 @@
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.parcelize)
 }
@@ -13,7 +12,7 @@ val versionPatch = 0
 
 android {
     namespace = "top.easelink.lcg"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "top.easelink.lcg"
@@ -63,16 +62,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    kotlin {
-        jvmToolchain(21)
-    }
-
     lint {
-        warningsAsErrors = true
-        abortOnError = true
+        // 原来 abortOnError 写了两次，后者覆盖前者，warningsAsErrors 形同虚设。
+        // 先让配置与行为一致；存量 warning 清完后再把这两个一起打开。
+        warningsAsErrors = false
+        abortOnError = false
         checkDependencies = true
         disable += "CoroutineCreationDuringComposition"
-        abortOnError = false
     }
 
     packaging {
@@ -109,9 +105,6 @@ dependencies {
     implementation(libs.androidx.core.base)
     implementation(project(":framework"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-
-    // Debug
-    debugImplementation(libs.debug.db)
 
     // Shiply
     implementation(libs.shiply.upgrade)
@@ -158,7 +151,6 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.persistentcookiejar)
     implementation(libs.photoview)
-    implementation(libs.richtext)
     implementation(libs.shimmerlayout)
     implementation(libs.timber)
     implementation(libs.kotlin.stdlib.jdk8)

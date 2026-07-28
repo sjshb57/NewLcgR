@@ -4,23 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/dp_2"
-    android:layout_marginBottom="@dimen/dp_6"
-    android:clickable="true"
-    android:focusable="true"
-    android:background="@color/white"
-    android:foreground="?attr/selectableItemBackgroundBorderless"
-    app:cardCornerRadius="0dp"
-    app:cardElevation="@dimen/dp_3">
+    style="@style/Widget.LCG.ItemCard">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/favoriteContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:paddingBottom="@dimen/dp_10">
+        android:paddingTop="@dimen/dp_12"
+        android:paddingBottom="@dimen/dp_12">
 
         <TextView
             android:id="@+id/title_text_view"
@@ -29,10 +20,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_14"
-            android:layout_marginTop="@dimen/dp_10"
             android:layout_marginEnd="@dimen/dp_14"
             android:maxLines="2"
-            android:textSize="@dimen/sp_14"
+            android:textSize="@dimen/sp_16"
+            android:lineSpacingExtra="@dimen/dp_2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -43,8 +34,7 @@
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp_8"
-            android:layout_marginTop="@dimen/dp_5"
+            android:layout_marginTop="@dimen/dp_8"
             app:layout_constraintTop_toBottomOf="@id/title_text_view"
             app:layout_constraintStart_toStartOf="@id/title_text_view"
             tools:text="0 / 0"/>
@@ -57,9 +47,10 @@
             android:ellipsize="middle"
             android:maxWidth="@dimen/dp_200"
             android:singleLine="true"
-            android:layout_marginTop="@dimen/dp_4"
-            app:layout_constraintTop_toBottomOf="@id/reply_and_view"
-            app:layout_constraintStart_toStartOf="@id/title_text_view"
+            android:layout_marginStart="@dimen/dp_8"
+            app:layout_constraintTop_toTopOf="@id/reply_and_view"
+            app:layout_constraintBottom_toBottomOf="@id/reply_and_view"
+            app:layout_constraintStart_toEndOf="@id/reply_and_view"
             tools:text="『收藏文章』"/>
 
         <TextView
@@ -67,7 +58,10 @@
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
             app:layout_constraintTop_toTopOf="@id/reply_and_view"
+            app:layout_constraintBottom_toBottomOf="@id/reply_and_view"
             app:layout_constraintEnd_toEndOf="@id/title_text_view"
             tools:text="收藏作者"/>
 
@@ -76,8 +70,9 @@
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/origin"
-            app:layout_constraintEnd_toEndOf="@id/author_text_view"
+            android:layout_marginTop="@dimen/dp_4"
+            app:layout_constraintTop_toBottomOf="@id/author_text_view"
+            app:layout_constraintEnd_toEndOf="@id/title_text_view"
             tools:text="收藏日期"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

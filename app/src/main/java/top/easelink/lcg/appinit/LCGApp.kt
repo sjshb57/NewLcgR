@@ -2,6 +2,7 @@ package top.easelink.lcg.appinit
 
 import android.app.Application
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,10 +23,13 @@ class LCGApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        // 初始化日志系统
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
         }
+        // 在所有 Activity 创建之前应用用户选择的暗夜模式偏好。
+        AppCompatDelegate.setDefaultNightMode(
+            AppConfig.toDelegateMode(AppConfig.nightMode)
+        )
         initCoil()
         AppGuardStarter.init(this)
         ShiplyInitialization.init(this@LCGApp)
@@ -35,13 +39,25 @@ class LCGApp : Application() {
 
     private fun trySignIn() {
         applicationScope.launch {
-            if (AppConfig.autoSignEnable && UserDataRepo.isLoggedIn) {
-                delay(2000)
-                try {
-                    SignInWorker.sendSignInRequest()
-                } catch (e: Exception) {
-                    Timber.e(e)
-                }
+            if (!AppConfig.autoSignEnable || !UserDataRepo.isLoggedIn) return@launch
+
+            // 原来只有设置页会注册周期任务，没进过设置页就永远只有冷启动这一次。
+            // ExistingPeriodicWorkPolicy.KEEP 幂等，每次启动调用是安全的。
+            runCatching { SignInWorker.startSignInWork(this@LCGApp) }
+                .onFailure { Timber.e(it, "startSignInWork failed") }
+
+            // 与 SignInWorker 去重：如 7 小时内已成功签过，不再触发，避免冷启动 + Worker 双跑。
+            if (SignInWorker.isRecentlyExecuted()) {
+                Timber.d("trySignIn skipped: recently executed")
+                return@launch
+            }
+            delay(2000)
+            try {
+                // 结果必须落日志，否则 BLOCKED_BY_WAF 会被当成"每天都签上了"
+                val result = SignInWorker.sendSignInRequest()
+                Timber.d("trySignIn result = %s", result)
+            } catch (e: Exception) {
+                Timber.e(e)
             }
         }
     }

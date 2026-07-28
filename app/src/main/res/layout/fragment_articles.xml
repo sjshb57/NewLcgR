@@ -16,7 +16,7 @@
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/lcg_surface"
         app:refreshing="@{viewModel.isLoading}"
         android:focusable="true"
         android:clickable="true">
@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"
-                android:background="@color/slight_light_light_gray"
+                android:background="@color/lcg_background"
                 tools:visibility="visible" />
 
             <com.airbnb.lottie.LottieAnimationView

@@ -72,7 +72,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
                 try {
                     val pos = binding.forumTab.selectedTabPosition
                     viewModel.threadList.value?.takeIf { pos >= 0 && pos < it.size }?.let { threadList ->
-                        threadList[pos].threadUrl?.let {
+                        threadList[pos].threadUrl.let {
                             viewModel.initUrlAndFetch(
                                 url = it,
                                 fetchType = ArticleFetcher.FetchType.FETCH_INIT,

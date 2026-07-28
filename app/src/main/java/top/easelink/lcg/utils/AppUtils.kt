@@ -41,13 +41,15 @@ fun getScreenHeightDp(context: Context): Int {
 }
 
 /**
- * Get the device's real User-Agent
+ * 系统 WebView 默认 UA，去掉 " wv)" 标记，让 Jsoup/OkHttp 与 WebView 用同一个 UA。
  *
+ * 注意：这不是过盾手段。实测带/不带 wv 请求首页结果完全一致，
+ * 未复现"strip wv 能绕过知道创宇盾"的说法。登录死循环别再往这个方向查。
  */
 fun getDeviceUserAgent(context: Context): String {
-    // 显示UA信息
-    // showMessage(WebSettings.getDefaultUserAgent(context))
     return WebSettings.getDefaultUserAgent(context)
+        .replace("; wv) ", ") ")
+        .replace(" wv) ", ") ")
 }
 
 fun getScreenWidth(context: Context): Int = context.resources.displayMetrics.widthPixels

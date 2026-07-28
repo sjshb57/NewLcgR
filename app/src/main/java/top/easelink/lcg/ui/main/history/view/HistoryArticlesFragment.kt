@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -11,6 +14,7 @@ import top.easelink.framework.threadpool.IOPool
 import top.easelink.framework.threadpool.Main
 import top.easelink.framework.topbase.ControllableFragment
 import top.easelink.framework.topbase.TopFragment
+import top.easelink.lcg.R
 import top.easelink.lcg.databinding.FragmentHistoryArticlesBinding
 import top.easelink.lcg.ui.main.history.model.HistoryModel
 import top.easelink.lcg.ui.main.source.local.ArticlesDatabase
@@ -28,30 +32,36 @@ class HistoryArticlesFragment : TopFragment(), ControllableFragment {
         }
     }
 
-    override fun isControllable(): Boolean {
-        return true
-    }
+    override fun isControllable(): Boolean = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentHistoryArticlesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.root.setStatusBarPadding()
-        binding.clearAll.setOnClickListener {
-            launch(IOPool) {
-                ArticlesDatabase.getInstance().articlesDao().deleteHistories()
-            }
+        // toolbar 顶部 + recyclerview 底部分别处理状态栏 / 导航栏 inset，避免 edge-to-edge 下被吃。
+        binding.toolbar.setStatusBarPadding()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.recyclerView) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = bars.bottom)
+            insets
         }
+
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_clear_all) {
+                launch(IOPool) {
+                    ArticlesDatabase.getInstance().articlesDao().deleteHistories()
+                }
+                true
+            } else false
+        }
+
         setUpRecyclerView()
     }
 
@@ -63,12 +73,9 @@ class HistoryArticlesFragment : TopFragment(), ControllableFragment {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = RecyclerView.VERTICAL
-                isItemPrefetchEnabled = false
-                initialPrefetchItemCount = 0
             }
             itemAnimator = null
             adapter = mAdapter
-            setHasFixedSize(true)
         }
 
         ArticlesDatabase
