@@ -17,7 +17,7 @@ import top.easelink.lcg.ui.main.forumnav.model.ChildForumItemInfo;
 public class ChildGridViewAdapter extends ArrayAdapter<ChildForumItemInfo> {
 
     @LayoutRes
-    private int mLayoutRes;
+    private final int mLayoutRes;
 
     ChildGridViewAdapter(@NonNull Context context, @LayoutRes int resource) {
         super(context, resource);

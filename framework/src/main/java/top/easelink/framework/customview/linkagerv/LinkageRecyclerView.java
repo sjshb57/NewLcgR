@@ -72,7 +72,7 @@ public class LinkageRecyclerView<T extends BaseGroupedItem.ItemInfo> extends Rel
     private List<String> mInitGroupNames;
     private List<BaseGroupedItem<T>> mInitItems;
 
-    private List<Integer> mHeaderPositions = new ArrayList<>();
+    private final List<Integer> mHeaderPositions = new ArrayList<>();
     private int mTitleHeight;
     private int mFirstVisiblePosition;
     private String mLastGroupName;
@@ -97,10 +97,10 @@ public class LinkageRecyclerView<T extends BaseGroupedItem.ItemInfo> extends Rel
     private void initView(Context context, @Nullable AttributeSet attrs) {
         this.mContext = context;
         View view = LayoutInflater.from(context).inflate(R.layout.layout_linkage_view, this);
-        mRvPrimary = (RecyclerView) view.findViewById(R.id.rv_primary);
-        mRvSecondary = (RecyclerView) view.findViewById(R.id.rv_secondary);
-        mHeaderContainer = (FrameLayout) view.findViewById(R.id.header_container);
-        mLinkageLayout = (LinearLayout) view.findViewById(R.id.linkage_layout);
+        mRvPrimary = view.findViewById(R.id.rv_primary);
+        mRvSecondary = view.findViewById(R.id.rv_secondary);
+        mHeaderContainer = view.findViewById(R.id.header_container);
+        mLinkageLayout = view.findViewById(R.id.linkage_layout);
     }
 
     private void setLevel2LayoutManager() {

@@ -28,7 +28,7 @@ import androidx.annotation.NonNull;
  * Copied from http://stackoverflow.com/a/22298833
  */
 public class HtmlResImageGetter implements Html.ImageGetter {
-    private Context context;
+    private final Context context;
 
     public HtmlResImageGetter(@NonNull Context context) {
         this.context = context;

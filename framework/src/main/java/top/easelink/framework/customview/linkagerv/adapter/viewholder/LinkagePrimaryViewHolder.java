@@ -29,7 +29,7 @@ public class LinkagePrimaryViewHolder extends BaseViewHolder {
 
     public View mGroupTitle;
     public View mLayout;
-    private ILinkagePrimaryAdapterConfig mConfig;
+    private final ILinkagePrimaryAdapterConfig mConfig;
 
     public LinkagePrimaryViewHolder(@NonNull View itemView, ILinkagePrimaryAdapterConfig config) {
         super(itemView);

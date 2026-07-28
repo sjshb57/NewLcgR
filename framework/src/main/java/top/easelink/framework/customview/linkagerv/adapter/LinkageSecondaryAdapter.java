@@ -48,7 +48,7 @@ public class LinkageSecondaryAdapter<T extends BaseGroupedItem.ItemInfo> extends
     private static final int IS_FOOTER = 3;
     private boolean mIsGridMode;
 
-    private ILinkageSecondaryAdapterConfig mConfig;
+    private final ILinkageSecondaryAdapterConfig mConfig;
 
     public ILinkageSecondaryAdapterConfig getConfig() {
         return mConfig;

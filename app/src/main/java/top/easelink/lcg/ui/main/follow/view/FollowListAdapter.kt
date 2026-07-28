@@ -113,7 +113,7 @@ class FollowListAdapter(
         }
     }
 
-    inner class EmptyViewHolder(binding: ItemEmptyViewBinding) : BaseViewHolder(binding.root) {
+    class EmptyViewHolder(binding: ItemEmptyViewBinding) : BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {}
     }
 

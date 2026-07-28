@@ -175,7 +175,7 @@ class FollowingFeedAdapter(
         override fun onBind(position: Int) {}
     }
 
-    inner class LoadMoreViewHolder internal constructor(
+    class LoadMoreViewHolder internal constructor(
         private val binding: ItemLoadMoreViewBinding,
         private val followingFeedViewModel: FollowingFeedViewModel
     ) : BaseViewHolder(binding.root) {

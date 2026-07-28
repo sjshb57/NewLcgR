@@ -5,9 +5,9 @@ import android.text.style.ClickableSpan;
 import android.view.View;
 
 public class LinkClickSpan extends ClickableSpan {
-    private Context context;
+    private final Context context;
     private OnLinkTagClickListener listener;
-    private String url;
+    private final String url;
 
     public LinkClickSpan(Context context, String url) {
         this.context = context;

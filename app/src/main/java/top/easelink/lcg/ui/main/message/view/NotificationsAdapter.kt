@@ -103,7 +103,7 @@ class NotificationsAdapter(
 
     }
 
-    inner class EmptyViewHolder(view: View) : BaseViewHolder(view) {
+    class EmptyViewHolder(view: View) : BaseViewHolder(view) {
         override fun onBind(position: Int) {}
     }
 

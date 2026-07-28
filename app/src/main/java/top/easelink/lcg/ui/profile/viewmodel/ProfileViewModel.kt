@@ -12,7 +12,7 @@ class ProfileViewModel : ViewModel() {
     private var job = Job()
 
     fun startFetchUserInfo(query: String) {
-        val deffer = viewModelScope.async(CalcPool) {
+        viewModelScope.async(CalcPool) {
             ProfileSource.getProfile(query)
         }
     }

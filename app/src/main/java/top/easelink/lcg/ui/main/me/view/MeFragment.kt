@@ -58,7 +58,7 @@ class MeFragment : TopFragment(), ControllableFragment {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentMeBinding.inflate(inflater, container, false)
         return binding.root
     }

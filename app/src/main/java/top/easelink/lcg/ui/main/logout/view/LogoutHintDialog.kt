@@ -21,7 +21,7 @@ class LogoutHintDialog(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         dialog?.window?.apply {
             setWindowAnimations(R.style.FadeInOutAnim)
             val windowParam = attributes

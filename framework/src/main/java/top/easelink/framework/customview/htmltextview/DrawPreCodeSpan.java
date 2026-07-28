@@ -31,8 +31,8 @@ import android.text.style.ReplacementSpan;
 public class DrawPreCodeSpan extends ReplacementSpan {
 
     private static final String DEFAULT_TABLE_LINK_TEXT = "";
-    private static float DEFAULT_TEXT_SIZE = 80f;
-    private static int DEFAULT_TEXT_COLOR = Color.BLUE;
+    private static final float DEFAULT_TEXT_SIZE = 80f;
+    private static final int DEFAULT_TEXT_COLOR = Color.BLUE;
 
     protected String mTableLinkText = DEFAULT_TABLE_LINK_TEXT;
     protected float mTextSize = DEFAULT_TEXT_SIZE;

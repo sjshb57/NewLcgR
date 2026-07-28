@@ -97,7 +97,7 @@ class BaiduSearchResultAdapter(private var mListener: SearchAdapterListener) :
 
     }
 
-    inner class EmptyViewHolder internal constructor(view: View) :
+    class EmptyViewHolder internal constructor(view: View) :
         BaseViewHolder(view) {
         override fun onBind(position: Int) {}
     }

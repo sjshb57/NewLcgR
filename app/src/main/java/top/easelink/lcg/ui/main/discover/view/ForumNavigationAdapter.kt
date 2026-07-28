@@ -69,7 +69,7 @@ class ForumNavigationAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         }
     }
 
-    inner class LoadMoreViewHolder internal constructor(private val binding: ItemForumsGridBinding) : BaseViewHolder(binding.root) {
+    class LoadMoreViewHolder internal constructor(private val binding: ItemForumsGridBinding) : BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {
             binding.apply {
                 root.setOnClickListener {

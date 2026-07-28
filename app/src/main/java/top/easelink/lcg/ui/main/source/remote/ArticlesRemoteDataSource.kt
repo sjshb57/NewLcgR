@@ -99,7 +99,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
 
     @Throws(BlockException::class, NetworkException::class)
     @WorkerThread
-    override fun getArticleDetail(query: String, isFirstFetch: Boolean): ArticleDetail? {
+    override fun getArticleDetail(query: String, isFirstFetch: Boolean): ArticleDetail {
         try {
             val doc = JsoupClient.sendGetRequestWithQuery(query)
             val articleAbstract: ArticleAbstractResponse? =

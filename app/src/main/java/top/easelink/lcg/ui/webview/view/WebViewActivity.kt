@@ -123,7 +123,7 @@ class WebViewActivity : AppCompatActivity() {
         // CookieManager 默认接受 first-party cookie，但 third-party 默认是 false。
         // QQ 登录会跨域跳转到 connect.qq.com，需要 third-party cookie 才能完成；
         // WAF cookie wzws_cid 是 first-party HttpOnly，依赖 acceptCookie=true。
-        android.webkit.CookieManager.getInstance().apply {
+        CookieManager.getInstance().apply {
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(mWebView, true)
         }
@@ -159,7 +159,7 @@ class WebViewActivity : AppCompatActivity() {
      * 普通登录 cookie 不动，避免破坏"登录过但 token 失效"的恢复路径。
      */
     private fun clearStaleWafCookies(url: String) {
-        val cm = android.webkit.CookieManager.getInstance()
+        val cm = CookieManager.getInstance()
         val current = cm.getCookie(url) ?: return
         val expired = "Expires=Thu, 01-Jan-1970 00:00:00 GMT"
         // 只清 WAF 挑战 cookie（52pojie 不下发 PHPSESSID，其 Discuz 前缀是 htVC_2132_*）
@@ -399,7 +399,7 @@ class WebViewActivity : AppCompatActivity() {
             // commit 瞬间 wzws_cid 可能还没到 CookieManager：它由 /waf_text_captcha
             // 那张 JPEG 的 Set-Cookie 下发。滑块页则在 HTML 响应本身就带，无需等待。
             view.postDelayed({
-                runCatching { android.webkit.CookieManager.getInstance().flush() }
+                runCatching { CookieManager.getInstance().flush() }
                 LCGCookieJar.syncFromWebView(url)
             }, COOKIE_SYNC_DELAY_MS)
             // 登录过程中可能跳到别的域（QQ 互联回跳等），每次注入前按当前 URL 再校验
@@ -419,7 +419,7 @@ class WebViewActivity : AppCompatActivity() {
             // /waf_text_captcha 是唯一会下发 wzws_cid 的子资源（image/jpeg + Set-Cookie）
             if (u.contains("/waf_text_captcha")) {
                 view.post {
-                    runCatching { android.webkit.CookieManager.getInstance().flush() }
+                    runCatching { CookieManager.getInstance().flush() }
                     LCGCookieJar.syncFromWebView(u)
                 }
             }

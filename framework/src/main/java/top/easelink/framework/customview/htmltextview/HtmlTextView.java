@@ -203,7 +203,7 @@ public class HtmlTextView extends MaterialTextView {
         if (getMovementMethod() instanceof LocalLinkMovementMethod) {
             // 只处理点击事件，不处理滚动
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_DOWN) {
-                return ((LocalLinkMovementMethod) getMovementMethod()).onTouchEvent(this, (Spannable) getText(), event);
+                return getMovementMethod().onTouchEvent(this, (Spannable) getText(), event);
             }
         }
         // 禁止其他触摸事件，防止滚动

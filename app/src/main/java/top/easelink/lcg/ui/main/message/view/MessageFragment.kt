@@ -22,7 +22,7 @@ class MessageFragment : TopFragment(), ControllableFragment {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentMessageBinding.inflate(inflater, container, false)
         return binding.root
     }

@@ -439,10 +439,6 @@ class ArticleAdapter(
         }
     }
 
-    override fun onViewRecycled(holder: BaseViewHolder) {
-        super.onViewRecycled(holder)
-    }
-
     companion object {
         private const val VIEW_TYPE_EMPTY = 0
         private const val VIEW_TYPE_REPLY = 1

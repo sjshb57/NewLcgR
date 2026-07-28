@@ -40,8 +40,8 @@ public class LinkagePrimaryAdapter extends RecyclerView.Adapter<LinkagePrimaryVi
     private View mView;
     private int mSelectedPosition;
 
-    private ILinkagePrimaryAdapterConfig mConfig;
-    private OnLinkageListener mLinkageListener;
+    private final ILinkagePrimaryAdapterConfig mConfig;
+    private final OnLinkageListener mLinkageListener;
 
     public List<String> getStrings() {
         return mStrings;

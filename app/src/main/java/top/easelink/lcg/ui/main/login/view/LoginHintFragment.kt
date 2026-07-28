@@ -18,7 +18,7 @@ class LoginHintFragment : TopFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentLoginHintBinding.inflate(inflater, container, false)
         return binding.root
     }

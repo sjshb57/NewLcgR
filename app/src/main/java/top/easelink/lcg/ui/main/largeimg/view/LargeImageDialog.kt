@@ -29,7 +29,7 @@ class LargeImageDialog : TopDialog() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         dialog?.window?.setWindowAnimations(R.style.FadeInOutAnim)
         _binding = DialogLargeImageBinding.inflate(inflater, container, false)
         return binding.root

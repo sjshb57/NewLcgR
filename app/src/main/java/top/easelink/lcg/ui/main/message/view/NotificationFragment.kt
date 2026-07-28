@@ -25,7 +25,7 @@ class NotificationFragment : TopFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentNotificationBinding.inflate(inflater, container, false)
         return binding.root
     }

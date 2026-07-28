@@ -4,7 +4,7 @@ import timber.log.Timber
 import top.easelink.framework.BuildConfig
 import java.util.concurrent.*
 
-class ELThreadPoolExecutor constructor(
+class ELThreadPoolExecutor(
     corePoolSize: Int,
     maximumPoolSize: Int,
     keepAliveTime: Long,

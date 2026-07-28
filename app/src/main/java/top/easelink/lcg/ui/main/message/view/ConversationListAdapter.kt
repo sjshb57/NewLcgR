@@ -103,11 +103,11 @@ class ConversationListAdapter(
         }
     }
 
-    inner class EmptyViewHolder(view: View) : BaseViewHolder(view) {
+    class EmptyViewHolder(view: View) : BaseViewHolder(view) {
         override fun onBind(position: Int) {}
     }
 
-    inner class LoadMoreViewHolder internal constructor(private val binding: ItemLoadMoreViewBinding) :
+    class LoadMoreViewHolder internal constructor(private val binding: ItemLoadMoreViewBinding) :
         BaseViewHolder(binding.root) {
         override fun onBind(position: Int) {
             //TODO add fetch more in the future

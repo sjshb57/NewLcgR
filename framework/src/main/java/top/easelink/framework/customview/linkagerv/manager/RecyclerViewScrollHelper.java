@@ -30,8 +30,7 @@ public class RecyclerViewScrollHelper {
 
     public static void smoothScrollToPosition(RecyclerView recyclerView, int snapMode, int position) {
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-        if (layoutManager instanceof LinearLayoutManager) {
-            LinearLayoutManager manager = (LinearLayoutManager) layoutManager;
+        if (layoutManager instanceof LinearLayoutManager manager) {
             LinearSmoothScroller mScroller = null;
             if (snapMode == LinearSmoothScroller.SNAP_TO_START) {
                 mScroller = new TopSmoothScroller(recyclerView.getContext());

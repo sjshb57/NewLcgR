@@ -95,7 +95,7 @@ class LCGSearchResultAdapter(
         }
     }
 
-    private inner class EmptyViewHolder(view: View) : BaseViewHolder(view) {
+    private class EmptyViewHolder(view: View) : BaseViewHolder(view) {
         override fun onBind(position: Int) {}
     }
 

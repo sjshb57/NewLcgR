@@ -8,10 +8,10 @@ import android.view.View;
 import org.jetbrains.annotations.NotNull;
 
 public class ImageClickSpan extends ClickableSpan {
-    private Context context;
-    private String imageUrl;
+    private final Context context;
+    private final String imageUrl;
     private OnImgTagClickListener listener;
-    private int position;
+    private final int position;
 
     ImageClickSpan(Context context, String imageUrl, int position) {
         this.context = context;
