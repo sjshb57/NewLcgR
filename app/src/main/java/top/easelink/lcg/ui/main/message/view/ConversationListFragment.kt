@@ -45,14 +45,13 @@ class ConversationListFragment : TopFragment() {
     }
 
     private fun setUpSwipeRefresh() {
+        // observe 只注册一次；写在 setOnRefreshListener 里会每次下拉叠加一个
+        mConversationVM.conversations.observe(viewLifecycleOwner) {
+            binding.conversationSwipeRefresh.isRefreshing = false
+        }
         binding.conversationSwipeRefresh.setOnRefreshListener {
-            // 清除现有数据并重新加载
             (binding.conversationList.adapter as ConversationListAdapter).clearItems()
             mConversationVM.fetchConversations()
-            // 监听数据加载完成后停止刷新
-            mConversationVM.conversations.observe(viewLifecycleOwner, Observer {
-                binding.conversationSwipeRefresh.isRefreshing = false
-            })
         }
     }
 

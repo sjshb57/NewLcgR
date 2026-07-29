@@ -1,6 +1,7 @@
 package top.easelink.lcg.ui.main.message.viewmodel
 
 import androidx.lifecycle.MutableLiveData
+import top.easelink.framework.threadpool.IOPool
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -19,13 +20,13 @@ class ConversationListViewModel : ViewModel() {
 
     fun fetchConversations() {
         isLoading.value = true
-        viewModelScope.launch {
+        viewModelScope.launch(IOPool) {
             try {
                 parseConversations(JsoupClient.sendGetRequestWithQuery(WebsiteConstant.PRIVATE_MESSAGE_QUERY))
             } catch (e: Exception) {
                 Timber.e(e)
             }
-            isLoading.value = false
+            isLoading.postValue(false)
         }
     }
 
@@ -56,7 +57,7 @@ class ConversationListViewModel : ViewModel() {
                     replyUrl = replyUrl
                 )
             }
-            conversations.value = conversationList
+            conversations.postValue(conversationList)
         }
     }
 }

@@ -44,7 +44,6 @@ import top.easelink.lcg.utils.WebsiteConstant.LOGIN_QUERY
 import top.easelink.lcg.utils.WebsiteConstant.QQ_LOGIN_URL
 import top.easelink.lcg.utils.WebsiteConstant.SERVER_BASE_URL
 import top.easelink.lcg.utils.WebsiteConstant.URL_KEY
-import top.easelink.lcg.utils.getDeviceUserAgent
 import top.easelink.lcg.utils.showMessage
 import top.easelink.lcg.utils.setStatusBarPadding
 
@@ -121,8 +120,8 @@ class WebViewActivity : AppCompatActivity() {
         }
 
         // CookieManager 默认接受 first-party cookie，但 third-party 默认是 false。
-        // QQ 登录会跨域跳转到 connect.qq.com，需要 third-party cookie 才能完成；
-        // WAF cookie wzws_cid 是 first-party HttpOnly，依赖 acceptCookie=true。
+        // QQ 登录会跨域跳转到 connect.qq.com，需要 third-party cookie 才能完成。
+        // 创宇盾的 wzws_sid 是 first-party HttpOnly，同样依赖 acceptCookie=true。
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(mWebView, true)
@@ -137,7 +136,6 @@ class WebViewActivity : AppCompatActivity() {
                 // 本 Activity 是 exported 的：第三方 App 能发 Intent 带 OPEN_LOGIN_PAGE=true
                 // + 任意 URL，进而调用 hook.processHtml() 塞假 HTML 骗过登录判定。限定可信域。
                 if (isOpenLoginEvent && isTrustedLoginHost(mUrl)) {
-                    clearStaleWafCookies(mUrl!!)
                     mWebView.removeJavascriptInterface(HOOK_NAME)
                     mWebView.addJavascriptInterface(WebViewHook(), HOOK_NAME)
                 } else if (isOpenLoginEvent) {
@@ -151,30 +149,6 @@ class WebViewActivity : AppCompatActivity() {
                 mWebView.loadDataWithBaseURL("", mHtml!!, "text/html", "UTF-8", "")
             }
         }
-    }
-
-    /**
-     * 登录页打开前清理残留的 WAF 挑战 cookie (wzws_*)。
-     * 失效的 wzws_cid 会让服务端在原 URL 与 /waf_text_verify.html 之间 302 死循环。
-     * 普通登录 cookie 不动，避免破坏"登录过但 token 失效"的恢复路径。
-     */
-    private fun clearStaleWafCookies(url: String) {
-        val cm = CookieManager.getInstance()
-        val current = cm.getCookie(url) ?: return
-        val expired = "Expires=Thu, 01-Jan-1970 00:00:00 GMT"
-        // 只清 WAF 挑战 cookie（52pojie 不下发 PHPSESSID，其 Discuz 前缀是 htVC_2132_*）
-        val targets = current.split(";").mapNotNull { entry ->
-            val name = entry.trim().substringBefore('=').trim()
-            name.takeIf { it.startsWith("wzws") }
-        }
-        if (targets.isEmpty()) return
-        targets.forEach { name ->
-            // 不知道服务端写的是哪个 domain，两套都打一遍兜底。
-            cm.setCookie(url, "$name=; Path=/; $expired")
-            cm.setCookie(url, "$name=; Path=/; Domain=.52pojie.cn; $expired")
-        }
-        cm.flush()
-        Timber.tag("WAF").d("cleared stale WAF cookies before login: %s", targets)
     }
 
     inner class WebViewHook : HookInterface {
@@ -335,10 +309,6 @@ class WebViewActivity : AppCompatActivity() {
             setSupportZoom(false)
             cacheMode = WebSettings.LOAD_DEFAULT
             blockNetworkImage = true
-            // 关键:strip 掉 WebView UA 里的 " wv) " 标记,跟 Jsoup/OkHttp 对齐。
-            // 知道创宇盾的环境检测 JS 读 navigator.userAgent,看到 wv 就判可疑流量,
-            // 把请求卡在"浏览器环境检查中"页自我刷新循环里(进而升级到滑块也卡死)。
-            userAgentString = getDeviceUserAgent(LCGApp.context)
         }
     }
 
@@ -396,34 +366,15 @@ class WebViewActivity : AppCompatActivity() {
         override fun onPageCommitVisible(view: WebView, url: String) {
             setLoading(false)
             view.settings.blockNetworkImage = false
-            // commit 瞬间 wzws_cid 可能还没到 CookieManager：它由 /waf_text_captcha
-            // 那张 JPEG 的 Set-Cookie 下发。滑块页则在 HTML 响应本身就带，无需等待。
-            view.postDelayed({
-                runCatching { CookieManager.getInstance().flush() }
-                LCGCookieJar.syncFromWebView(url)
-            }, COOKIE_SYNC_DELAY_MS)
+            // WebView 已把本页 cookie 落到 CookieManager，flush 后同步进统一 jar，
+            // 让 OkHttp / Jsoup / Coil 立刻共享同一个会话
+            //（包含 WebView 自行跑完创宇盾 JS 挑战后拿到的 wzws_sid）。
+            runCatching { CookieManager.getInstance().flush() }
+            LCGCookieJar.syncFromWebView(url)
             // 登录过程中可能跳到别的域（QQ 互联回跳等），每次注入前按当前 URL 再校验
             if (isOpenLoginEvent && isTrustedLoginHost(url)) {
                 view.loadUrl("javascript:$HOOK_NAME.processHtml(document.documentElement.outerHTML);")
             }
-        }
-
-        // 子资源粒度的 cookie 同步：/waf_*_captcha 响应会下发新的 wzws_cid，
-        // 必须在它返回后立刻 flush + sync，否则后续 OkHttp 请求带的是过期 cookie。
-        // 同时给 WAF/wzws-* 子资源打日志，方便定位"卡在正在加载中"的环节。
-        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-            val u = request.url.toString()
-            if (u.contains("/waf_") || u.contains("/wzws-")) {
-                Timber.tag("WAF").d("→ %s %s", request.method, u)
-            }
-            // /waf_text_captcha 是唯一会下发 wzws_cid 的子资源（image/jpeg + Set-Cookie）
-            if (u.contains("/waf_text_captcha")) {
-                view.post {
-                    runCatching { CookieManager.getInstance().flush() }
-                    LCGCookieJar.syncFromWebView(u)
-                }
-            }
-            return null
         }
 
         override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
@@ -445,13 +396,8 @@ class WebViewActivity : AppCompatActivity() {
         }
 
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            // 关键修复：WAF 验证页 (/waf_text_verify.html / /waf_slider_verify.html) 必须
-            // 立刻加载图片——验证码图 (/waf_text_captcha) 的响应头才是下发 wzws_cid
-            // cookie 的地方。普通页面才屏蔽图片以加快首屏。
-            val isWaf = isWafChallengeUrl(url)
-            view.settings.blockNetworkImage = !isWaf
-            // 验证页要让用户看到，不能用 Lottie 占位盖住
-            setLoading(!isWaf)
+            view.settings.blockNetworkImage = true
+            setLoading(true)
         }
 
         override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
@@ -482,19 +428,9 @@ class WebViewActivity : AppCompatActivity() {
         return TRUSTED_LOGIN_HOSTS.any { host == it || host.endsWith(".$it") }
     }
 
-    private fun isWafChallengeUrl(url: String?): Boolean {
-        if (url == null) return false
-        return url.contains("/waf_text_verify.html") ||
-                url.contains("/waf_slider_verify.html") ||
-                url.contains("/waf_text_captcha") ||
-                url.contains("/waf_slider_captcha")
-    }
 
     companion object {
         private const val HOOK_NAME = "hook"
-
-        /** cookie 同步延迟：等 /waf_text_captcha 的 Set-Cookie 落到 CookieManager。 */
-        private const val COOKIE_SYNC_DELAY_MS = 300L
 
         private val TRUSTED_LOGIN_HOSTS = listOf(
             "52pojie.cn",

@@ -68,14 +68,23 @@ class ConversationListAdapter(
         notifyDataSetChanged()
     }
 
+    // 位置必须取数据列表旧长度，不能用 itemCount（含 footer）
     fun appendItems(conversations: List<Conversation>) {
-        val count = itemCount
+        if (conversations.isEmpty()) return
+        val start = mConversations.size
         mConversations.addAll(conversations)
-        notifyItemRangeInserted(count - 1, conversations.size)
+        if (start == 0) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemRangeInserted(start, conversations.size)
+        }
     }
 
+    // 必须发通知：下拉刷新会单独调用它
     fun clearItems() {
+        if (mConversations.isEmpty()) return
         mConversations.clear()
+        notifyDataSetChanged()
     }
 
     inner class ArticleViewHolder internal constructor(private val binding: ItemConversationViewBinding) :

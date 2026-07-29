@@ -1,6 +1,7 @@
 package top.easelink.lcg.ui.main.article.viewmodel
 
 import androidx.lifecycle.MutableLiveData
+import top.easelink.framework.threadpool.IOPool
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +33,7 @@ class PostPreviewViewModel : ViewModel() {
         loadJob?.cancel()
         _loadingResult.value = R.string.preview_loading
 
-        loadJob = viewModelScope.launch {
+        loadJob = viewModelScope.launch(IOPool) {
             try {
                 val post = withContext(Dispatchers.IO) {
                     ArticlesRemoteDataSource.getPostPreview(query)

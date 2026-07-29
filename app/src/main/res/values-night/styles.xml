@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/lcg_on_surface</item>
+        <item name="colorOnPrimary">@color/lcg_surface</item>
+        <item name="colorPrimaryContainer">@color/lcg_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/lcg_on_primary_container</item>
+
+        <item name="colorSecondary">@color/pojie_logo</item>
+        <item name="colorOnSecondary">#3B0A0C</item>
+        <item name="colorSecondaryContainer">@color/lcg_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/pojie_logo</item>
+
+        <item name="colorTertiary">@color/lcg_tertiary</item>
+        <item name="colorOnTertiary">@color/lcg_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/lcg_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/lcg_on_tertiary_container</item>
+
+        <item name="colorError">@color/lcg_error</item>
+        <item name="colorOnError">@color/lcg_on_error</item>
+        <item name="colorErrorContainer">@color/lcg_error_container</item>
+        <item name="colorOnErrorContainer">@color/lcg_on_error_container</item>
+
+        <item name="colorSurface">@color/lcg_surface</item>
+        <item name="colorOnSurface">@color/lcg_on_surface</item>
+        <item name="colorSurfaceVariant">@color/lcg_surface_variant</item>
+        <item name="colorSurfaceContainerLow">@color/lcg_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/lcg_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/lcg_surface_container_high</item>
+        <item name="colorOnSurfaceVariant">@color/lcg_on_surface_variant</item>
+        <item name="android:colorBackground">@color/lcg_background</item>
+        <item name="colorOnBackground">@color/lcg_on_surface</item>
+
+        <item name="colorOutline">@color/lcg_outline</item>
+        <item name="colorOutlineVariant">@color/lcg_outline_variant</item>
+
+        <item name="android:textColorPrimary">@color/lcg_on_surface</item>
+        <item name="android:textColorSecondary">@color/lcg_on_surface_variant</item>
+
+        <item name="android:windowBackground">@color/lcg_background</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- 关键：夜间必须是 false，否则状态栏图标是深色，在深色背景上看不见 -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/sp_16</item>
+        <item name="android:typeface">sans</item>
+
+        <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_black_24px</item>
+        <item name="actionOverflowButtonStyle">@style/LCGOverflowButtonStyle</item>
+        <item name="searchViewStyle">@style/LCGSearchView</item>
+    </style>
+
+</resources>

@@ -1,6 +1,7 @@
 package top.easelink.lcg.ui.main.message.viewmodel
 
 import androidx.lifecycle.MutableLiveData
+import top.easelink.framework.threadpool.IOPool
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -23,11 +24,11 @@ class NotificationViewModel : ViewModel() {
             callback.invoke(false)
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(IOPool) {
             try {
                 JsoupClient.sendGetRequestWithQuery(nextPageUrl).let {
                     val model = parseResponse(it)
-                    notifications.value = model
+                    notifications.postValue(model)
                     callback.invoke(true)
                 }
             } catch (e: Exception) {
@@ -38,16 +39,16 @@ class NotificationViewModel : ViewModel() {
     }
 
     fun fetchNotifications() {
-        viewModelScope.launch {
-            isLoading.value = true
+        viewModelScope.launch(IOPool) {
+            isLoading.postValue(true)
             try {
                 JsoupClient.sendGetRequestWithQuery(NOTIFICATION_HOME_QUERY).let {
-                    notifications.value = parseResponse(it)
+                    notifications.postValue(parseResponse(it))
                 }
             } catch (e: Exception) {
                 Timber.e(e)
             }
-            isLoading.value = false
+            isLoading.postValue(false)
         }
     }
 

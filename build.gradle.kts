@@ -1,5 +1,3 @@
-// AGP 9 内置 Kotlin，自带 KGP 2.2.10。要用更高版本的 Kotlin/KSP 只能在这里用
-// buildscript classpath 覆盖 —— 因此 catalog 里 parcelize / ksp 不能再带版本号。
 buildscript {
     repositories {
         google()

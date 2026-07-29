@@ -16,7 +16,7 @@
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/lcg_surface"
+        android:background="?attr/colorSurfaceContainer"
         app:refreshing="@{viewModel.isLoading}"
         android:focusable="true"
         android:clickable="true">
@@ -25,10 +25,13 @@
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
+                android:clipToPadding="false"
+                android:paddingTop="@dimen/dp_8"
+                android:paddingBottom="@dimen/dp_8"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"
-                android:background="@color/lcg_background"
+                android:background="?attr/colorSurfaceContainer"
                 tools:visibility="visible" />
 
             <com.airbnb.lottie.LottieAnimationView

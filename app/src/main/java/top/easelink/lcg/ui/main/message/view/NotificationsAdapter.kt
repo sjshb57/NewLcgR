@@ -68,14 +68,23 @@ class NotificationsAdapter(
         notifyDataSetChanged()
     }
 
+    // 位置必须取数据列表旧长度，不能用 itemCount（含 footer）
     fun appendItems(notifications: List<BaseNotification>) {
-        val count = itemCount
+        if (notifications.isEmpty()) return
+        val start = mNotifications.size
         mNotifications.addAll(notifications)
-        notifyItemRangeInserted(count - 1, notifications.size)
+        if (start == 0) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemRangeInserted(start, notifications.size)
+        }
     }
 
+    // 必须发通知：下拉刷新会单独调用它
     fun clearItems() {
+        if (mNotifications.isEmpty()) return
         mNotifications.clear()
+        notifyDataSetChanged()
     }
 
     inner class ArticleViewHolder internal constructor(private val binding: ItemNotificationViewBinding) :

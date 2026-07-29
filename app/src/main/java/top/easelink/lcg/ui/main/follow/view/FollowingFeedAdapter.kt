@@ -79,10 +79,16 @@ class FollowingFeedAdapter(
         notifyItemRangeInserted(startPosition, follows.size)
     }
 
+    // 位置必须取数据列表旧长度，不能用 itemCount（含 footer）
     fun appendItems(follows: List<FeedInfo>) {
-        val count = itemCount
+        if (follows.isEmpty()) return
+        val start = mFeeds.size
         mFeeds.addAll(follows)
-        notifyItemRangeInserted(count - 1, follows.size)
+        if (start == 0) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemRangeInserted(start, follows.size)
+        }
     }
 
     fun clearItems() {

@@ -71,14 +71,23 @@ class FollowListAdapter(
         notifyDataSetChanged()
     }
 
+    // 位置必须取数据列表旧长度，不能用 itemCount（含 footer）
     fun appendItems(follows: List<FollowInfo>) {
-        val count = itemCount
+        if (follows.isEmpty()) return
+        val start = mFollowing.size
         mFollowing.addAll(follows)
-        notifyItemRangeInserted(count - 1, follows.size)
+        if (start == 0) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemRangeInserted(start, follows.size)
+        }
     }
 
+    // 必须发通知：下拉刷新会单独调用它
     fun clearItems() {
+        if (mFollowing.isEmpty()) return
         mFollowing.clear()
+        notifyDataSetChanged()
     }
 
     override fun onViewRecycled(holder: BaseViewHolder) {

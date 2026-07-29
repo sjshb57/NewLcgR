@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/lcg_background"
+    android:background="?attr/colorSurfaceContainer"
     android:paddingTop="@dimen/dp_6"
     android:paddingBottom="@dimen/dp_6"
     android:paddingStart="@dimen/dp_8"

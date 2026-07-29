@@ -42,6 +42,9 @@
         <item name="colorSurface">@color/lcg_surface</item>
         <item name="colorOnSurface">@color/lcg_on_surface</item>
         <item name="colorSurfaceVariant">@color/lcg_surface_variant</item>
+        <item name="colorSurfaceContainerLow">@color/lcg_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/lcg_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/lcg_surface_container_high</item>
         <item name="colorOnSurfaceVariant">@color/lcg_on_surface_variant</item>
         <item name="android:colorBackground">@color/lcg_background</item>
         <item name="colorOnBackground">@color/lcg_on_surface</item>

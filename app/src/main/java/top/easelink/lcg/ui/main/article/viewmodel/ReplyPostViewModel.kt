@@ -1,6 +1,7 @@
 package top.easelink.lcg.ui.main.article.viewmodel
 
 import androidx.lifecycle.MutableLiveData
+import top.easelink.framework.threadpool.IOPool
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -17,12 +18,12 @@ class ReplyPostViewModel : ViewModel() {
 
     fun sendReply(query: String?, content: String, callback: (Boolean) -> Unit) {
         sending.value = true
-        viewModelScope.launch {
+        viewModelScope.launch(IOPool) {
             val ok = runCatching {
                 withContext(Dispatchers.IO) { sendReplyAsync(query, content) }
             }.onFailure { Timber.e(it) }.getOrDefault(false)
             callback(ok)
-            sending.value = false
+            sending.postValue(false)
         }
     }
 

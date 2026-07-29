@@ -77,14 +77,25 @@ class ArticlesAdapter(
         notifyDataSetChanged()
     }
 
-    fun appendItems(notifications: List<Article>) {
-        val count = itemCount
-        mArticleList.addAll(notifications)
-        notifyItemRangeInserted(count - 1, notifications.size)
+    // 位置必须取数据列表旧长度；空视图占位或 footer 的存在性一变，就不是单纯插入
+    fun appendItems(articles: List<Article>) {
+        if (articles.isEmpty()) return
+        val start = mArticleList.size
+        val hadFooter = start > 10
+        val wasEmpty = start == 0
+        mArticleList.addAll(articles)
+        if (wasEmpty || hadFooter != (mArticleList.size > 10)) {
+            notifyDataSetChanged()
+        } else {
+            notifyItemRangeInserted(start, articles.size)
+        }
     }
 
+    // 必须发通知：下拉刷新会单独调用它，否则 itemCount 与 RecyclerView 不一致
     fun clearItems() {
+        if (mArticleList.isEmpty()) return
         mArticleList.clear()
+        notifyDataSetChanged()
     }
 
     fun setFragmentManager(fragmentManager: FragmentManager) {

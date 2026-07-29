@@ -201,6 +201,13 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
             )
     }
 
+    /**
+     * 主题行的 <th>。不能写死 th.common —— Discuz 会随已读/未读在 common 与 new
+     * 之间切换，写死会导致登录后未读帖整行丢失。也不要写 "th.common, th.new"：
+     * CSS 逗号在顶层拆分，拼接子选择器时语义是错的。实测每行只有一个 th。
+     */
+    private const val TH_TITLE = "th"
+
     private const val HOT_PATTERN = "热度"
     private const val RECOMMENDED_PATTERN = "评价指数"
     private const val HOT_LIMIT = 100
@@ -220,15 +227,15 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                         val view = extractFrom(e, "td.num", "em")
                             .ifBlank { return@map null }
                             .toIntOrNull() ?: 0
-                        val title = e.selectFirst("th.common > .xst")?.text().orEmpty()
+                        val title = e.selectFirst("$TH_TITLE > .xst")?.text().orEmpty()
                         val author = extractFrom(e, "td.by", "a[href*=uid]")
                         val date = extractFrom(e, "td.by", "span")
-                        val url = extractAttrFrom(e, "href", "th.common", "a.xst")
+                        val url = extractAttrFrom(e, "href", TH_TITLE, "a.xst")
                         val origin = e.selectFirst("td.by > a[target]")?.text().orEmpty()
-                        val helpInfo = e.select("th.common > span.xi1 > span.xw1").firstOrNull()?.text().orEmpty()
+                        val helpInfo = e.select("$TH_TITLE > span.xi1 > span.xw1").firstOrNull()?.text().orEmpty()
                         var helpCoin = 0
                         if (helpInfo.isEmpty()) {
-                            if (e.selectFirst("th.common")
+                            if (e.selectFirst(TH_TITLE)
                                     ?.text()
                                     ?.contains("- [已解决]") == true
                             ) {
@@ -242,7 +249,7 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                             }
                         }
                         val isRecommended = if (AppConfig.articleShowRecommendFlag) {
-                            e.selectFirst("th.common")
+                            e.selectFirst(TH_TITLE)
                                 ?.getElementsByTag("img")
                                 ?.map { it.attr("title") }
                                 ?.any { s ->
@@ -309,19 +316,10 @@ object ArticlesRemoteDataSource : ArticlesDataSource, FavoritesRemoteDataSource 
                 try {
                     val reply = extractFrom(element, "td.num", "a.xi2").toIntOrNull() ?: 0
                     val view = extractFrom(element, "td.num", "em").toIntOrNull() ?: 0
-                    val title = extractFrom(element, "th.new", ".xst").let {
-                        it.ifBlank {
-                            extractFrom(element, "th.common", ".xst")
-                        }
-
-                    }
+                    val title = extractFrom(element, TH_TITLE, ".xst")
                     val author = extractFrom(element, "td.by", "a[href*=uid]")
                     val date = extractFrom(element, "td.by", "span")
-                    val url = extractAttrFrom(element, "href", "th.new", "a.xst").let {
-                        it.ifBlank {
-                            extractAttrFrom(element, "href", "th.common", "a.xst")
-                        }
-                    }
+                    val url = extractAttrFrom(element, "href", TH_TITLE, "a.xst")
                     val origin = extractFrom(element, "td.by", "a[target]")
                     if (!TextUtils.isEmpty(title) && !TextUtils.isEmpty(author)) {
                         article = Article(title, author, date, url, view, reply, origin)

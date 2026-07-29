@@ -2,9 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, dev]
   pull_request:
-    branches: [master]
+    branches: [master, dev]
   workflow_dispatch:
 
 # 同一个 PR 上的连续 push 只跑最新的，节省 Actions 分钟数
@@ -31,7 +31,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platforms;android-36 build-tools;36.0.0'
+          # 必须跟 build.gradle.kts 里的 compileSdk 对齐，
+          # 否则 CI 会去下载 platform 失败或直接编译报 "compileSdk 37 not found"。
+          packages: 'platforms;android-37 build-tools;37.0.0'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4

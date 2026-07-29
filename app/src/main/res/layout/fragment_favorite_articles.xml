@@ -41,7 +41,7 @@
             android:paddingTop="@dimen/dp_4"
             android:paddingBottom="@dimen/dp_8"
             android:clipToPadding="false"
-            android:background="@color/lcg_background"
+            android:background="?attr/colorSurfaceContainer"
             app:layout_constraintTop_toBottomOf="@id/article_toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
             />
