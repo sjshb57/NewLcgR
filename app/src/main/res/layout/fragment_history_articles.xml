@@ -12,7 +12,7 @@
     android:id="@+id/clRootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurfaceContainer">
+    android:background="@color/lcg_background">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -35,7 +35,7 @@
         android:paddingTop="@dimen/dp_4"
         android:paddingBottom="@dimen/dp_8"
         android:clipToPadding="false"
-        android:background="?attr/colorSurfaceContainer"
+        android:background="@color/lcg_background"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:visibility="visible" />

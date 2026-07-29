@@ -42,18 +42,13 @@ public abstract class BaseFragment<T extends ViewBinding, V extends ViewModel> e
     protected abstract T initViewBinding(@NonNull LayoutInflater inflater, ViewGroup container);
 
     @Override
-    @SuppressWarnings("rawtypes")
     public void onAttach(@NotNull Context context) {
         super.onAttach(context);
 
         if (context instanceof AppCompatActivity) {
 
-            if (this.isControllable()) {
-                if (context instanceof BaseActivity) {
-                    ((BaseActivity) context).onFragmentAttached(getBackStackTag());
-                } else if (context instanceof TopActivity) {
-                    ((TopActivity) context).onFragmentAttached(getBackStackTag());
-                }
+            if (this.isControllable() && context instanceof TopActivity) {
+                ((TopActivity) context).onFragmentAttached(getBackStackTag());
             }
         }
     }

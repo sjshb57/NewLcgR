@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <data>
-        <import type="android.view.View" />
-        <variable
-            name="viewModel"
-            type="top.easelink.lcg.ui.main.articles.viewmodel.FavoriteArticlesViewModel"/>
-    </data>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/clRootView"
         android:background="@color/lcg_surface"
         android:layout_width="match_parent"
@@ -41,13 +33,14 @@
             android:paddingTop="@dimen/dp_4"
             android:paddingBottom="@dimen/dp_8"
             android:clipToPadding="false"
-            android:background="?attr/colorSurfaceContainer"
+            android:background="@color/lcg_background"
             app:layout_constraintTop_toBottomOf="@id/article_toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
             />
 
         <FrameLayout
-            android:visibility="@{viewModel.isLoading? View.VISIBLE:View.GONE, default = gone}"
+            android:id="@+id/loading_container"
+            android:visibility="gone"
             android:background="@color/lcg_surface"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -67,5 +60,3 @@
                 app:lottie_autoPlay="true"/>
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-</layout>

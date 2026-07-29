@@ -71,6 +71,9 @@ class FavoriteArticlesFragment :
                 addItems(it)
             }
         })
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            binding.loadingContainer.visibility = if (it) View.VISIBLE else View.GONE
+        }
     }
 
     private fun setupToolBar() {

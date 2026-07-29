@@ -49,8 +49,6 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
         arguments?.run {
             showTab = getBoolean(ARG_SHOW_TAB, true)
         }
@@ -154,6 +152,7 @@ class ForumArticlesFragment : BaseFragment<FragmentForumArticlesBinding, ForumAr
             setOnRefreshListener {
                 viewModel.fetchArticles(ArticleFetcher.FetchType.FETCH_INIT) {}
             }
+            viewModel.isLoading.observe(viewLifecycleOwner) { isRefreshing = it }
         }
         viewModel.articles.observe(viewLifecycleOwner, Observer { articleList ->
             if (articleList.isEmpty() && viewModel.isLoading.value == true) {

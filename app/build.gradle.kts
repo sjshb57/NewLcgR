@@ -89,7 +89,6 @@ android {
 
     buildFeatures {
         buildConfig = true
-        dataBinding = true
         viewBinding = true
     }
 }
@@ -115,7 +114,6 @@ dependencies {
     implementation(libs.google.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.fragment.ktx)
-    implementation(libs.androidx.tracing)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
@@ -126,8 +124,6 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation(libs.androidx.vectordrawable)
-    implementation(libs.androidx.vectordrawable.animated)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.common.java8)
@@ -140,18 +136,14 @@ dependencies {
 
     // Third-party
     implementation(libs.coil)
-    implementation(libs.coil.compose)
-    implementation(libs.easypermissions)
     implementation(libs.eventbus)
     implementation(libs.gson)
-    implementation(libs.guava)
     implementation(libs.jsoup)
     implementation(libs.lottie)
     implementation(libs.multitype)
     implementation(libs.okhttp)
     implementation(libs.persistentcookiejar)
     implementation(libs.photoview)
-    implementation(libs.shimmerlayout)
     implementation(libs.timber)
     implementation(libs.kotlin.stdlib.jdk8)
     testImplementation(libs.junit)

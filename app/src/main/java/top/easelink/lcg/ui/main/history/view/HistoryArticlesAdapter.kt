@@ -144,7 +144,8 @@ class HistoryArticlesAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         binding: ItemArticleEmptyViewBinding
     ) : BaseViewHolder(binding.root), ArticleEmptyItemViewModelListener {
         init {
-            binding.viewModel = ArticleEmptyItemViewModel(this)
+            val vm = ArticleEmptyItemViewModel(this)
+            binding.btnRetry.setOnClickListener { vm.onRetryClick() }
         }
 
         override fun onBind(position: Int) {}

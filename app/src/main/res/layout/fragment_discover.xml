@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <data>
-        <variable
-            name="viewModel"
-            type="top.easelink.lcg.ui.main.discover.viewmodel.DiscoverViewModel"/>
-    </data>
-
-    <top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
+<top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/colorSurfaceContainer"
+        android:background="@color/lcg_background"
         android:focusable="true"
-        android:clickable="true"
-        app:refreshing="@{viewModel.isLoading}">
+        android:clickable="true">
 
         <androidx.recyclerview.widget.RecyclerView
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -25,4 +17,3 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </top.easelink.framework.customview.ScrollChildSwipeRefreshLayout>
-</layout>

@@ -48,8 +48,6 @@ class DiscoverFragment : TopFragment(), ControllableFragment {
         savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
-        binding.viewModel = mViewModel
-        binding.lifecycleOwner = viewLifecycleOwner
         setUp()
     }
 
@@ -70,6 +68,7 @@ class DiscoverFragment : TopFragment(), ControllableFragment {
             setOnRefreshListener {
                 mViewModel.refreshOptions(mContext)
             }
+            mViewModel.isLoading.observe(viewLifecycleOwner) { isRefreshing = it }
         }
     }
 

@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <data>
-        <import type="android.view.View" />
-        <variable
-            name="viewModel"
-            type="top.easelink.lcg.ui.main.articles.viewmodel.ArticlesViewModel"/>
-
-    </data>
-
-    <top.easelink.framework.customview.ScrollChildSwipeRefreshLayout
+    xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/colorSurfaceContainer"
-        app:refreshing="@{viewModel.isLoading}"
+        android:background="@color/lcg_surface"
         android:focusable="true"
         android:clickable="true">
         <FrameLayout
@@ -25,13 +15,10 @@
             android:layout_height="match_parent">
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
-                android:clipToPadding="false"
-                android:paddingTop="@dimen/dp_8"
-                android:paddingBottom="@dimen/dp_8"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"
-                android:background="?attr/colorSurfaceContainer"
+                android:background="@color/lcg_background"
                 tools:visibility="visible" />
 
             <com.airbnb.lottie.LottieAnimationView
@@ -54,5 +41,3 @@
         </FrameLayout>
 
     </top.easelink.framework.customview.ScrollChildSwipeRefreshLayout>
-
-</layout>

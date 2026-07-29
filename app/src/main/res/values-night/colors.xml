@@ -1,32 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="lcg_surface">#1E1E1E</color>
+    <color name="lcg_on_surface">#ECECEC</color>
+    <color name="lcg_surface_variant">#2A2A2A</color>
+    <color name="lcg_on_surface_variant">#B0B0B0</color>
+    <color name="lcg_background">#121212</color>
 
-    <!-- ============================================================
-         深色模式 token。
-         上一版只覆盖了 lcg_* 这一组新 token，而布局里还有 90+ 处直接写
-         @color/gray / @color/light_gray / @color/bg_color …… 这些在夜间
-         完全没被覆盖，于是深色底上飘着浅灰字和白卡片 —— 这里补齐。
-
-         注意：@color/white 故意不覆盖。它在 dialog / 按钮上是"深色底上的
-         文字色"，翻转会直接让那些字消失。
-         ============================================================ -->
-
-    <!-- ========== M3 语义 token ========== -->
-    <color name="lcg_surface">#1D1B1B</color>
-    <color name="lcg_on_surface">#E6E1E1</color>
-    <color name="lcg_surface_variant">#4A4544</color>
-    <color name="lcg_on_surface_variant">#CDC5C4</color>
-    <color name="lcg_background">#141313</color>
-
-    <color name="lcg_surface_container_low">#211F1F</color>
-    <color name="lcg_surface_container">#252323</color>
-    <color name="lcg_surface_container_high">#302D2D</color>
-
-    <!-- 深色下 primary 必须提亮：原来 light/night 都用 #2A2A2A，
-         压在 #1D1B1B 的 surface 上几乎看不见 -->
-    <color name="lcg_primary_container">#3A3737</color>
-    <color name="lcg_on_primary_container">#E6E1E1</color>
-    <color name="lcg_secondary_container">#5C1A1E</color>
+    <color name="lcg_primary_container">#3A3A3A</color>
+    <color name="lcg_on_primary_container">#ECECEC</color>
+    <color name="lcg_secondary_container">#4A1418</color>
 
     <color name="lcg_tertiary">#DABFA1</color>
     <color name="lcg_on_tertiary">#3B2E15</color>
@@ -38,39 +20,10 @@
     <color name="lcg_error_container">#93000A</color>
     <color name="lcg_on_error_container">#FFDAD6</color>
 
-    <color name="lcg_outline">#9A9291</color>
-    <color name="lcg_outline_variant">#4A4544</color>
+    <color name="lcg_outline">#948F88</color>
+    <color name="lcg_outline_variant">#4A4642</color>
 
-    <color name="lcg_switch_track_on">#80FF6B70</color>
+    <color name="light_grey_background">#2A2A2A</color>
 
-    <!-- ========== 注意：pojie_logo 绝对不能在这里覆盖 ==========
-         ic_launcher_foreground.xml 的 fillColor 原本引用的就是它，
-         而启动图标由桌面进程渲染、按「系统」深色配置解析资源。
-         一旦在 values-night 里改它，系统切深色时桌面图标就跟着变
-         （白底 + 浅粉印章，几乎看不见）。
-         App 内部需要提亮的品牌红请用 lcg_brand_accent。 -->
-    <color name="lcg_brand_accent">#FF8A85</color>
-
-    <!-- ========== 历史 token 整体翻转 ========== -->
-    <color name="colorPrimary">#E6E1E1</color>
-    <color name="colorPrimaryDark">#000000</color>
-
-    <color name="black">#E6E1E1</color>          <!-- 仅用于 ic_share / ic_link 的 fillColor -->
-    <color name="black_effective">#E6E1E1</color>
-    <color name="light_gray">#3A3737</color>
-    <color name="slight_light_gray">#252323</color>
-    <color name="slight_light_light_gray">#1D1B1B</color>
-    <color name="gray">#B5ADAC</color>
-    <color name="semi_gray">#948C8B</color>
-    <color name="dark_gray">#CDC5C4</color>
-    <color name="bg_color">#141313</color>
-    <color name="shadow">#000000</color>
-    <color name="translucent_white">#88000000</color>
-    <color name="translucent_gray">#4D3A3737</color>
-    <color name="light_grey_background">#252323</color>
-
-    <color name="statusBarColorRecommend">#000000</color>
-    <color name="statusBarColorMessageTab">#1D1B1B</color>
-    <color name="statusBarColorWhite">#1D1B1B</color>
-
+    <color name="lcg_switch_track_on">#80E01720</color>
 </resources>

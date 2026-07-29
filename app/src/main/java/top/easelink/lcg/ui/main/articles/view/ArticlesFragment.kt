@@ -63,8 +63,6 @@ class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = viewLifecycleOwner
         setUpView()
     }
 
@@ -98,6 +96,7 @@ class ArticlesFragment : BaseFragment<FragmentArticlesBinding, ArticlesViewModel
             setOnRefreshListener {
                 viewModel.fetchArticles(ArticleFetcher.FetchType.FETCH_INIT) {}
             }
+            viewModel.isLoading.observe(viewLifecycleOwner) { isRefreshing = it }
         }
     }
 

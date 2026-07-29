@@ -21,7 +21,6 @@ android {
 
     buildFeatures {
         buildConfig = true
-        dataBinding = true
         viewBinding = true
     }
     lint {
@@ -35,50 +34,21 @@ android {
 dependencies {
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
 
-    // android support libraries
-    api(libs.androidx.appcompat)
-    api(libs.androidx.recyclerview)
-    api(libs.androidx.cardview)
-    api(libs.google.material)
-    api(libs.androidx.vectordrawable)
-    api(libs.androidx.vectordrawable.animated)
-    api(libs.androidx.constraintlayout)
-    api(libs.androidx.swiperefreshlayout)
-    api(libs.androidx.work.runtime)
-    api(libs.easypermissions)
-    api(libs.androidx.core.ktx)
-
-    // image
-    api(libs.photoview)
-    api(libs.coil)
-    // parser
-    api(libs.gson)
-
-    // view
-    api(libs.multitype)
-    api(libs.shimmerlayout)
-    api(libs.lottie)
-
-    // logger
+    // 只声明本模块源码真正 import 到的东西。
+    // 之前这里用 api 把 Room / WorkManager / Jsoup / OkHttp / EventBus / Gson /
+    // Guava / PhotoView / MultiType / Lottie 全导出了一遍，而 framework 一个都没用到。
+    api(libs.androidx.appcompat)          // AppCompatActivity
+    api(libs.androidx.core.ktx)           // ViewCompat, graphics 扩展
+    api(libs.fragment.ktx)                // Fragment, DialogFragment
+    api(libs.androidx.recyclerview)       // linkagerv
+    api(libs.androidx.swiperefreshlayout) // ScrollChildSwipeRefreshLayout
+    api(libs.google.material)             // HtmlTextView 继承 MaterialTextView
+    api(libs.androidx.annotation)
+    api(libs.coil)                        // HtmlCoilImageGetter
     api(libs.timber)
-    // view model
-    api(libs.androidx.lifecycle.runtime.ktx)
-    api(libs.androidx.lifecycle.livedata.ktx)
-    api(libs.androidx.lifecycle.common.java8)
-    api(libs.androidx.lifecycle.viewmodel.ktx)
-    // guava
-    api(libs.guava)
-    // jsoup
-    api(libs.jsoup)
-    api(libs.okhttp)
-    api(libs.persistentcookiejar)
-    // database
-    api(libs.androidx.room.runtime)
-    api(libs.androidx.room.ktx)
-    // event-bus
-    api(libs.eventbus)
 
-    // kotlin
+    api(libs.androidx.lifecycle.viewmodel.ktx)
+
     api(libs.kotlin.stdlib.jdk8)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)

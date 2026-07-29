@@ -247,5 +247,4 @@
     <string name="empty_response">服务器返回空响应</string>
     <string name="no_content_available">暂无内容</string>
     <string name="forum_name_format">#%s</string>
-    <string name="article_recommend_flag">推荐</string>
 </resources>

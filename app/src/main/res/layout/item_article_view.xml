@@ -1,18 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  帖子列表卡片。
 
-  【垂直定位规则，改之前先读】
-  Adapter 里只有 recommend_flag 和 stamp 会被设成 GONE，
-  title / reply_and_view / author / date / origin 永远可见。
-  ConstraintLayout 里 GONE 的 view 会塌缩成一个零尺寸的点，
-  所以任何 view 的「垂直」约束都不能挂在 recommend_flag 或 stamp 上，
-  否则它一隐藏，整行就会骑到标题上去。
-  => 垂直方向一律锚 title_text_view / reply_and_view；
-     recommend_flag 反过来对齐 reply_and_view，
-     stamp 反过来对齐 title_text_view。
-  水平方向可以挂 GONE 的 view，配 layout_goneMarginXxx 即可。
--->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -20,136 +7,105 @@
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/dp_10"
-    android:layout_marginEnd="@dimen/dp_10"
-    android:layout_marginTop="@dimen/dp_0"
+    android:layout_marginTop="@dimen/dp_2"
     android:layout_marginBottom="@dimen/dp_6"
     android:clickable="true"
     android:focusable="true"
+    android:background="@color/lcg_surface"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
     android:longClickable="true"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="@dimen/dp_10"
-    app:cardElevation="@dimen/dp_0"
-    app:cardPreventCornerOverlap="true"
-    app:strokeWidth="@dimen/dp_0">
+    android:orientation="vertical"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="@dimen/dp_3">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/article_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/dp_12"
-        android:paddingEnd="@dimen/dp_12"
-        android:paddingTop="@dimen/dp_11"
-        android:paddingBottom="@dimen/dp_11">
-
-        <!-- ============ 第 1 行：标题（最多 2 行） ============ -->
+        android:orientation="vertical"
+        android:background="@color/lcg_surface"
+        android:paddingBottom="@dimen/dp_14">
         <TextView
             android:id="@+id/title_text_view"
             style="@style/TextStyle.Heading"
+            android:textStyle="bold"
             android:layout_width="@dimen/dp_0"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="@dimen/sp_15"
-            android:lineSpacingExtra="@dimen/dp_2"
+            android:layout_marginStart="@dimen/dp_14"
+            android:layout_marginTop="@dimen/dp_14"
+            android:layout_marginEnd="@dimen/dp_14"
             android:maxLines="2"
-            android:ellipsize="end"
+            android:textSize="15sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/stamp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_goneMarginEnd="@dimen/dp_0"
-            tools:text="闲鱼低价提醒工具 V1.0" />
-
-        <!-- 印章：垂直对齐标题，自身 GONE 不影响任何人 -->
-        <top.easelink.framework.customview.ELStampView
-            android:id="@+id/stamp"
-            android:layout_width="@dimen/dp_30"
-            android:layout_height="@dimen/dp_30"
-            android:layout_marginStart="@dimen/dp_8"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="@id/title_text_view"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible"
-            tools:stampText="50" />
+            tools:text="Title"/>
 
-        <!-- ============ 第 2 行：[推荐] 回复/查看 ……… 作者 ============
-             reply_and_view 是这一行的定位基准（它永远可见）。 -->
         <TextView
             android:id="@+id/reply_and_view"
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_9"
-            android:layout_marginStart="@dimen/dp_6"
-            android:singleLine="true"
+            android:layout_marginStart="@dimen/dp_8"
+            android:layout_marginTop="@dimen/dp_5"
             app:layout_constraintTop_toBottomOf="@id/title_text_view"
-            app:layout_constraintStart_toEndOf="@id/recommend_flag"
-            app:layout_goneMarginStart="@dimen/dp_0"
-            tools:text="100 / 2494" />
+            app:layout_constraintStart_toStartOf="@id/title_text_view"
+            tools:text="10 / 200"/>
 
-        <!-- 推荐标签：垂直对齐 reply_and_view，GONE 时上面那条 goneMarginStart 生效 -->
         <TextView
-            android:id="@+id/recommend_flag"
+            android:id="@+id/origin"
+            style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_recommend_pill"
-            android:paddingStart="@dimen/dp_5"
-            android:paddingEnd="@dimen/dp_5"
-            android:paddingTop="@dimen/dp_1"
-            android:paddingBottom="@dimen/dp_1"
-            android:text="@string/article_recommend_flag"
-            android:textColor="?attr/colorOnSecondaryContainer"
-            android:textSize="@dimen/sp_10"
-            android:includeFontPadding="false"
+            android:ellipsize="middle"
+            android:maxWidth="@dimen/dp_200"
+            android:singleLine="true"
+            android:layout_marginTop="@dimen/dp_4"
+            app:layout_constraintTop_toBottomOf="@id/reply_and_view"
+            app:layout_constraintStart_toStartOf="@id/title_text_view"
+            tools:text="『原创发布区』"/>
+        
+        <top.easelink.framework.customview.ELStampView
+            android:id="@+id/stamp"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginEnd="@dimen/dp_4"
+            android:layout_marginTop="@dimen/dp_4"
             android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/reply_and_view"
-            app:layout_constraintBottom_toBottomOf="@id/reply_and_view"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible"
+            tools:stampText="50"
+            tools:stampColor="@color/colorAccent"
+            />
 
         <TextView
             android:id="@+id/author_text_view"
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp_8"
-            android:singleLine="true"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/reply_and_view"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1"
-            app:layout_constraintWidth_max="wrap"
+            android:layout_marginBottom="@dimen/dp_14"
             app:layout_constraintTop_toTopOf="@id/reply_and_view"
-            app:layout_constraintBottom_toBottomOf="@id/reply_and_view"
-            tools:text="花开半夏つ" />
-
-        <!-- ============ 第 3 行：板块 ……… 时间 ============ -->
-        <TextView
-            android:id="@+id/origin"
-            style="@style/TextStyle.Title.Sub"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_3"
-            android:singleLine="true"
-            android:ellipsize="end"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/date_text_view"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintWidth_max="wrap"
-            app:layout_constraintTop_toBottomOf="@id/reply_and_view"
-            tools:text="『精品软件区』" />
+            app:layout_constraintEnd_toEndOf="@id/title_text_view"
+            tools:text="Author"/>
 
         <TextView
             android:id="@+id/date_text_view"
             style="@style/TextStyle.Title.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dp_8"
-            android:singleLine="true"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/origin"
-            app:layout_constraintBottom_toBottomOf="@id/origin"
-            tools:text="2026-7-29 11:05" />
+            app:layout_constraintEnd_toEndOf="@id/author_text_view"
+            tools:text="2019-07-04"/>
+
+        <ImageView
+            android:id="@+id/recommend_flag"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:src="@drawable/ic_recommendation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@null" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

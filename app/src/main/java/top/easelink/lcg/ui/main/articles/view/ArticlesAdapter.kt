@@ -166,11 +166,8 @@ class ArticlesAdapter(
     inner class EmptyViewHolder internal constructor(private val binding: ItemArticleEmptyViewBinding) :
         BaseViewHolder(binding.root), ArticleEmptyItemViewModelListener {
         override fun onBind(position: Int) {
-            val emptyItemViewModel =
-                ArticleEmptyItemViewModel(
-                    this
-                )
-            binding.viewModel = emptyItemViewModel
+            val emptyItemViewModel = ArticleEmptyItemViewModel(this)
+            binding.btnRetry.setOnClickListener { emptyItemViewModel.onRetryClick() }
         }
 
         override fun onRetryClick() {
